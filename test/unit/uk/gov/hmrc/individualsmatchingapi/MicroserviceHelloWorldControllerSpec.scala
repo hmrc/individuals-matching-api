@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.individualsmatchingapi.controllers
+package unit.uk.gov.hmrc.individualsmatchingapi
 
-import uk.gov.hmrc.play.microservice.controller.BaseController
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import play.api.mvc._
-import scala.concurrent.Future
+import play.api.http.Status
+import play.api.test.FakeRequest
+import uk.gov.hmrc.individualsmatchingapi.controllers.MicroserviceHelloWorld
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-object MicroserviceHelloWorld extends MicroserviceHelloWorld
 
-trait MicroserviceHelloWorld extends BaseController {
+class MicroserviceHelloWorldControllerSpec extends UnitSpec with WithFakeApplication{
 
-	def hello() = Action.async { implicit request =>
-		Future.successful(Ok("Hello world"))
-	}
+  val fakeRequest = FakeRequest("GET", "/")
+
+
+  "GET /" should {
+    "return 200" in {
+      val result = MicroserviceHelloWorld.hello()(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+  }
+
+
 }
