@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package unit.uk.gov.hmrc.individualsmatchingapi
+package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
 import play.api.http.Status
 import play.api.test.FakeRequest
