@@ -1,0 +1,27 @@
+@import play.api.libs.json.Json
+@(whitelistedApplicationIds: Seq[String])
+{
+  "scopes": [
+    {
+      "key": "read:individuals-matching",
+      "name": "match individual from their details",
+      "description": "Match individual from their details"
+    }
+  ],
+  "api": {
+    "name": "Individuals Matching",
+    "description": "Individuals Matching API",
+    "context": "individuals/matching",
+    "versions": [
+      {
+        "version": "P1",
+        "status": "PUBLISHED",
+        "access" : {"type":"PRIVATE", "whitelistedApplicationIds": @Json.toJson(whitelistedApplicationIds)}
+      },
+      {
+        "version": "1",
+        "status": "PUBLISHED"
+      }
+    ]
+  }
+}
