@@ -22,7 +22,7 @@
                 </p>
             </td>
             <td><p>HTTP status: <code class="code--slim">303 (See Other)</code></p>
-                <p class="code--block">Location: /matched/08aa2149-5e6c-4f3d-8769-4b025db6ba42</p>
+                <p class="code--block">Location: /individuals/matching/08aa2149-5e6c-4f3d-8769-4b025db6ba42</p>
             </td>
         </tr>
         <tr>
