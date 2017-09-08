@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Individuals Matching",
+  "type": "object",
+  "properties": {
+    "_links": {
+      "type": "object",
+      "properties": {
+        "income": {
+          "type": "object",
+          "description": "The URI for the resource to get the individual's income per employment data.",
+          "properties": {
+            "href": {
+              "type": "string",
+              "example": "/individuals/income?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
+            },
+            "name": {
+              "type": "string",
+              "example": "GET"
+            },
+            "title": {
+              "type": "string",
+              "example": "View individual's income per employment"
+            }
+          },
+          "required": ["href"]
+        },
+        "employments": {
+          "type": "object",
+          "description": "The URI for the resource to get the individual's employments.",
+          "properties": {
+            "href": {
+              "type": "string",
+              "example": "/individuals/employments?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
+            },
+            "name": {
+              "type": "string",
+              "example": "GET"
+            },
+            "title": {
+              "type": "string",
+              "example": "View individual's employments"
+            }
+          },
+          "required": ["href"]
+        },
+        "self": {
+          "type": "object",
+          "description": "The URI to this resource",
+          "properties": {
+            "href": {
+              "type": "string",
+              "example": "/individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430"
+            }
+          },
+          "required": ["href"]
+        }
+      },
+      "required": ["income", "employments", "self"]
+    },
+    "firstName": {
+      "type": "string",
+      "description": "The individual's first name"
+    },
+    "lastName": {
+      "type": "string",
+      "description": "The individual's last name"
+    },
+    "nino": {
+      "type": "string",
+      "format": "NINO",
+      "description": "The individual's national insurance number"
+    },
+    "dateOfBirth": {
+      "type": "string",
+      "format": "date",
+      "description": "The individual's date of birth"
+    }
+  },
+  "required": ["_links", "firstName", "lastName", "nino", "dateOfBirth"]
+}

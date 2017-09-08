@@ -17,13 +17,18 @@ object MicroServiceBuild extends Build with MicroService {
     "uk.gov.hmrc" %% "play-config" % "4.3.0",
     "uk.gov.hmrc" %% "play-hmrc-api" % "1.4.0",
     "uk.gov.hmrc" %% "logback-json-logger" % "3.1.0",
-    "uk.gov.hmrc" %% "domain" % "4.1.0"
+    "uk.gov.hmrc" %% "domain" % "4.1.0",
+    "uk.gov.hmrc" %% "play-hal" % "1.2.0"
   )
 
   def test(scope: String = "test,it") = Seq(
     "uk.gov.hmrc" %% "hmrctest" % "2.3.0" % scope,
     "org.scalatest" %% "scalatest" % "2.2.6" % scope,
+    "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" %  scope,
     "org.pegdown" % "pegdown" % "1.6.0" % scope,
+    "org.mockito" % "mockito-all" % "1.10.19" % scope,
+    "org.scalaj" %% "scalaj-http" % "1.1.6" % scope,
+    "com.github.tomakehurst" % "wiremock" % "2.6.0" % scope,
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
   )
 
