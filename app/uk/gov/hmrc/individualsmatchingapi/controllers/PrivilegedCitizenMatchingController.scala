@@ -26,7 +26,7 @@ import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, Sand
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-abstract class CitizenMatchingController(citizenMatchingService: CitizenMatchingService) extends CommonController {
+abstract class PrivilegedCitizenMatchingController(citizenMatchingService: CitizenMatchingService) extends CommonController {
 
   private def seeOthers(location: String) = new Status(SEE_OTHER)(Json.obj()).withHeaders(LOCATION -> location)
 
@@ -38,5 +38,5 @@ abstract class CitizenMatchingController(citizenMatchingService: CitizenMatching
 }
 
 @Singleton
-class SandboxCitizenMatchingController @Inject()(sandboxCitizenMatchingService: SandboxCitizenMatchingService)
-  extends CitizenMatchingController(sandboxCitizenMatchingService)
+class SandboxPrivilegedCitizenMatchingController @Inject()(sandboxCitizenMatchingService: SandboxCitizenMatchingService)
+  extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService)

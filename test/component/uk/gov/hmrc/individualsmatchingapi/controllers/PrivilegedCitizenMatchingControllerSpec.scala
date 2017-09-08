@@ -23,7 +23,7 @@ import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 
 import scalaj.http.Http
 
-class CitizenMatchingControllerSpec extends BaseSpec {
+class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
 
   feature("citizen matching is open and accessible") {
 

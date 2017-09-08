@@ -27,7 +27,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Results
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, status, _}
-import uk.gov.hmrc.individualsmatchingapi.controllers.IndividualsController
+import uk.gov.hmrc.individualsmatchingapi.controllers.PrivilegedIndividualsController
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.services.CitizenMatchingService
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -35,12 +35,12 @@ import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
 import scala.concurrent.Future.{failed, successful}
 
-class IndividualsControllerSpec extends PlaySpec with Results with MockitoSugar with Individuals {
+class PrivilegedIndividualsControllerSpec extends PlaySpec with Results with MockitoSugar with Individuals {
 
   trait Setup {
     val uuid = UUID.randomUUID()
     val citizenMatchingService = mock[CitizenMatchingService]
-    val individualsController = new IndividualsController(citizenMatchingService) {}
+    val individualsController = new PrivilegedIndividualsController(citizenMatchingService) {}
     implicit val headerCarrier = new HeaderCarrier()
   }
 

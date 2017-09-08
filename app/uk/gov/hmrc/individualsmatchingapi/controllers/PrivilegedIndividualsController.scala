@@ -26,7 +26,7 @@ import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFo
 import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, SandboxCitizenMatchingService}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-abstract class IndividualsController(citizenMatchingService: CitizenMatchingService) extends CommonController {
+abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMatchingService) extends CommonController {
 
   def matchedIndividual(matchId: String) = Action.async { implicit request =>
     withUuid(matchId) { matchUuid =>
@@ -41,5 +41,5 @@ abstract class IndividualsController(citizenMatchingService: CitizenMatchingServ
 }
 
 @Singleton
-class SandboxIndividualsController @Inject() (sandboxCitizenMatchingService: SandboxCitizenMatchingService)
-  extends IndividualsController(sandboxCitizenMatchingService)
+class SandboxPrivilegedIndividualsController @Inject()(sandboxCitizenMatchingService: SandboxCitizenMatchingService)
+  extends PrivilegedIndividualsController(sandboxCitizenMatchingService)

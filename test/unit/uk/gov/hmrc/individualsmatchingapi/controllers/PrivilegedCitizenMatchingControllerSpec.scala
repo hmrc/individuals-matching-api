@@ -26,7 +26,7 @@ import play.api.http.HeaderNames.LOCATION
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import uk.gov.hmrc.individualsmatchingapi.controllers.CitizenMatchingController
+import uk.gov.hmrc.individualsmatchingapi.controllers.PrivilegedCitizenMatchingController
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenMatchingRequest, CitizenNotFoundException, InvalidNinoException, MatchingException}
 import uk.gov.hmrc.individualsmatchingapi.services.CitizenMatchingService
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -34,13 +34,13 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
-class CitizenMatchingControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
+class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
   implicit lazy val materializer = fakeApplication.materializer
 
   trait Setup {
     val fakeRequest = FakeRequest()
     val mockCitizenMatchingService = mock[CitizenMatchingService]
-    val citizenMatchingController = new CitizenMatchingController(mockCitizenMatchingService) {}
+    val citizenMatchingController = new PrivilegedCitizenMatchingController(mockCitizenMatchingService) {}
   }
 
   "match citizen function" should {

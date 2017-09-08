@@ -23,7 +23,7 @@ import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 
 import scalaj.http.Http
 
-class IndividualsControllerSpec extends BaseSpec {
+class PrivilegedIndividualsControllerSpec extends BaseSpec {
 
   feature("matched individual is open and accessible") {
 
