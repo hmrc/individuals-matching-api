@@ -19,16 +19,17 @@ package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 import java.util.UUID
 
 import org.mockito.Matchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{verifyZeroInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.http.HeaderNames.LOCATION
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import uk.gov.hmrc.individualsmatchingapi.controllers.PrivilegedCitizenMatchingController
+import uk.gov.hmrc.individualsmatchingapi.config.ServiceAuthConnector
+import uk.gov.hmrc.individualsmatchingapi.controllers.SandboxPrivilegedCitizenMatchingController
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenMatchingRequest, CitizenNotFoundException, InvalidNinoException, MatchingException}
-import uk.gov.hmrc.individualsmatchingapi.services.CitizenMatchingService
+import uk.gov.hmrc.individualsmatchingapi.services.SandboxCitizenMatchingService
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -39,8 +40,10 @@ class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar
 
   trait Setup {
     val fakeRequest = FakeRequest()
-    val mockCitizenMatchingService = mock[CitizenMatchingService]
-    val citizenMatchingController = new PrivilegedCitizenMatchingController(mockCitizenMatchingService) {}
+    val mockSandboxCitizenMatchingService = mock[SandboxCitizenMatchingService]
+    val mockAuthConnector = mock[ServiceAuthConnector]
+
+    val citizenMatchingController = new SandboxPrivilegedCitizenMatchingController(mockSandboxCitizenMatchingService, mockAuthConnector)
   }
 
   "match citizen function" should {
@@ -48,7 +51,7 @@ class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar
     val matchId = UUID.randomUUID()
 
     "return 303 for a matched citizen" in new Setup {
-      when(mockCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
+      when(mockSandboxCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.successful(matchId))
 
       val result = await(citizenMatchingController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest()))))
@@ -59,7 +62,7 @@ class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar
     }
 
     "return 403 (Forbidden) for a citizen not found" in new Setup {
-      when(mockCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
+      when(mockSandboxCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new CitizenNotFoundException))
 
       val result = await(citizenMatchingController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest()))))
@@ -71,7 +74,7 @@ class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar
     }
 
     "return 403 (Forbidden) when a matching exception is thrown" in new Setup {
-      when(mockCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
+      when(mockSandboxCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new MatchingException))
 
       val result = await(citizenMatchingController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest()))))
@@ -83,7 +86,7 @@ class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar
     }
 
     "return 403 (Forbidden) when an invalid nino exception is thrown" in new Setup {
-      when(mockCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
+      when(mockSandboxCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new InvalidNinoException()))
 
       val result = await(citizenMatchingController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest()))))
@@ -121,6 +124,16 @@ class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar
         "code" -> "INVALID_REQUEST", "message" -> "Malformed nino submitted"
       )
     }
+
+    "not require bearer token authentication" in new Setup {
+      when(mockSandboxCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(matchId))
+
+      val result = await(citizenMatchingController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest()))))
+
+      status(result) shouldBe SEE_OTHER
+      verifyZeroInteractions(mockAuthConnector)
+    }
   }
 
   private def matchingRequest(firstName: String = "Amanda", dateOfBirth: String = "1960-01-15") = {
@@ -129,15 +142,6 @@ class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar
           "lastName":"Joseph",
           "nino":"NA000799C",
           "dateOfBirth":"$dateOfBirth"
-        }
-      """
-  }
-
-  private def invalidMatchingRequest() = {
-    s"""{
-          "lastName":"Joseph",
-          "nino":"NA000799C",
-          "dateOfBirth":"1960-01-15"
         }
       """
   }

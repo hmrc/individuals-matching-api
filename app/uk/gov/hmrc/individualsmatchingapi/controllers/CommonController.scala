@@ -21,7 +21,11 @@ import java.util.UUID
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.mvc.{Request, Result}
+import uk.gov.hmrc.auth.core.AuthorisedFunctions
+import uk.gov.hmrc.auth.core.authorise.Enrolment
+import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
 import uk.gov.hmrc.individualsmatchingapi.domain._
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.Future
@@ -61,3 +65,17 @@ trait CommonController extends BaseController {
   }
 }
 
+trait PrivilegedAuthentication extends AuthorisedFunctions {
+
+  val environment: String
+
+  def requiresPrivilegedAuthentication(body: Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
+    if (environment == SANDBOX) body
+    else authorised(Enrolment("read:individuals-matching"))(body)
+  }
+}
+
+object Environment {
+  val SANDBOX = "SANDBOX"
+  val PRODUCTION = "PRODUCTION"
+}
