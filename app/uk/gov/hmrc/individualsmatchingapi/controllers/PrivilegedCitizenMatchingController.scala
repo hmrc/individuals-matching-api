@@ -20,23 +20,29 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.libs.json.Json
 import play.api.mvc.{Action, BodyParsers}
+import uk.gov.hmrc.individualsmatchingapi.config.ServiceAuthConnector
+import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenMatchingFormat
 import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, SandboxCitizenMatchingService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-abstract class PrivilegedCitizenMatchingController(citizenMatchingService: CitizenMatchingService) extends CommonController {
+abstract class PrivilegedCitizenMatchingController(citizenMatchingService: CitizenMatchingService) extends CommonController with PrivilegedAuthentication {
 
   private def seeOthers(location: String) = new Status(SEE_OTHER)(Json.obj()).withHeaders(LOCATION -> location)
 
   def matchCitizen = Action.async(BodyParsers.parse.json) { implicit request =>
-    withJsonBody[CitizenMatchingRequest] { matchCitizen =>
-      citizenMatchingService.matchCitizen(matchCitizen) map (id => seeOthers(s"/individuals/matching/$id"))
-    } recover recovery
+    requiresPrivilegedAuthentication {
+      withJsonBody[CitizenMatchingRequest] { matchCitizen =>
+        citizenMatchingService.matchCitizen(matchCitizen) map (id => seeOthers(s"/individuals/matching/$id"))
+      } recover recovery
+    }
   }
 }
 
 @Singleton
-class SandboxPrivilegedCitizenMatchingController @Inject()(sandboxCitizenMatchingService: SandboxCitizenMatchingService)
-  extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService)
+class SandboxPrivilegedCitizenMatchingController @Inject()(sandboxCitizenMatchingService: SandboxCitizenMatchingService, val authConnector: ServiceAuthConnector)
+  extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService) {
+  override val environment = SANDBOX
+}

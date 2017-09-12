@@ -22,24 +22,31 @@ import play.api.hal.Hal._
 import play.api.hal.HalLink
 import play.api.mvc.Action
 import play.api.mvc.hal._
+import uk.gov.hmrc.individualsmatchingapi.config.ServiceAuthConnector
+import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, SandboxCitizenMatchingService}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
-abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMatchingService) extends CommonController {
+abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMatchingService) extends CommonController with PrivilegedAuthentication {
 
   def matchedIndividual(matchId: String) = Action.async { implicit request =>
-    withUuid(matchId) { matchUuid =>
-      citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
-        val selfLink = HalLink("self", s"/individuals/matching/$matchId")
-        val incomeLink = HalLink("income", s"/individuals/income?matchId=$matchId", name = Option("GET"), title = Option("View individual's income"))
-        val employmentsLink = HalLink("employments", s"/individuals/employments?matchId=$matchId", name = Option("GET"), title = Option("View individual's employments"))
-        Ok(state(citizenDetails) ++ links(selfLink, incomeLink, employmentsLink))
-      } recover recovery
+    requiresPrivilegedAuthentication {
+      withUuid(matchId) { matchUuid =>
+        citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
+          val selfLink = HalLink("self", s"/individuals/matching/$matchId")
+          val incomeLink = HalLink("income", s"/individuals/income?matchId=$matchId", name = Option("GET"), title = Option("View individual's income"))
+          val employmentsLink = HalLink("employments", s"/individuals/employments?matchId=$matchId", name = Option("GET"), title = Option("View individual's employments"))
+          Ok(state(citizenDetails) ++ links(selfLink, incomeLink, employmentsLink))
+        } recover recovery
+      }
     }
   }
 }
 
 @Singleton
-class SandboxPrivilegedIndividualsController @Inject()(sandboxCitizenMatchingService: SandboxCitizenMatchingService)
-  extends PrivilegedIndividualsController(sandboxCitizenMatchingService)
+class SandboxPrivilegedIndividualsController @Inject()(sandboxCitizenMatchingService: SandboxCitizenMatchingService, val authConnector: ServiceAuthConnector)
+  extends PrivilegedIndividualsController(sandboxCitizenMatchingService) {
+  override val environment = SANDBOX
+}

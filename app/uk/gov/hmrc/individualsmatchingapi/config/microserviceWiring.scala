@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.individualsmatchingapi
+package uk.gov.hmrc.individualsmatchingapi.config
 
+import javax.inject.Singleton
+import javax.inject.Inject
+
+import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
 import uk.gov.hmrc.play.http.hooks.HttpHook
 import uk.gov.hmrc.play.http.ws._
@@ -31,6 +34,12 @@ object MicroserviceAuditConnector extends AuditConnector with RunMode {
   override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
 }
 
-object MicroserviceAuthConnector extends AuthConnector with ServicesConfig {
-  override val authBaseUrl = baseUrl("auth")
+@Singleton
+class WSHttp @Inject()() extends WSGet with WSPut with WSPost with WSDelete with WSPatch with AppName {
+  override val hooks: Seq[HttpHook] = NoneRequired
+}
+
+@Singleton
+class ServiceAuthConnector @Inject()(val http: WSHttp) extends PlayAuthConnector with ServicesConfig {
+  override lazy val serviceUrl: String = baseUrl("auth")
 }

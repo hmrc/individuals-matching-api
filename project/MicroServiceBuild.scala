@@ -18,7 +18,8 @@ object MicroServiceBuild extends Build with MicroService {
     "uk.gov.hmrc" %% "play-hmrc-api" % "1.4.0",
     "uk.gov.hmrc" %% "logback-json-logger" % "3.1.0",
     "uk.gov.hmrc" %% "domain" % "4.1.0",
-    "uk.gov.hmrc" %% "play-hal" % "1.2.0"
+    "uk.gov.hmrc" %% "play-hal" % "1.2.0",
+    "uk.gov.hmrc" %% "play-auth" % "2.2.1"
   )
 
   def test(scope: String = "test,it") = Seq(
