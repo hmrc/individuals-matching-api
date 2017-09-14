@@ -17,12 +17,16 @@
 package uk.gov.hmrc.individualsmatchingapi.services
 
 import java.util.UUID
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
 
 import org.joda.time.LocalDate
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.individualsmatchingapi.connectors.{CitizenDetailsConnector, MatchingConnector}
 import uk.gov.hmrc.individualsmatchingapi.domain._
+import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
 import uk.gov.hmrc.play.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 
@@ -30,6 +34,28 @@ trait CitizenMatchingService {
   def matchCitizen(citizenMatchingRequest: CitizenMatchingRequest)(implicit hc: HeaderCarrier): Future[UUID]
 
   def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier): Future[CitizenDetails]
+}
+
+@Singleton
+class LiveCitizenMatchingService @Inject()(liveNinoMatchRepository: NinoMatchRepository,
+                                           citizenDetailsConnector: CitizenDetailsConnector,
+                                           matchingConnector: MatchingConnector) extends CitizenMatchingService {
+
+  override def matchCitizen(citizenMatchingRequest: CitizenMatchingRequest)(implicit hc: HeaderCarrier): Future[UUID] = {
+
+    for {
+      details <- citizenDetailsConnector.citizenDetails(citizenMatchingRequest.nino)
+      _ <- matchingConnector.validateMatch(DetailsMatchRequest(citizenMatchingRequest, Seq(details)))
+      ninoMatch <- liveNinoMatchRepository.create(Nino(citizenMatchingRequest.nino))
+    } yield ninoMatch.id
+  }
+
+  override def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier) =
+    liveNinoMatchRepository.read(matchId) flatMap {
+      case Some(ninoMatch) => citizenDetailsConnector.citizenDetails(ninoMatch.nino.nino)
+      case _ => failed(new MatchNotFoundException)
+    }
+
 }
 
 @Singleton

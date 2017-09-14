@@ -42,6 +42,17 @@ object JsonFormatters {
         "nino" -> citizenDetails.nino,
         "dateOfBirth" -> citizenDetails.dateOfBirth)
   }
+
+  implicit val detailsMatchRequestFormat = new Format[DetailsMatchRequest] {
+    def reads(json: JsValue) = JsSuccess(
+      DetailsMatchRequest(
+        (json \ "verifyPerson").as[CitizenMatchingRequest],
+        (json \ "cidPersons").as[List[CitizenDetails]]))
+
+    def writes(matchingRequest: DetailsMatchRequest): JsValue =
+      Json.obj("verifyPerson" -> matchingRequest.verifyPerson, "cidPersons" -> matchingRequest.cidPersons)
+  }
+
   implicit val errorResponseWrites = new Writes[ErrorResponse] {
     def writes(e: ErrorResponse): JsValue = Json.obj("code" -> e.errorCode, "message" -> e.message)
   }
@@ -62,4 +73,5 @@ object JsonFormatters {
   }
 
   implicit val dateTimeFormat = ReactiveMongoFormats.dateTimeFormats
+  implicit val ninoMatchJsonFormat = Json.format[NinoMatch]
 }

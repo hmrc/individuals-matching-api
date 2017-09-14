@@ -33,3 +33,5 @@ case class CitizenMatchingRequest(firstName: String, lastName: String, nino: Str
 }
 
 case class CitizenDetails(firstName: Option[String], lastName: Option[String], nino: Option[String], dateOfBirth: Option[LocalDate])
+
+case class DetailsMatchRequest(verifyPerson: CitizenMatchingRequest, cidPersons: Seq[CitizenDetails])

@@ -16,16 +16,64 @@
 
 package component.uk.gov.hmrc.individualsmatchingapi.controllers
 
-import component.uk.gov.hmrc.individualsmatchingapi.stubs.BaseSpec
+import component.uk.gov.hmrc.individualsmatchingapi.stubs.{AuthStub, BaseSpec, CitizenDetailsStub}
 import play.api.http.Status
 import play.api.libs.json.Json
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 
+import scala.concurrent.Await.result
 import scalaj.http.Http
 
 class PrivilegedIndividualsControllerSpec extends BaseSpec {
 
+  val nino = "NA000799C"
+
   feature("matched individual is open and accessible") {
+
+    scenario("valid request to the live implementation") {
+
+      Given("A valid privileged Auth bearer token")
+      AuthStub.willAuthorizePrivilegedAuthToken(authToken)
+
+      And("A valid nino match exist")
+      val matchId = result(mongoRepository.create(Nino(nino)), timeout).id.toString
+
+      And("Citizen exists for the given NINO")
+      CitizenDetailsStub.getByNinoReturnsCitizenDetails(nino, "John", "Smith", "13101972")
+
+      When("I request available resources for a matched individual")
+      val response = Http(s"$serviceUrl/$matchId").headers(requestHeaders(acceptHeaderP1)).asString
+
+      Then("The response status should be 200 (Ok)")
+      response.code shouldBe Status.OK
+
+      And("The response contains a valid payload")
+      Json.parse(response.body) shouldBe Json.parse(
+        s"""
+           {
+             "_links":{
+               "income":{
+                 "href":"/individuals/income/?matchId=$matchId",
+                 "name":"GET",
+                 "title":"View individual's income"
+               },
+               "employments":{
+                 "href":"/individuals/employments/?matchId=$matchId",
+                 "name":"GET",
+                 "title":"View individual's employments"
+               },
+               "self":{
+                 "href":"/individuals/matching/$matchId"
+               }
+             },
+             "firstName":"John",
+             "lastName":"Smith",
+             "nino":"$nino",
+             "dateOfBirth":"1972-10-13"
+           }
+         """)
+    }
 
     scenario("valid request to the sandbox implementation") {
 
@@ -41,12 +89,12 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
            {
              "_links":{
                "income":{
-                 "href":"/individuals/income?matchId=$sandboxMatchId",
+                 "href":"/individuals/income/?matchId=$sandboxMatchId",
                  "name":"GET",
                  "title":"View individual's income"
                },
                "employments":{
-                 "href":"/individuals/employments?matchId=$sandboxMatchId",
+                 "href":"/individuals/employments/?matchId=$sandboxMatchId",
                  "name":"GET",
                  "title":"View individual's employments"
                },

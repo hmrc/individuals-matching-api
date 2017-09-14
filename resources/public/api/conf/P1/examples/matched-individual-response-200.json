@@ -1,12 +1,12 @@
 {
   "_links": {
     "income": {
-      "href": "/individuals/income?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430",
+      "href": "/individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430",
       "name": "GET",
       "title": "View individual's income"
     },
     "employments": {
-      "href": "/individuals/employments?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430",
+      "href": "/individuals/employments/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430",
       "name": "GET",
       "title": "View individual's employments"
     },

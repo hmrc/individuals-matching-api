@@ -21,10 +21,10 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, BodyParsers}
 import uk.gov.hmrc.individualsmatchingapi.config.ServiceAuthConnector
-import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
+import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenMatchingFormat
-import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, SandboxCitizenMatchingService}
+import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -39,6 +39,12 @@ abstract class PrivilegedCitizenMatchingController(citizenMatchingService: Citiz
       } recover recovery
     }
   }
+}
+
+@Singleton
+class LivePrivilegedCitizenMatchingController @Inject()(liveCitizenMatchingService: LiveCitizenMatchingService, val authConnector: ServiceAuthConnector)
+  extends PrivilegedCitizenMatchingController(liveCitizenMatchingService) {
+  override val environment = PRODUCTION
 }
 
 @Singleton

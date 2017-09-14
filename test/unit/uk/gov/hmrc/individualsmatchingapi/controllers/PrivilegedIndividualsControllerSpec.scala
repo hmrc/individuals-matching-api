@@ -18,8 +18,10 @@ package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
 import java.util.UUID
 
-import org.mockito.Matchers._
+import org.mockito.BDDMockito.given
+import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{verifyZeroInteractions, when}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play._
 import play.api.http.Status.OK
@@ -27,73 +29,109 @@ import play.api.libs.json.Json
 import play.api.mvc.Results
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, status, _}
+import uk.gov.hmrc.auth.core.InsufficientEnrolments
+import uk.gov.hmrc.auth.core.authorise.Enrolment
+import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.individualsmatchingapi.config.ServiceAuthConnector
-import uk.gov.hmrc.individualsmatchingapi.controllers.SandboxPrivilegedIndividualsController
+import uk.gov.hmrc.individualsmatchingapi.controllers.{LivePrivilegedIndividualsController, SandboxPrivilegedIndividualsController}
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
-import uk.gov.hmrc.individualsmatchingapi.services.SandboxCitizenMatchingService
+import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
 import scala.concurrent.Future.{failed, successful}
 
-class PrivilegedIndividualsControllerSpec extends PlaySpec with Results with MockitoSugar with Individuals {
+class PrivilegedIndividualsControllerSpec extends PlaySpec with Results with MockitoSugar with BeforeAndAfterEach with Individuals {
+
+  implicit val headerCarrier = new HeaderCarrier()
+  val uuid = UUID.randomUUID()
 
   trait Setup {
-    val uuid = UUID.randomUUID()
-    val mockSandboxCitizenMatchingService = mock[SandboxCitizenMatchingService]
-    val mockAuthConnector = mock[ServiceAuthConnector]
-    val individualsController = new SandboxPrivilegedIndividualsController(mockSandboxCitizenMatchingService, mockAuthConnector)
 
-    implicit val headerCarrier = new HeaderCarrier()
+    val mockCitizenMatchingService = mock[LiveCitizenMatchingService]
+    val mockAuthConnector = mock[ServiceAuthConnector]
+
+    val liveController = new LivePrivilegedIndividualsController(mockCitizenMatchingService, mockAuthConnector)
+    val sandboxController = new SandboxPrivilegedIndividualsController(new SandboxCitizenMatchingService(), mockAuthConnector)
+
+    given(mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any())).willReturn(successful(()))
   }
 
-  "The matched individual function" should {
-
+  "The live matched individual function" should {
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
-      when(mockSandboxCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])).thenReturn(failed(new MatchNotFoundException))
+      when(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])).thenReturn(failed(new MatchNotFoundException))
 
-      val eventualResult = individualsController.matchedIndividual(uuid.toString).apply(FakeRequest())
+      val eventualResult = liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
       status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.parse("""{"code":"NOT_FOUND","message":"The resource can not be found"}""")
     }
 
-    "respond with http 200 (ok) for a valid matchId and citizen details exist" in new Setup {
-      when(mockSandboxCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])).thenReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1960-01-15")))
-
-      val eventualResult = individualsController.matchedIndividual(uuid.toString).apply(FakeRequest())
+    "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
+      given(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])).willReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
+      val eventualResult = liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
       status(eventualResult) mustBe OK
-      contentAsJson(eventualResult) mustBe Json.parse(
-        s"""
-          {
-            "_links":{
-              "income":{
-                "href":"/individuals/income?matchId=$uuid",
-                "name":"GET",
-                "title":"View individual's income"
-              },
-              "employments":{
-                "href":"/individuals/employments?matchId=$uuid",
-                "name":"GET",
-                "title":"View individual's employments"
-              },
-              "self":{
-                "href":"/individuals/matching/$uuid"
-              }
-            },
-            "firstName":"Joe",
-            "lastName":"Bloggs",
-            "nino":"AB123456C",
-            "dateOfBirth":"1960-01-15"
-          }
-        """)
+      contentAsJson(eventualResult) mustBe Json.parse(response(uuid, "Joe", "Bloggs", "AB123456C", "1969-01-15"))
+    }
+
+    "fail with AuthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
+      given(mockAuthConnector.authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any())).willReturn(failed(new InsufficientEnrolments()))
+
+      intercept[InsufficientEnrolments] {
+        await(liveController.matchedIndividual(uuid.toString).apply(FakeRequest()))
+      }
+
+      verifyZeroInteractions(mockCitizenMatchingService)
+    }
+  }
+
+  "The sandbox matched individual function" should {
+
+    "respond with http 404 (not found) for an invalid matchId" in new Setup {
+      val eventualResult = sandboxController.matchedIndividual(uuid.toString).apply(FakeRequest())
+      status(eventualResult) mustBe NOT_FOUND
+      contentAsJson(eventualResult) mustBe Json.parse("""{"code":"NOT_FOUND","message":"The resource can not be found"}""")
+    }
+
+    "respond with http 200 (ok) for sandbox valid matchId and citizen details exist" in new Setup {
+      val eventualResult = sandboxController.matchedIndividual(sandboxMatchId.toString).apply(FakeRequest())
+      status(eventualResult) mustBe OK
+      contentAsJson(eventualResult) mustBe Json.parse(response(sandboxMatchId))
     }
 
     "not require bearer token authentication" in new Setup {
-      when(mockSandboxCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])).thenReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1960-01-15")))
-
-      val eventualResult = individualsController.matchedIndividual(uuid.toString).apply(FakeRequest())
+      val eventualResult = sandboxController.matchedIndividual(sandboxMatchId.toString).apply(FakeRequest())
       status(eventualResult) mustBe OK
       verifyZeroInteractions(mockAuthConnector)
     }
+  }
+
+  private def response(matchId: UUID,
+                       firstName: String = "Amanda",
+                       lastName: String = "Joseph",
+                       nino: String = "NA000799C",
+                       dateOfBirth: String = "1960-01-15") = {
+      s"""
+        {
+           "_links": {
+             "income": {
+               "href": "/individuals/income/?matchId=$matchId",
+               "name": "GET",
+               "title": "View individual's income"
+             },
+             "employments": {
+               "href": "/individuals/employments/?matchId=$matchId",
+               "name": "GET",
+               "title": "View individual's employments"
+             },
+             "self": {
+               "href": "/individuals/matching/$matchId"
+             }
+           },
+           "firstName": "$firstName",
+           "lastName": "$lastName",
+           "nino": "$nino",
+           "dateOfBirth": "$dateOfBirth"
+        }"""
   }
 }
