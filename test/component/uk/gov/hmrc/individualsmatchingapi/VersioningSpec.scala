@@ -52,12 +52,12 @@ class VersioningSpec extends BaseSpec {
             {
               "_links": {
                 "income": {
-                  "href": "/individuals/income?matchId=$sandboxMatchId",
+                  "href": "/individuals/income/?matchId=$sandboxMatchId",
                   "name": "GET",
                   "title": "View individual's income"
                 },
                 "employments": {
-                  "href": "/individuals/employments?matchId=$sandboxMatchId",
+                  "href": "/individuals/employments/?matchId=$sandboxMatchId",
                   "name": "GET",
                   "title": "View individual's employments"
                 },

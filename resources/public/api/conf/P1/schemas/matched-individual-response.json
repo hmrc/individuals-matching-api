@@ -12,7 +12,7 @@
           "properties": {
             "href": {
               "type": "string",
-              "example": "/individuals/income?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
+              "example": "/individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
             },
             "name": {
               "type": "string",
@@ -31,7 +31,7 @@
           "properties": {
             "href": {
               "type": "string",
-              "example": "/individuals/employments?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
+              "example": "/individuals/employments/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
             },
             "name": {
               "type": "string",

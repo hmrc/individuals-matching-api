@@ -27,8 +27,11 @@ import play.api.Application
 import play.api.http.HeaderNames.{ACCEPT, AUTHORIZATION, CONTENT_TYPE}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.mvc.Http.MimeTypes.JSON
+import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
 
+import scala.concurrent.Await.result
 import scala.concurrent.duration.Duration
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait BaseSpec extends FeatureSpec with BeforeAndAfterAll with BeforeAndAfterEach with Matchers with GuiceOneServerPerSuite
   with GivenWhenThen {
@@ -38,12 +41,16 @@ trait BaseSpec extends FeatureSpec with BeforeAndAfterAll with BeforeAndAfterEac
     "auditing.enabled" -> false,
     "auditing.traceRequests" -> false,
     "microservice.services.auth.port" -> AuthStub.port,
+    "microservice.services.citizen-details.port" -> CitizenDetailsStub.port,
+    "microservice.services.matching.port" -> MatchingStub.port,
+    "mongodb.uri" -> "mongodb://localhost:27017/nino-match-repository-it",
     "run.mode" -> "It"
   ).build()
 
   val timeout = Duration(5, TimeUnit.SECONDS)
   val serviceUrl = s"http://localhost:$port"
-  val mocks = Seq(AuthStub)
+  val mocks = Seq(AuthStub, CitizenDetailsStub, MatchingStub)
+  val mongoRepository = app.injector.instanceOf[NinoMatchRepository]
   val authToken = "Bearer AUTH_TOKEN"
   val acceptHeaderV1 = ACCEPT -> "application/vnd.hmrc.1+json"
   val acceptHeaderP1 = ACCEPT -> "application/vnd.hmrc.P1+json"
@@ -58,6 +65,8 @@ trait BaseSpec extends FeatureSpec with BeforeAndAfterAll with BeforeAndAfterEac
 
   override protected def beforeEach(): Unit = {
     mocks.foreach(m => if (!m.server.isRunning) m.server.start())
+    result(mongoRepository.drop, timeout)
+    result(mongoRepository.ensureIndexes, timeout)
   }
 
   override protected def afterEach(): Unit = {
@@ -66,6 +75,7 @@ trait BaseSpec extends FeatureSpec with BeforeAndAfterAll with BeforeAndAfterEac
 
   override def afterAll(): Unit = {
     mocks.foreach(_.server.stop())
+    result(mongoRepository.drop, timeout)
   }
 }
 

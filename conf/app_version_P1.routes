@@ -1,3 +1,4 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.individualsmatchingapi.controllers.MicroserviceHelloWorld.hello
+POST        /                   @uk.gov.hmrc.individualsmatchingapi.controllers.LivePrivilegedCitizenMatchingController.matchCitizen
+GET         /:matchId           @uk.gov.hmrc.individualsmatchingapi.controllers.LivePrivilegedIndividualsController.matchedIndividual(matchId: java.lang.String)
