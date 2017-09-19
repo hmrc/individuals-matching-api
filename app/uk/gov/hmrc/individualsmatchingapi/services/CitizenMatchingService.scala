@@ -34,6 +34,8 @@ trait CitizenMatchingService {
   def matchCitizen(citizenMatchingRequest: CitizenMatchingRequest)(implicit hc: HeaderCarrier): Future[UUID]
 
   def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier): Future[CitizenDetails]
+
+  def fetchMatchedCitizenRecord(matchId: UUID)(implicit hc: HeaderCarrier): Future[MatchedCitizenRecord]
 }
 
 @Singleton
@@ -56,6 +58,12 @@ class LiveCitizenMatchingService @Inject()(liveNinoMatchRepository: NinoMatchRep
       case _ => failed(new MatchNotFoundException)
     }
 
+  override def fetchMatchedCitizenRecord(matchId: UUID)(implicit hc: HeaderCarrier) = {
+    liveNinoMatchRepository.read(matchId) flatMap {
+      case Some(ninoMatch) => successful(MatchedCitizenRecord(ninoMatch.nino, ninoMatch.id))
+      case _ => failed(new MatchNotFoundException)
+    }
+  }
 }
 
 @Singleton
@@ -89,4 +97,6 @@ class SandboxCitizenMatchingService extends CitizenMatchingService {
         Option(individual.nino), Option(individual.dateOfBirth)))
       case _ => failed(new MatchNotFoundException)
     }
+
+  override def fetchMatchedCitizenRecord(matchId: UUID)(implicit hc: HeaderCarrier) = failed(new NotImplementedException)
 }

@@ -125,6 +125,22 @@ class CitizenMatchingServiceSpec extends UnitSpec with MockitoSugar with ScalaFu
 
   }
 
+  "liveCitizenMatchingService fetch matched citizen record function" should {
+
+    "return a matched citizen record for a valid matchId" in new Setup {
+      val matchedCitizenRecord = MatchedCitizenRecord(Nino(ninoString), matchId)
+      when(mockNinoMatchRepository.read(matchId)).thenReturn(successful(Some(ninoMatch)))
+
+      val result = await(liveService.fetchMatchedCitizenRecord(matchId))
+      result shouldBe matchedCitizenRecord
+    }
+
+    "throw an exception for an invalid matchId" in new Setup {
+      when(mockNinoMatchRepository.read(matchId)).thenReturn(successful(None))
+      intercept[MatchNotFoundException](await(liveService.fetchMatchedCitizenRecord(matchId)))
+    }
+  }
+
   "sandboxCitizenMatchingService match citizen function" should {
 
     "return default matchId for a successful match" in new Setup {
@@ -181,7 +197,12 @@ class CitizenMatchingServiceSpec extends UnitSpec with MockitoSugar with ScalaFu
     "return citizen details when a nino matches sandbox employment data" in new Setup {
       await(sandboxService.fetchCitizenDetailsByMatchId(sandboxMatchId)) shouldBe citizenDetails()
     }
+  }
 
+  "SandboxCitizenMatchingService fetch matched citizen record function" should {
+    "throw a not implemented exception" in new Setup {
+      intercept[NotImplementedException](await(sandboxService.fetchMatchedCitizenRecord(sandboxMatchId)))
+    }
   }
 
   def aCitizenMatchingRequest(firstName: String = "Amanda",
