@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.individualsmatchingapi.domain
 
+import java.util.UUID
+
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import uk.gov.hmrc.domain.Nino
@@ -35,3 +37,5 @@ case class CitizenMatchingRequest(firstName: String, lastName: String, nino: Str
 case class CitizenDetails(firstName: Option[String], lastName: Option[String], nino: Option[String], dateOfBirth: Option[LocalDate])
 
 case class DetailsMatchRequest(verifyPerson: CitizenMatchingRequest, cidPersons: Seq[CitizenDetails])
+
+case class MatchedCitizenRecord(nino: Nino, matchId: UUID)

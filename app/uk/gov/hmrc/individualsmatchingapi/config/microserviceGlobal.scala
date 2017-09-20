@@ -67,6 +67,8 @@ object MicroserviceGlobal extends DefaultMicroserviceGlobal  with ServiceLocator
 
   override val slConnector = ServiceLocatorConnector(WSHttp)
 
+  override lazy val registrationEnabled = Play.current.configuration.getBoolean("microservice.services.service-locator.enabled").getOrElse(false)
+
   private lazy val unversionedContexts = Play.current.configuration.getStringSeq("versioning.unversionedContexts").getOrElse(Seq.empty[String])
 
   override def onRequestReceived(originalRequest: RequestHeader) = {

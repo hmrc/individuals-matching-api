@@ -40,3 +40,4 @@ class MatchingException extends RuntimeException
 class CitizenNotFoundException extends RuntimeException
 class InvalidNinoException extends RuntimeException
 class MatchNotFoundException extends RuntimeException
+class NotImplementedException extends RuntimeException

@@ -74,4 +74,5 @@ object JsonFormatters {
 
   implicit val dateTimeFormat = ReactiveMongoFormats.dateTimeFormats
   implicit val ninoMatchJsonFormat = Json.format[NinoMatch]
+  implicit val matchedCitizenRecordJsonFormat = Json.format[MatchedCitizenRecord]
 }
