@@ -36,7 +36,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class   NinoMatchRepository @Inject() (mongoConnectionProvider: MongoConnectionProvider, configuration: Configuration)
+class NinoMatchRepository @Inject() (mongoConnectionProvider: MongoConnectionProvider, configuration: Configuration)
   extends ReactiveRepository[NinoMatch, UUID]("ninoMatch", mongoConnectionProvider.mongoDatabase, JsonFormatters.ninoMatchJsonFormat, JsonFormatters.uuidJsonFormat) {
 
   private lazy val ninoMatchTtl = configuration.getInt("mongo.ninoMatchTtlInSeconds").getOrElse(60 * 60 * 5)

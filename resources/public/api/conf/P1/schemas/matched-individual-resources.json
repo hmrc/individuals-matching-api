@@ -12,7 +12,7 @@
           "properties": {
             "href": {
               "type": "string",
-              "example": "/individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e43"
+              "example": "/individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430"
             },
             "name": {
               "type": "string",
