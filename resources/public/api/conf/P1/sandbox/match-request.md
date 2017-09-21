@@ -28,7 +28,7 @@
         <td><p>Happy path</p>
         <p>(Match first letter of first name)</p></td>
         <td><p>firstName = &quot;A&quot;<br/>lastName = &quot;Joseph&quot;<br/>nino = &quot;NA000799C&quot;<br/>dateOfBirth = &quot;1960-01-15&quot;</p></td>
-        <td><p>303 (See Other)</p><p>Location = &#47;individuals&#47;57072660-1df9-4aeb-b4ea-cd2d7f96e439</p></td>
+        <td><p>200 (OK)</p><p>Payload as response example above</p></td>
     </tr>
     <tr>
         <td><p>No match</p></td>

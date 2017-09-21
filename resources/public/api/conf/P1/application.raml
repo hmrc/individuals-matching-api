@@ -34,11 +34,12 @@ uses:
       (annotations.scope): "read:individuals-matching"
       securedBy: [ sec.oauth_2_0: { scopes: [ "read:individuals-matching" ] } ]
       responses:
-        303:
-          headers:
-            Location:
-              description: The location of employment and income information for the matched individual
-              example: /individuals/matching/123e4567-e89b-12d3-a456-426655440000
+        200:
+          description: The available resources to retrieve the matched individual's details
+          body:
+            application/json:
+              example: !include examples/matched-individual-resources-200.json
+              type: !include schemas/matched-individual-resources.json
         400:
           body:
             application/json:

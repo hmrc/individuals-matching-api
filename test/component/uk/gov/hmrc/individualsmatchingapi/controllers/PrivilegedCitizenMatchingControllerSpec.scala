@@ -16,19 +16,19 @@
 
 package component.uk.gov.hmrc.individualsmatchingapi.controllers
 
-import java.util.UUID
-
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.{AuthStub, BaseSpec, CitizenDetailsStub, MatchingStub}
 import org.joda.time.LocalDate
 import play.api.http.Status._
 import play.api.libs.json.Json
-import play.api.test.Helpers.{BAD_REQUEST, LOCATION, NOT_FOUND}
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenMatchingRequest, ErrorMatchingFailed}
-import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
+import play.api.libs.json.Json.parse
+import play.api.test.Helpers.{BAD_REQUEST, NOT_FOUND}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
+import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
+import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenMatchingRequest, ErrorMatchingFailed}
 
-import scala.concurrent.Await.result
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.DurationDouble
 import scalaj.http.{Http, HttpResponse}
 
 class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
@@ -42,18 +42,32 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
 
   feature("citizen matching is open and accessible") {
 
-    scenario("valid request to the sandbox implementation") {
+    scenario("valid request to the sandbox implementation. Individual's details match sandbox citizen") {
 
       When("I request individual income for the sandbox matchId")
       val response = Http(s"$serviceUrl/sandbox/")
         .postData("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"1960-01-15"}""")
         .headers(requestHeaders(acceptHeaderP1)).asString
 
-      Then("The response status should be 303 (See Other)")
-      response.code shouldBe SEE_OTHER
+      Then("The response status should be 200 (Ok)")
+      response.code shouldBe OK
 
-      And("The 'Location' header contains the correct URL")
-      response.headers.get(LOCATION) shouldBe Some(s"/individuals/matching/$sandboxMatchId")
+      And("The response contains a valid payload")
+      parse(response.body) shouldBe parse(
+        s"""
+           {
+             "_links": {
+               "individual": {
+                 "href": "/individuals/matching/$sandboxMatchId",
+                 "name": "GET",
+                 "title": "Individual Details"
+               },
+               "self": {
+                 "href": "/individuals/matching/"
+               }
+             }
+           }"""
+      )
     }
 
     scenario("Valid request to the live implementation. Individual's details match existing citizen records") {
@@ -72,17 +86,29 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       When("I request a citizen's details match")
       val response = requestMatch(matchingRequest)
 
-      Then("The response status should be 303 (See Other)")
-      response.code shouldBe SEE_OTHER
+      Then("a single ninoMatch record is stored in mongo with its corresponding NINO and generated matchId")
+      val ninoMatchRecords = Await.result(mongoRepository.find("nino" -> nino), 3 second)
+      ninoMatchRecords.size shouldBe 1
 
-      And("The 'Location' header contains the generated matchId")
-      val locationHeader = response.headers.get(LOCATION)
-      locationHeader shouldNot be(None)
-      val matchId = locationHeader.get.stripPrefix("/individuals/matching/")
+      And("The response status should be 200 (Ok)")
+      response.code shouldBe OK
 
-      And("The matchId is stored in mongo with its corresponding NINO")
-      val ninoMatch = result(mongoRepository.read(UUID.fromString(matchId)), timeout).get
-      ninoMatch.nino shouldBe Nino(nino)
+      And("The response contains a valid payload")
+      parse(response.body) shouldBe parse(
+        s"""
+           {
+             "_links": {
+               "individual": {
+                 "href": "/individuals/matching/${ninoMatchRecords.head.id}",
+                 "name": "GET",
+                 "title": "Individual Details"
+               },
+               "self": {
+                 "href": "/individuals/matching/"
+               }
+             }
+           }"""
+      )
     }
   }
 
@@ -107,7 +133,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       response.code shouldBe FORBIDDEN
 
       And("The correct error message is returned")
-      Json.parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
+      parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
     }
 
     scenario("Citizen does not exist for the given NINO") {
@@ -125,7 +151,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       response.code shouldBe FORBIDDEN
 
       And("The correct error message is returned")
-      Json.parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
+      parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
     }
 
     scenario("Invalid NINO provided") {
@@ -143,7 +169,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       response.code shouldBe FORBIDDEN
 
       And("The correct error message is returned")
-      Json.parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
+      parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
     }
   }
 

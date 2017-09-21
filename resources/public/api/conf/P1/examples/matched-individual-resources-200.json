@@ -1,0 +1,12 @@
+{
+  "_links": {
+    "individual": {
+      "href": "/individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430",
+      "name": "GET",
+      "title": "Individual Details"
+    },
+    "self": {
+      "href": "/individuals/matching/"
+    }
+  }
+}
