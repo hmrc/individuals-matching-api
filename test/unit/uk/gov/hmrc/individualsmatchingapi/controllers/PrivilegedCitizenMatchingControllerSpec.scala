@@ -21,28 +21,28 @@ import java.util.UUID
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{verifyZeroInteractions, when}
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.BeforeAndAfter
 import org.scalatest.mockito.MockitoSugar
-import play.api.http.HeaderNames.LOCATION
-import play.api.http.Status._
+import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
+import play.api.libs.json.Json.parse
+import play.api.mvc.Results
 import play.api.test.FakeRequest
+import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.auth.core.InsufficientEnrolments
 import uk.gov.hmrc.auth.core.authorise.Enrolment
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.individualsmatchingapi.config.ServiceAuthConnector
 import uk.gov.hmrc.individualsmatchingapi.controllers.{LivePrivilegedCitizenMatchingController, SandboxPrivilegedCitizenMatchingController}
-import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenMatchingRequest, CitizenNotFoundException, InvalidNinoException, MatchingException}
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
+import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 
-class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
-  implicit lazy val materializer = fakeApplication.materializer
+class PrivilegedCitizenMatchingControllerSpec extends PlaySpec with MockitoSugar with Results with BeforeAndAfter {
 
   trait Setup {
     val fakeRequest = FakeRequest()
@@ -62,25 +62,38 @@ class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar
 
     val matchId = UUID.randomUUID()
 
-    "return 303 for a matched citizen" in new Setup {
+    "return 200 (Ok) for a matched citizen" in new Setup {
       when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.successful(matchId))
 
-      val result = await(liveController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest()))))
+      val eventualResult = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
 
-      status(result) shouldBe SEE_OTHER
-      bodyOf(result) shouldBe "{}"
-      result.header.headers.get(LOCATION) shouldBe Some(s"/individuals/matching/$matchId")
+      status(eventualResult) mustBe OK
+      contentAsJson(eventualResult) mustBe parse(
+        s"""
+           {
+             "_links": {
+               "individual": {
+                 "href": "/individuals/matching/$matchId",
+                 "name": "GET",
+                 "title": "Individual Details"
+               },
+               "self": {
+                 "href": "/individuals/matching/"
+               }
+             }
+           }"""
+      )
     }
 
     "return 403 (Forbidden) for a citizen not found" in new Setup {
       when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new CitizenNotFoundException))
 
-      val result = await(liveController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest()))))
+      val eventualResult = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
 
-      status(result) shouldBe FORBIDDEN
-      jsonBodyOf(result) shouldBe Json.obj(
+      status(eventualResult) mustBe FORBIDDEN
+      contentAsJson(eventualResult) mustBe Json.obj(
         "code" -> "MATCHING_FAILED", "message" -> "There is no match for the information provided"
       )
     }
@@ -89,10 +102,10 @@ class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar
       when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new MatchingException))
 
-      val result = await(liveController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest()))))
+      val eventualResult = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
 
-      status(result) shouldBe FORBIDDEN
-      jsonBodyOf(result) shouldBe Json.obj(
+      status(eventualResult) mustBe FORBIDDEN
+      contentAsJson(eventualResult) mustBe Json.obj(
         "code" -> "MATCHING_FAILED", "message" -> "There is no match for the information provided"
       )
     }
@@ -101,44 +114,44 @@ class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar
       when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new InvalidNinoException()))
 
-      val result = await(liveController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest()))))
+      val eventualResult = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
 
-      status(result) shouldBe FORBIDDEN
-      jsonBodyOf(result) shouldBe Json.obj(
+      status(eventualResult) mustBe FORBIDDEN
+      contentAsJson(eventualResult) mustBe Json.obj(
         "code" -> "MATCHING_FAILED", "message" -> "There is no match for the information provided"
       )
     }
 
     "return 400 (BadRequest) for an invalid dateOfBirth" in new Setup {
-      var requestBody = Json.parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
-      var result = await(liveController.matchCitizen()(fakeRequest.withBody(requestBody)))
+      var requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
+      var eventualResult = liveController.matchCitizen()(fakeRequest.withBody(requestBody))
 
-      status(result) shouldBe BAD_REQUEST
-      jsonBodyOf(result) shouldBe Json.obj(
+      status(eventualResult) mustBe BAD_REQUEST
+      contentAsJson(eventualResult) mustBe Json.obj(
         "code" -> "INVALID_REQUEST", "message" -> "dateOfBirth: invalid date format"
       )
 
-      requestBody = Json.parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
-      result = await(liveController.matchCitizen()(fakeRequest.withBody(requestBody)))
+      requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
+      eventualResult = liveController.matchCitizen()(fakeRequest.withBody(requestBody))
 
-      status(result) shouldBe BAD_REQUEST
-      jsonBodyOf(result) shouldBe Json.obj(
+      status(eventualResult) mustBe BAD_REQUEST
+      contentAsJson(eventualResult) mustBe Json.obj(
         "code" -> "INVALID_REQUEST", "message" -> "dateOfBirth: invalid date format"
       )
     }
 
     "return 400 (BadRequest) for an invalid nino" in new Setup {
-      val requestBody = Json.parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"AB1234567","dateOfBirth":"2020-01-31"}""")
-      val result = await(liveController.matchCitizen()(fakeRequest.withBody(requestBody)))
+      val requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"AB1234567","dateOfBirth":"2020-01-31"}""")
+      val eventualResult = liveController.matchCitizen()(fakeRequest.withBody(requestBody))
 
-      status(result) shouldBe BAD_REQUEST
-      jsonBodyOf(result) shouldBe Json.obj(
+      status(eventualResult) mustBe BAD_REQUEST
+      contentAsJson(eventualResult) mustBe Json.obj(
         "code" -> "INVALID_REQUEST", "message" -> "Malformed nino submitted"
       )
     }
 
-    "fail with AuthorizedException when the bearer token does not have enrollment read:individuals-matching" in new Setup {
-      var requestBody = Json.parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
+    "fail with AuthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
+      var requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
 
       given(mockAuthConnector.authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any())).willReturn(failed(new InsufficientEnrolments()))
 
@@ -152,73 +165,86 @@ class PrivilegedCitizenMatchingControllerSpec extends UnitSpec with MockitoSugar
 
     val matchId = UUID.randomUUID()
 
-    "return 303 for a valid matchId" in new Setup {
-      val result = await(sandboxController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest()))))
+    "return 200 (Ok) for the sandbox matchId" in new Setup {
+      val eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
 
-      status(result) shouldBe SEE_OTHER
-      bodyOf(result) shouldBe "{}"
-      result.header.headers.get(LOCATION) shouldBe Some(s"/individuals/matching/$sandboxMatchId")
+      status(eventualResult) mustBe OK
+      contentAsJson(eventualResult) mustBe parse(
+        s"""
+           {
+             "_links": {
+               "individual": {
+                 "href": "/individuals/matching/$sandboxMatchId",
+                 "name": "GET",
+                 "title": "Individual Details"
+               },
+               "self": {
+                 "href": "/individuals/matching/"
+               }
+             }
+           }"""
+      )
     }
 
     "return 403 (Forbidden) for a citizen not found" in new Setup {
-      val result = await(sandboxController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest(firstName = "José")))))
+      val eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest(firstName = "José"))))
 
-      status(result) shouldBe FORBIDDEN
-      jsonBodyOf(result) shouldBe Json.obj(
+      status(eventualResult) mustBe FORBIDDEN
+      contentAsJson(eventualResult) mustBe Json.obj(
         "code" -> "MATCHING_FAILED", "message" -> "There is no match for the information provided"
       )
     }
 
     "return 403 (Forbidden) when nino does not match a sandbox individual" in new Setup {
-      val result = await(sandboxController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest(nino="AA000799C")))))
+      val eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest(nino="AA000799C"))))
 
-      status(result) shouldBe FORBIDDEN
-      jsonBodyOf(result) shouldBe Json.obj(
+      status(eventualResult) mustBe FORBIDDEN
+      contentAsJson(eventualResult) mustBe Json.obj(
         "code" -> "MATCHING_FAILED", "message" -> "There is no match for the information provided"
       )
     }
 
     "return 403 (Forbidden) when an invalid nino exception is thrown" in new Setup {
-      val result = await(sandboxController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest(nino="NA000799D")))))
+      val eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest(nino="NA000799D"))))
 
-      status(result) shouldBe FORBIDDEN
-      jsonBodyOf(result) shouldBe Json.obj(
+      status(eventualResult) mustBe FORBIDDEN
+      contentAsJson(eventualResult) mustBe Json.obj(
         "code" -> "MATCHING_FAILED", "message" -> "There is no match for the information provided"
       )
     }
 
     "return 400 (BadRequest) for an invalid dateOfBirth" in new Setup {
-      var requestBody = Json.parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
-      var result = await(sandboxController.matchCitizen()(fakeRequest.withBody(requestBody)))
+      var requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
+      var eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(requestBody))
 
-      status(result) shouldBe BAD_REQUEST
-      jsonBodyOf(result) shouldBe Json.obj(
+      status(eventualResult) mustBe BAD_REQUEST
+      contentAsJson(eventualResult) mustBe Json.obj(
         "code" -> "INVALID_REQUEST", "message" -> "dateOfBirth: invalid date format"
       )
 
-      requestBody = Json.parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
-      result = await(sandboxController.matchCitizen()(fakeRequest.withBody(requestBody)))
+      requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
+      eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(requestBody))
 
-      status(result) shouldBe BAD_REQUEST
-      jsonBodyOf(result) shouldBe Json.obj(
+      status(eventualResult) mustBe BAD_REQUEST
+      contentAsJson(eventualResult) mustBe Json.obj(
         "code" -> "INVALID_REQUEST", "message" -> "dateOfBirth: invalid date format"
       )
     }
 
     "return 400 (BadRequest) for an invalid nino" in new Setup {
-      val requestBody = Json.parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"AB1234567","dateOfBirth":"2020-01-31"}""")
-      val result = await(sandboxController.matchCitizen()(fakeRequest.withBody(requestBody)))
+      val requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"AB1234567","dateOfBirth":"2020-01-31"}""")
+      val eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(requestBody))
 
-      status(result) shouldBe BAD_REQUEST
-      jsonBodyOf(result) shouldBe Json.obj(
+      status(eventualResult) mustBe BAD_REQUEST
+      contentAsJson(eventualResult) mustBe Json.obj(
         "code" -> "INVALID_REQUEST", "message" -> "Malformed nino submitted"
       )
     }
 
     "not require bearer token authentication" in new Setup {
-      val result = await(sandboxController.matchCitizen()(fakeRequest.withBody(Json.parse(matchingRequest()))))
+      val eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
 
-      status(result) shouldBe SEE_OTHER
+      status(eventualResult) mustBe OK
       verifyZeroInteractions(mockAuthConnector)
     }
   }

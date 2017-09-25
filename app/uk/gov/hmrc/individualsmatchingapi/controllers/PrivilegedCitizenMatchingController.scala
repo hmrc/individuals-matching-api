@@ -18,6 +18,9 @@ package uk.gov.hmrc.individualsmatchingapi.controllers
 
 import javax.inject.{Inject, Singleton}
 
+import play.api.hal.Hal.links
+import play.api.hal.HalLink
+import play.api.mvc.hal._
 import play.api.libs.json.Json
 import play.api.mvc.{Action, BodyParsers}
 import uk.gov.hmrc.individualsmatchingapi.config.ServiceAuthConnector
@@ -35,7 +38,11 @@ abstract class PrivilegedCitizenMatchingController(citizenMatchingService: Citiz
   def matchCitizen = Action.async(BodyParsers.parse.json) { implicit request =>
     requiresPrivilegedAuthentication {
       withJsonBody[CitizenMatchingRequest] { matchCitizen =>
-        citizenMatchingService.matchCitizen(matchCitizen) map (id => seeOthers(s"/individuals/matching/$id"))
+        citizenMatchingService.matchCitizen(matchCitizen) map { matchId =>
+          val selfLink = HalLink("self", s"/individuals/matching/")
+          val individualLink = HalLink("individual", s"/individuals/matching/$matchId", name = Option("GET"), title = Option("Individual Details"))
+          Ok(links(selfLink, individualLink))
+        }
       } recover recovery
     }
   }

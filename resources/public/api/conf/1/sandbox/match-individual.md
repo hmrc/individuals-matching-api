@@ -21,9 +21,10 @@
                                          }
                 </p>
             </td>
-            <td><p>HTTP status: <code class="code--slim">303 (See Other)</code></p>
-                <p class="code--block">Location: /individuals/matching/08aa2149-5e6c-4f3d-8769-4b025db6ba42</p>
-            </td>
+              <td>
+                <p>200 (OK)</p>
+                <p>Payload as response example above</p>
+              </td>
         </tr>
         <tr>
             <td><p>Request with an invalid nino, no first name, invalid data type for last name and a date of birth which does not exist</p></td>
