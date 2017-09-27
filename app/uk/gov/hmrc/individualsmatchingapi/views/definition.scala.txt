@@ -14,12 +14,12 @@
     "context": "individuals/matching",
     "versions": [
       {
-        "version": "P1",
+        "version": "P1.0",
         "status": "PUBLISHED",
         "access" : {"type":"PRIVATE", "whitelistedApplicationIds": @Json.toJson(whitelistedApplicationIds)}
       },
       {
-        "version": "1",
+        "version": "1.0",
         "status": "PUBLISHED"
       }
     ]

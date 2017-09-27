@@ -39,11 +39,11 @@ class RequestHeaderUtilsSpec extends UnitSpec with Matchers {
       getVersionedRequest(fooRequest.withHeaders(ACCEPT -> "application/vnd.hmrc.2.0+json")).path shouldBe "/v2.0"
     }
 
-    "Default to 1 when the Accept header is not set" in {
+    "Default to 1.0 when the Accept header is not set" in {
       val fooRequest = FakeRequest(GET, "/foo")
 
-      getVersionedRequest(fooRequest).uri shouldBe "/v1/foo"
-      getVersionedRequest(fooRequest).path shouldBe "/v1/foo"
+      getVersionedRequest(fooRequest).uri shouldBe "/v1.0/foo"
+      getVersionedRequest(fooRequest).path shouldBe "/v1.0/foo"
     }
   }
 
