@@ -40,7 +40,7 @@ object RequestHeaderUtils {
   private def getVersion(originalRequest: RequestHeader) =
     originalRequest.headers.get(ACCEPT) flatMap { acceptHeaderValue =>
       acceptHeaderRegex.findFirstMatchIn(acceptHeaderValue) map (_.group(1))
-    } getOrElse "1"
+    } getOrElse "1.0"
 
   private def versionedUri(urlPath: String, version: String) = {
     urlPath match {
