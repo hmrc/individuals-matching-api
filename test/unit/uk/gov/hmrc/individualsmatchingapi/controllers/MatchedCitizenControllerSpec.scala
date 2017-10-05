@@ -28,11 +28,11 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.controllers.MatchedCitizenController
 import uk.gov.hmrc.individualsmatchingapi.domain.{MatchNotFoundException, MatchedCitizenRecord}
 import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import play.api.http.Status._
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class MatchedCitizenControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
   implicit lazy val materializer = fakeApplication.materializer

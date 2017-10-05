@@ -23,8 +23,8 @@ import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
 import uk.gov.hmrc.individualsmatchingapi.connectors.MatchingConnector
 import uk.gov.hmrc.individualsmatchingapi.domain._
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.http.HeaderCarrier
 
 class MatchingConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApplication {
   val stubPort = sys.env.getOrElse("WIREMOCK", "11122").toInt

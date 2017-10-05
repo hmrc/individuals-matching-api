@@ -18,11 +18,11 @@ package uk.gov.hmrc.individualsmatchingapi.connectors
 
 import javax.inject.Singleton
 
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpGet, NotFoundException}
 import uk.gov.hmrc.individualsmatchingapi.config.WSHttp
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenNotFoundException, InvalidNinoException}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

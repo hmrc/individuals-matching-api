@@ -29,15 +29,14 @@ import play.api.libs.json.Json.parse
 import play.api.mvc.Results
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
-import uk.gov.hmrc.auth.core.InsufficientEnrolments
-import uk.gov.hmrc.auth.core.authorise.Enrolment
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+import uk.gov.hmrc.auth.core.{Enrolment, InsufficientEnrolments}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.config.ServiceAuthConnector
 import uk.gov.hmrc.individualsmatchingapi.controllers.{LivePrivilegedCitizenMatchingController, SandboxPrivilegedCitizenMatchingController}
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
@@ -54,7 +53,7 @@ class PrivilegedCitizenMatchingControllerSpec extends PlaySpec with MockitoSugar
     val mockAuthConnector = mock[ServiceAuthConnector]
     val liveController = new LivePrivilegedCitizenMatchingController(mockLiveCitizenMatchingService, mockAuthConnector)
 
-    given(mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any())).willReturn(successful(()))
+    given(mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any(), any())).willReturn(successful(()))
 
   }
 
@@ -153,7 +152,7 @@ class PrivilegedCitizenMatchingControllerSpec extends PlaySpec with MockitoSugar
     "fail with AuthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
       var requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
 
-      given(mockAuthConnector.authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any())).willReturn(failed(new InsufficientEnrolments()))
+      given(mockAuthConnector.authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any(), any())).willReturn(failed(new InsufficientEnrolments()))
 
       intercept[InsufficientEnrolments]{await(liveController.matchCitizen()(fakeRequest.withBody(requestBody)))}
 
