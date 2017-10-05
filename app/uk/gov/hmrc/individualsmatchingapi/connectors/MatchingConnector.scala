@@ -19,11 +19,12 @@ package uk.gov.hmrc.individualsmatchingapi.connectors
 import javax.inject.Singleton
 
 import play.api.libs.json.JsValue
+import uk.gov.hmrc.http.{HeaderCarrier, HttpPost}
 import uk.gov.hmrc.individualsmatchingapi.config.WSHttp
+import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.detailsMatchRequestFormat
 import uk.gov.hmrc.individualsmatchingapi.domain.{DetailsMatchRequest, HasSucceeded, MatchingException}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost}
-import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.detailsMatchRequestFormat
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

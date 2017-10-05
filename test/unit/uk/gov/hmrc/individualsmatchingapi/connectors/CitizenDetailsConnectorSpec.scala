@@ -23,8 +23,8 @@ import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
 import uk.gov.hmrc.individualsmatchingapi.connectors.CitizenDetailsConnector
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenNotFoundException, InvalidNinoException}
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.http.HeaderCarrier
 
 class CitizenDetailsConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApplication {
   val stubPort = sys.env.getOrElse("WIREMOCK", "11121").toInt

@@ -29,15 +29,14 @@ import play.api.libs.json.Json
 import play.api.mvc.Results
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, status, _}
-import uk.gov.hmrc.auth.core.InsufficientEnrolments
-import uk.gov.hmrc.auth.core.authorise.Enrolment
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+import uk.gov.hmrc.auth.core.{Enrolment, InsufficientEnrolments}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.config.ServiceAuthConnector
 import uk.gov.hmrc.individualsmatchingapi.controllers.{LivePrivilegedIndividualsController, SandboxPrivilegedIndividualsController}
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
-import uk.gov.hmrc.play.http.HeaderCarrier
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
 import scala.concurrent.Future.{failed, successful}
@@ -55,7 +54,7 @@ class PrivilegedIndividualsControllerSpec extends PlaySpec with Results with Moc
     val liveController = new LivePrivilegedIndividualsController(mockCitizenMatchingService, mockAuthConnector)
     val sandboxController = new SandboxPrivilegedIndividualsController(new SandboxCitizenMatchingService(), mockAuthConnector)
 
-    given(mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any())).willReturn(successful(()))
+    given(mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any(), any())).willReturn(successful(()))
   }
 
   "The live matched individual function" should {
@@ -75,7 +74,7 @@ class PrivilegedIndividualsControllerSpec extends PlaySpec with Results with Moc
     }
 
     "fail with AuthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
-      given(mockAuthConnector.authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any())).willReturn(failed(new InsufficientEnrolments()))
+      given(mockAuthConnector.authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any(), any())).willReturn(failed(new InsufficientEnrolments()))
 
       intercept[InsufficientEnrolments] {
         await(liveController.matchedIndividual(uuid.toString).apply(FakeRequest()))
