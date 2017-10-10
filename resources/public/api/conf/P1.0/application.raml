@@ -33,6 +33,17 @@ uses:
       is: [headers.acceptHeader]
       (annotations.scope): "read:individuals-matching"
       securedBy: [ sec.oauth_2_0: { scopes: [ "read:individuals-matching" ] } ]
+      headers:
+        Authorization:
+          description: OAuth 2.0 Bearer Token with the read:individuals-matching scope.
+          type: string
+          required: true
+          example: Bearer <BEARER_TOKEN>
+        Content-Type:
+          description: Specifies the content-type of the body.
+          type: string
+          required: true
+          example: application/json
       responses:
         200:
           description: The available resources to retrieve the matched individual's details
@@ -72,6 +83,12 @@ uses:
       (annotations.sandboxData): !include sandbox/matched-individual-request.md
       (annotations.scope): "read:individuals-matching"
       securedBy: [ sec.oauth_2_0: { scopes: [ "read:individuals-matching" ] } ]
+      headers:
+        Authorization:
+          description: OAuth 2.0 Bearer Token with the read:individuals-matching scope.
+          type: string
+          required: true
+          example: Bearer <BEARER_TOKEN>
       responses:
         200:
           description: The individual's details for the given match id
