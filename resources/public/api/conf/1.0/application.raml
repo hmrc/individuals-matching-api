@@ -38,6 +38,17 @@ types:
       (annotations.scope): "read:individuals-matching"
       securedBy: [ sec.oauth_2_0: { scopes: [ "read:individuals-matching" ] } ]
       (annotations.sandboxData): !include sandbox/match-individual.md
+      headers:
+        Authorization:
+          description: OAuth 2.0 Bearer Token with the read:individuals-matching scope.
+          type: string
+          required: true
+          example: Bearer <BEARER_TOKEN>
+        Content-Type:
+          description: Specifies the content-type of the body.
+          type: string
+          required: true
+          example: application/json
       body:
         application/json:
           example: !include examples/match-request.json
@@ -128,8 +139,14 @@ types:
 
           The URL is only valid for a limited period of time. After expiry a 404 will be returned if accessed.
         displayName: Check a individual’s information
-        securedBy: [ sec.x-application ]
+        securedBy: [ sec.oauth_2_0: { scopes: [ "read:individuals-matching" ] } ]
         (annotations.sandboxData): !include sandbox/matched-response.md
+        headers:
+          Authorization:
+            description: OAuth 2.0 Bearer Token with the read:individuals-matching scope.
+            type: string
+            required: true
+            example: Bearer <BEARER_TOKEN>
         responses:
           200:
             body:
