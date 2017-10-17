@@ -139,6 +139,7 @@ types:
 
           The URL is only valid for a limited period of time. After expiry a 404 will be returned if accessed.
         displayName: Check a individual’s information
+        (annotations.scope): "read:individuals-matching"
         securedBy: [ sec.oauth_2_0: { scopes: [ "read:individuals-matching" ] } ]
         (annotations.sandboxData): !include sandbox/matched-response.md
         headers:
