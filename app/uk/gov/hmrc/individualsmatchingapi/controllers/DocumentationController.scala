@@ -27,10 +27,12 @@ import uk.gov.hmrc.individualsmatchingapi.views._
 @Singleton
 class DocumentationController @Inject()(httpErrorHandler: HttpErrorHandler, configuration: Configuration) extends uk.gov.hmrc.api.controllers.DocumentationController(httpErrorHandler) {
 
-  private lazy val whitelistedApplicationIds = configuration.getStringSeq("api.access.version-P1.0.whitelistedApplicationIds").getOrElse(Seq.empty)
+  private lazy val whitelistedApplicationIdsVP1 = configuration.getStringSeq("api.access.version-P1.0.whitelistedApplicationIds").getOrElse(Seq.empty)
+  private lazy val accessTypeV1 = configuration.getString("api.access.version-1.0.accessType").getOrElse("PRIVATE")
+  private lazy val whitelistedApplicationIdsV1 = configuration.getStringSeq("api.access.version-1.0.whitelistedApplicationIds").getOrElse(Seq.empty)
 
   override def definition(): Action[AnyContent] = Action {
-    Ok(txt.definition(whitelistedApplicationIds)).withHeaders(CONTENT_TYPE -> JSON)
+    Ok(txt.definition(whitelistedApplicationIdsVP1, accessTypeV1, whitelistedApplicationIdsV1)).withHeaders(CONTENT_TYPE -> JSON)
   }
 
   def raml(version: String, file: String) = {
