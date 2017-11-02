@@ -58,24 +58,31 @@
       },
       "required": ["income", "employments", "self"]
     },
-    "firstName": {
-      "type": "string",
-      "description": "The individual's first name"
-    },
-    "lastName": {
-      "type": "string",
-      "description": "The individual's last name"
-    },
-    "nino": {
-      "type": "string",
-      "format": "NINO",
-      "description": "The individual's national insurance number"
-    },
-    "dateOfBirth": {
-      "type": "string",
-      "format": "date",
-      "description": "The individual's date of birth"
+    "individual": {
+      "type": "object",
+      "description": "The matched individual.",
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "description": "The individual's first name"
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The individual's last name"
+        },
+        "nino": {
+          "type": "string",
+          "format": "NINO",
+          "description": "The individual's national insurance number"
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "format": "date",
+          "description": "The individual's date of birth"
+        }
+      },
+      "required": ["firstName", "lastName", "nino", "dateOfBirth"]
     }
   },
-  "required": ["_links", "firstName", "lastName", "nino", "dateOfBirth"]
+  "required": ["_links", "individual"]
 }

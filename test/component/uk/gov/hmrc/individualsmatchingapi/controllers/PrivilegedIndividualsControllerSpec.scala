@@ -67,10 +67,12 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
                  "href":"/individuals/matching/$matchId"
                }
              },
-             "firstName":"John",
-             "lastName":"Smith",
-             "nino":"$nino",
-             "dateOfBirth":"1972-10-13"
+             "individual": {
+               "firstName":"John",
+               "lastName":"Smith",
+               "nino":"$nino",
+               "dateOfBirth":"1972-10-13"
+             }
            }
          """)
     }
@@ -102,10 +104,12 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
                  "href":"/individuals/matching/$sandboxMatchId"
                }
              },
-             "firstName":"Amanda",
-             "lastName":"Joseph",
-             "nino":"NA000799C",
-             "dateOfBirth":"1960-01-15"
+             "individual": {
+               "firstName":"Amanda",
+               "lastName":"Joseph",
+               "nino":"NA000799C",
+               "dateOfBirth":"1960-01-15"
+             }
            }
          """)
     }

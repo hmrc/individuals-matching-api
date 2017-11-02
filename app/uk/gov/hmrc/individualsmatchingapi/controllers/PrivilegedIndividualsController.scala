@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.hal.Hal._
 import play.api.hal.HalLink
+import play.api.libs.json.Json.{obj, toJson}
 import play.api.mvc.Action
 import play.api.mvc.hal._
 import uk.gov.hmrc.individualsmatchingapi.config.ServiceAuthConnector
@@ -38,7 +39,7 @@ abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMa
           val selfLink = HalLink("self", s"/individuals/matching/$matchId")
           val incomeLink = HalLink("income", s"/individuals/income/?matchId=$matchId", name = Option("GET"), title = Option("View individual's income"))
           val employmentsLink = HalLink("employments", s"/individuals/employments/?matchId=$matchId", name = Option("GET"), title = Option("View individual's employments"))
-          Ok(state(citizenDetails) ++ links(selfLink, incomeLink, employmentsLink))
+          Ok(state(obj("individual" -> toJson(citizenDetails))) ++ links(selfLink, incomeLink, employmentsLink))
         } recover recovery
       }
     }

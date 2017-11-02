@@ -127,10 +127,12 @@ class PrivilegedIndividualsControllerSpec extends PlaySpec with Results with Moc
                "href": "/individuals/matching/$matchId"
              }
            },
-           "firstName": "$firstName",
-           "lastName": "$lastName",
-           "nino": "$nino",
-           "dateOfBirth": "$dateOfBirth"
+           "individual": {
+             "firstName": "$firstName",
+             "lastName": "$lastName",
+             "nino": "$nino",
+             "dateOfBirth": "$dateOfBirth"
+           }
         }"""
   }
 }
