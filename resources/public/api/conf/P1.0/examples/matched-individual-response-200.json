@@ -14,8 +14,10 @@
       "href": "/individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430"
     }
   },
-  "firstName": "Amanda",
-  "lastName": "Joseph",
-  "nino": "NA000799C",
-  "dateOfBirth": "1960-01-15"
+  "individual": {
+    "firstName": "Amanda",
+    "lastName": "Joseph",
+    "nino": "NA000799C",
+    "dateOfBirth": "1960-01-15"
+  }
 }

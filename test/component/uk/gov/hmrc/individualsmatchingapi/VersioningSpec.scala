@@ -65,10 +65,12 @@ class VersioningSpec extends BaseSpec {
                   "href": "/individuals/matching/$sandboxMatchId"
                 }
               },
-              "firstName": "Amanda",
-              "lastName": "Joseph",
-              "nino": "NA000799C",
-              "dateOfBirth": "1960-01-15"
+              "individual": {
+                "firstName": "Amanda",
+                "lastName": "Joseph",
+                "nino": "NA000799C",
+                "dateOfBirth": "1960-01-15"
+              }
             }""")
     }
 
