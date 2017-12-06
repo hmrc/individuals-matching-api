@@ -10,7 +10,7 @@
   ],
   "api": {
     "name": "Individuals Matching",
-    "description": "Individuals Matching API",
+    "description": "Match an individual against HMRC's records",
     "context": "individuals/matching",
     "versions": [
       {

@@ -8,7 +8,7 @@
       "properties": {
         "income": {
           "type": "object",
-          "description": "The URI for the resource to get the individual's income per employment data.",
+          "description": "The URI for the resource to get the individual's income.",
           "properties": {
             "href": {
               "type": "string",
@@ -20,7 +20,7 @@
             },
             "title": {
               "type": "string",
-              "example": "View individual's income per employment"
+              "example": "View individual's income"
             }
           },
           "required": ["href"]
