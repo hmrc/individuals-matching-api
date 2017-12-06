@@ -8,7 +8,7 @@
       "properties": {
         "individual": {
           "type": "object",
-          "description": "The URI for the resource to get the individual's available information.",
+          "description": "The URI for the resource to get the individual's information.",
           "properties": {
             "href": {
               "type": "string",
