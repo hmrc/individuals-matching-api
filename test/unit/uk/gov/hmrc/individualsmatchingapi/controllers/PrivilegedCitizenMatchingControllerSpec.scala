@@ -40,6 +40,7 @@ import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, 
 
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
+import scala.util.Random
 
 class PrivilegedCitizenMatchingControllerSpec extends PlaySpec with MockitoSugar with Results with BeforeAndAfter {
 
@@ -149,7 +150,91 @@ class PrivilegedCitizenMatchingControllerSpec extends PlaySpec with MockitoSugar
       )
     }
 
-    "fail with AuthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
+    "return 400 Bad Request when the first name is empty" in new Setup {
+      val emptyFirstName = Json.obj(
+        "firstName" -> "",
+        "lastName" -> "Person",
+        "nino" -> "AA112233B",
+        "dateOfBirth" -> "1900-01-01"
+      )
+
+      val res = liveController.matchCitizen()(fakeRequest.withBody(emptyFirstName))
+
+      status(res) mustBe BAD_REQUEST
+      contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "firstName is required")
+    }
+
+    "return 400 Bad Request when the last name is empty" in new Setup {
+      val emptyLastName = Json.obj(
+        "firstName" -> "Mr",
+        "lastName" -> "",
+        "nino" -> "AA112233B",
+        "dateOfBirth" -> "1900-01-01"
+      )
+
+      val res = liveController.matchCitizen()(fakeRequest.withBody(emptyLastName))
+
+      status(res) mustBe BAD_REQUEST
+      contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "lastName is required")
+    }
+
+    "return 400 Bad Request when the first name is greater than 35 characters" in new Setup {
+      val firstNameTooLong = Json.obj(
+        "firstName" -> Random.nextString(36),
+        "lastName" -> "Person",
+        "nino" -> "AA112233B",
+        "dateOfBirth" -> "1900-01-01"
+      )
+
+      val res = liveController.matchCitizen()(fakeRequest.withBody(firstNameTooLong))
+
+      status(res) mustBe BAD_REQUEST
+      contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "firstName must be no more than 35 characters")
+    }
+
+    "return 400 Bad Request when the last name is greater than 35 characters" in new Setup {
+      val lastNameTooLong = Json.obj(
+        "firstName" -> "Mr",
+        "lastName" -> Random.nextString(36),
+        "nino" -> "AA112233B",
+        "dateOfBirth" -> "1900-01-01"
+      )
+
+      val res = liveController.matchCitizen()(fakeRequest.withBody(lastNameTooLong))
+
+      status(res) mustBe BAD_REQUEST
+      contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "lastName must be no more than 35 characters")
+    }
+
+    "return 400 Bad Request when the first name contains invalid characters" in new Setup {
+      val invalidFirstName = Json.obj(
+        "firstName" -> """/\/\/\/\""",
+        "lastName" -> "Person",
+        "nino" -> "AA112233B",
+        "dateOfBirth" -> "1900-01-01"
+      )
+
+      val res = liveController.matchCitizen()(fakeRequest.withBody(invalidFirstName))
+
+      status(res) mustBe BAD_REQUEST
+      contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "firstName contains invalid characters")
+    }
+
+    "return 400 Bad Request when the last name contains invalid characters" in new Setup {
+      val invalidFirstName = Json.obj(
+        "firstName" -> "Mr",
+        "lastName" -> """/\/\/\/\""",
+        "nino" -> "AA112233B",
+        "dateOfBirth" -> "1900-01-01"
+      )
+
+      val res = liveController.matchCitizen()(fakeRequest.withBody(invalidFirstName))
+
+      status(res) mustBe BAD_REQUEST
+      contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "lastName contains invalid characters")
+    }
+
+    "fail with UnauthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
       var requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
 
       given(mockAuthConnector.authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any(), any())).willReturn(failed(new InsufficientEnrolments()))
