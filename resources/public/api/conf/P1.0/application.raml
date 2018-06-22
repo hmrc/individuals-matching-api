@@ -44,6 +44,10 @@ uses:
           type: string
           required: true
           example: application/json
+      body:
+        application/json:
+          type: !include schemas/match-request.json
+          example: !include examples/match-request.json
       responses:
         200:
           description: The available resources to retrieve the matched individual's details
