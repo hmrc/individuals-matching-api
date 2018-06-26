@@ -1,6 +1,6 @@
 # individuals-matching-api
 
-[![Build Status](https://travis-ci.org/hmrc/individuals-matching-api.svg)](https://travis-ci.org/hmrc/individuals-matching-api) [ ![Download](https://api.bintray.com/packages/hmrc/releases/individuals-matching-api/images/download.svg) ](https://bintray.com/hmrc/releases/individuals-matching-api/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/hmrc/releases/individuals-matching-api/images/download.svg) ](https://bintray.com/hmrc/releases/individuals-matching-api/_latestVersion)
 
 This API allows users to check HMRC records to find information about an individual.
 
