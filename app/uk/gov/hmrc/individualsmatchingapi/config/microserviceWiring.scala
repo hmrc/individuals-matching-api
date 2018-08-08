@@ -32,7 +32,7 @@ object MicroserviceAuditConnector extends AuditConnector with RunMode {
 }
 
 trait Hooks extends HttpHooks with HttpAuditing {
-  override val hooks = NoneRequired
+  override val hooks = Seq(AuditingHook)
   override lazy val auditConnector: AuditConnector = MicroserviceAuditConnector
 }
 
