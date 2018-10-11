@@ -33,7 +33,7 @@ case class CitizenMatchingRequest(firstName: String, lastName: String, nino: Str
   validate(Try(LocalDate.parse(dateOfBirth, DateTimeFormat.forPattern("yyyy-MM-dd"))).isSuccess, "dateOfBirth: invalid date format")
 
   private def validateName(fieldName: String, value: String): Unit = {
-    lazy val nameRegex = """^[\p{L} `\-\'^]{1,35}$"""
+    lazy val nameRegex = """^[\p{L} `\-\'^.]{1,35}$"""
 
     validate(value.nonEmpty, s"$fieldName is required")
     validate(value.length <= 35, s"$fieldName must be no more than 35 characters")

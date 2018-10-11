@@ -86,6 +86,20 @@ class PrivilegedCitizenMatchingControllerSpec extends PlaySpec with MockitoSugar
       )
     }
 
+    "return 200 Ok when matching a user with a '.' in their name" in new Setup {
+      when(mockLiveCitizenMatchingService.matchCitizen(any())(any())).thenReturn(Future.successful(matchId))
+
+      val payload = Json.obj(
+        "firstName" -> "Mr.",
+        "lastName" -> "St. John",
+        "nino" -> "AA112233B",
+        "dateOfBirth" -> "1900-01-01"
+      )
+
+      val res = liveController.matchCitizen()(fakeRequest.withBody(payload))
+      status(res) mustBe OK
+    }
+
     "return 403 (Forbidden) for a citizen not found" in new Setup {
       when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new CitizenNotFoundException))
