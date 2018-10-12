@@ -4,7 +4,8 @@ import sbt._
 import play.routes.compiler.StaticRoutesGenerator
 import play.sbt.PlayImport.PlayKeys
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
-
+import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
+import uk.gov.hmrc.SbtArtifactory.autoImport.makePublicallyAvailableOnBintray
 
 trait MicroService {
 
@@ -63,6 +64,8 @@ trait MicroService {
       Resolver.bintrayRepo("hmrc", "releases"),
       Resolver.jcenterRepo
     ))
+    .settings(majorVersion := 0)
+    .settings(makePublicallyAvailableOnBintray := true)
     .settings(PlayKeys.playDefaultPort := 9653)
 
 }
