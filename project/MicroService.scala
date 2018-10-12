@@ -62,9 +62,7 @@ trait MicroService {
       Resolver.jcenterRepo
     ))
     .settings(majorVersion := 0)
-    .settings(makePublicallyAvailableOnBintray := true)
     .settings(PlayKeys.playDefaultPort := 9653)
-    .settings(SbtDistributablesPlugin.publishingSettings: _*)
 
   lazy val ComponentTest = config("component") extend Test
 
