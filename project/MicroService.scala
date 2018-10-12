@@ -16,9 +16,6 @@ trait MicroService {
   import uk.gov.hmrc.versioning.SbtGitVersioning
   import play.sbt.routes.RoutesKeys.routesGenerator
 
-
-  import TestPhases._
-
   val appName: String
 
   lazy val appDependencies : Seq[ModuleID] = ???
@@ -68,9 +65,6 @@ trait MicroService {
     .settings(makePublicallyAvailableOnBintray := true)
     .settings(PlayKeys.playDefaultPort := 9653)
 
-}
-
-private object TestPhases {
   lazy val ComponentTest = config("component") extend Test
 
   def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
