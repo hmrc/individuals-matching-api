@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,9 +69,8 @@ class MatchingConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFa
             """
         )).willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[]}""")))
 
-      val result = await(underTest.validateMatch(DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails()))))
-
-      result shouldBe HasSucceeded
+      val f = underTest.validateMatch(DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))
+      noException should be thrownBy await(f)
     }
 
     "throw matching exception for a citizen with non-matching details" in new Setup {

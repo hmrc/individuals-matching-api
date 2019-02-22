@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.individualsmatchingapi.config
 
+import com.typesafe.config.Config
 import javax.inject.Singleton
-
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.HttpHooks
@@ -27,7 +27,7 @@ import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
 import uk.gov.hmrc.play.http.ws._
 import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
 
-object MicroserviceAuditConnector extends AuditConnector with RunMode {
+object MicroserviceAuditConnector extends AuditConnector with RunMode with ConfigSupport {
   override lazy val auditingConfig = LoadAuditingConfig("auditing")
 }
 
@@ -38,10 +38,12 @@ trait Hooks extends HttpHooks with HttpAuditing {
 
 trait WSHttp extends HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with Hooks with AppName
 
-object WSHttp extends WSHttp
+object WSHttp extends WSHttp with ConfigSupport {
+  override protected def configuration: Option[Config] = Some(playConfiguration.underlying)
+}
 
 @Singleton
-class ServiceAuthConnector extends PlayAuthConnector with ServicesConfig {
+class ServiceAuthConnector extends PlayAuthConnector with ServicesConfig with ConfigSupport {
   override lazy val serviceUrl = baseUrl("auth")
 
   override def http = WSHttp

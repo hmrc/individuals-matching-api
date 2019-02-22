@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@
 package uk.gov.hmrc.individualsmatchingapi.connectors
 
 import javax.inject.Singleton
-
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpGet, NotFoundException}
-import uk.gov.hmrc.individualsmatchingapi.config.WSHttp
+import uk.gov.hmrc.individualsmatchingapi.config.{ConfigSupport, WSHttp}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenNotFoundException, InvalidNinoException}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -28,7 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CitizenDetailsConnector extends ServicesConfig {
+class CitizenDetailsConnector extends ServicesConfig with ConfigSupport {
 
   val serviceUrl = baseUrl("citizen-details")
   val http: HttpGet = WSHttp
