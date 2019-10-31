@@ -19,7 +19,7 @@ object MicroServiceBuild extends Build with MicroService {
   )
 
   def test(scope: String = "test,it") = Seq(
-    "uk.gov.hmrc" %% "hmrctest" % "3.5.0-play-25" % scope,
+    "uk.gov.hmrc" %% "service-integration-test" % "0.9.0-play-25" % scope,
     "org.scalatest" %% "scalatest" % "2.2.6" % scope,
     "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" %  scope,
     "uk.gov.hmrc" %% "reactivemongo-test" % "2.0.0" % scope,

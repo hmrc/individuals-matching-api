@@ -21,14 +21,13 @@ import java.util.UUID
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{verifyZeroInteractions, when}
-import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play._
+import org.scalatest.{BeforeAndAfterEach, MustMatchers}
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 import play.api.mvc.Results
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsJson, status, _}
+import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.auth.core.{Enrolment, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -37,11 +36,12 @@ import uk.gov.hmrc.individualsmatchingapi.controllers.{LivePrivilegedIndividuals
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
 import scala.concurrent.Future.{failed, successful}
 
-class PrivilegedIndividualsControllerSpec extends PlaySpec with Results with MockitoSugar with BeforeAndAfterEach with Individuals {
+class PrivilegedIndividualsControllerSpec extends SpecBase with MustMatchers with Results with MockitoSugar with BeforeAndAfterEach with Individuals {
 
   implicit val headerCarrier = new HeaderCarrier()
   val uuid = UUID.randomUUID()

@@ -18,6 +18,7 @@ package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.when
+import org.scalatest.Matchers
 import org.scalatest.mockito.MockitoSugar
 import play.api.Configuration
 import play.api.http.HttpErrorHandler
@@ -25,9 +26,10 @@ import play.api.libs.json.JsValue
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import uk.gov.hmrc.individualsmatchingapi.controllers.DocumentationController
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-class DocumentationControllerSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
+class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSugar {
+
   implicit lazy val materializer = fakeApplication.materializer
 
   trait Setup {

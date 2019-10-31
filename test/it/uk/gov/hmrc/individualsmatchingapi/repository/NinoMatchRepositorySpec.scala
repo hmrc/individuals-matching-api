@@ -18,26 +18,26 @@ package it.uk.gov.hmrc.individualsmatchingapi.repository
 
 import java.util.UUID
 
-import org.scalatest.BeforeAndAfterEach
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.scalatest.{BeforeAndAfterEach, Matchers}
+import play.api.Configuration
+import play.api.inject.guice.GuiceableModule
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONDocument
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.domain.NinoMatch
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
 import uk.gov.hmrc.mongo.MongoSpecSupport
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class NinoMatchRepositorySpec extends UnitSpec with MongoSpecSupport with WithFakeApplication with BeforeAndAfterEach {
+class NinoMatchRepositorySpec extends SpecBase with Matchers with MongoSpecSupport with BeforeAndAfterEach {
 
   val ninoMatchTtl = 60
 
-  override lazy val fakeApplication = new GuiceApplicationBuilder()
-    .configure("mongodb.uri" -> mongoUri, "mongo.ninoMatchTtlInSeconds" -> ninoMatchTtl)
-    .bindings(bindModules:_*)
-    .build()
+  val bindModules: Seq[GuiceableModule] = Seq()
+
+  override lazy val fakeApplication = buildFakeApplication(Configuration("mongodb.uri" -> mongoUri, "mongo.ninoMatchTtlInSeconds" -> ninoMatchTtl))
 
   val nino = Nino("AB123456A")
   val ninoMatchRepository = fakeApplication.injector.instanceOf[NinoMatchRepository]

@@ -21,9 +21,8 @@ import java.util.UUID
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{verifyZeroInteractions, when}
-import org.scalatest.BeforeAndAfter
 import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.{BeforeAndAfter, MustMatchers}
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
 import play.api.mvc.Results
@@ -37,12 +36,13 @@ import uk.gov.hmrc.individualsmatchingapi.controllers.{LivePrivilegedCitizenMatc
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 import scala.util.Random
 
-class PrivilegedCitizenMatchingControllerSpec extends PlaySpec with MockitoSugar with Results with BeforeAndAfter {
+class PrivilegedCitizenMatchingControllerSpec extends SpecBase with MustMatchers with MockitoSugar with Results with BeforeAndAfter {
 
   trait Setup {
     val fakeRequest = FakeRequest()
