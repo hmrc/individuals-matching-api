@@ -20,30 +20,31 @@ import java.util.UUID
 
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.when
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.Matchers
 import org.scalatest.mockito.MockitoSugar
+import play.api.http.Status._
 import play.api.libs.json.Json
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.MatchedCitizenController
 import uk.gov.hmrc.individualsmatchingapi.domain.{MatchNotFoundException, MatchedCitizenRecord}
 import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import play.api.http.Status._
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class MatchedCitizenControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
+class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSugar {
   implicit lazy val materializer = fakeApplication.materializer
 
   trait Setup {
     implicit val hc = HeaderCarrier()
-    val matchId = UUID.randomUUID()
-    val ninoString = "AA100009B"
-    val matchedCitizenRecord = MatchedCitizenRecord(Nino(ninoString), matchId)
-    val fakeRequest = FakeRequest()
-    val mockCitizenMatchingService = mock[LiveCitizenMatchingService]
+    val matchId: UUID = UUID.randomUUID()
+    val ninoString: String = "AA100009B"
+    val matchedCitizenRecord: MatchedCitizenRecord = MatchedCitizenRecord(Nino(ninoString), matchId)
+    val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+    val mockCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
 
     val matchedCitizenController = new MatchedCitizenController(mockCitizenMatchingService)
   }

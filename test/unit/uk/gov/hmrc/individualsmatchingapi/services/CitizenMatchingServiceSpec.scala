@@ -21,23 +21,22 @@ import java.util.UUID
 import org.joda.time.LocalDate
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{verifyZeroInteractions, when}
+import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.individualsmatchingapi.connectors.{CitizenDetailsConnector, MatchingConnector}
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
-import uk.gov.hmrc.play.test.UnitSpec
-
-import scala.concurrent.Future.{failed, successful}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.Authorization
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import scala.concurrent.Future
 
-class CitizenMatchingServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
+class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSugar with ScalaFutures {
 
   val authBearerToken = "AUTH_BEARER_TOKEN"
   val matchId = UUID.randomUUID()

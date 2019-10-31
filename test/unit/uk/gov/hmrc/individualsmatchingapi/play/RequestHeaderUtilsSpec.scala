@@ -18,11 +18,11 @@ package unit.uk.gov.hmrc.individualsmatchingapi.play
 
 import org.scalatest.Matchers
 import play.api.test.FakeRequest
-import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils._
 import play.api.test.Helpers.{ACCEPT, GET}
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils._
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-class RequestHeaderUtilsSpec extends UnitSpec with Matchers {
+class RequestHeaderUtilsSpec extends SpecBase with Matchers {
 
   "getVersionedUri" should {
     "return the versioned request when the Accept header is set" in {

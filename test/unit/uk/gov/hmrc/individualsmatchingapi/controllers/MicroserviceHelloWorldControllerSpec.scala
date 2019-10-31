@@ -16,13 +16,14 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
+import org.scalatest.Matchers
 import play.api.http.Status
 import play.api.test.FakeRequest
 import uk.gov.hmrc.individualsmatchingapi.controllers.MicroserviceHelloWorld
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 
-class MicroserviceHelloWorldControllerSpec extends UnitSpec with WithFakeApplication{
+class MicroserviceHelloWorldControllerSpec extends SpecBase with Matchers {
 
   val fakeRequest = FakeRequest("GET", "/")
 

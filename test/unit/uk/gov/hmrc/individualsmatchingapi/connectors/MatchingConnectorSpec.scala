@@ -20,13 +20,13 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import org.joda.time.LocalDate
-import org.scalatest.BeforeAndAfterEach
+import org.scalatest.{BeforeAndAfterEach, Matchers}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.MatchingConnector
 import uk.gov.hmrc.individualsmatchingapi.domain._
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import uk.gov.hmrc.http.HeaderCarrier
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-class MatchingConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApplication {
+class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEach {
   val stubPort = sys.env.getOrElse("WIREMOCK", "11122").toInt
   val stubHost = "localhost"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
