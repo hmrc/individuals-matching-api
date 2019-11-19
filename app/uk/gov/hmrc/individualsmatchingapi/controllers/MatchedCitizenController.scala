@@ -25,13 +25,15 @@ import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.matchedCitizenRe
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class MatchedCitizenController @Inject() (citizenMatchingService: LiveCitizenMatchingService)
-  extends CommonController {
+class MatchedCitizenController @Inject()(
+    citizenMatchingService: LiveCitizenMatchingService)
+    extends CommonController {
 
   def matchedCitizen(matchId: String) = Action.async { implicit request =>
     withUuid(matchId) { matchUuid =>
-      citizenMatchingService.fetchMatchedCitizenRecord(matchUuid) map { matchedCitizen =>
-        Ok(toJson(matchedCitizen))
+      citizenMatchingService.fetchMatchedCitizenRecord(matchUuid) map {
+        matchedCitizen =>
+          Ok(toJson(matchedCitizen))
       }
     } recover recovery
   }

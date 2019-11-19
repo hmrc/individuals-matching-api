@@ -17,30 +17,44 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
 import javax.inject.{Inject, Singleton}
-
+import org.slf4j.LoggerFactory
 import play.api.hal.Hal.links
 import play.api.hal.HalLink
 import play.api.mvc.hal._
 import play.api.libs.json.Json
 import play.api.mvc.{Action, BodyParsers}
-import uk.gov.hmrc.individualsmatchingapi.config.ServiceAuthConnector
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenMatchingFormat
-import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService}
+import uk.gov.hmrc.individualsmatchingapi.services.{
+  CitizenMatchingService,
+  LiveCitizenMatchingService,
+  SandboxCitizenMatchingService
+}
+import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-abstract class PrivilegedCitizenMatchingController(citizenMatchingService: CitizenMatchingService) extends CommonController with PrivilegedAuthentication {
+abstract class PrivilegedCitizenMatchingController(
+    citizenMatchingService: CitizenMatchingService)
+    extends CommonController
+    with PrivilegedAuthentication {
 
-  private def seeOthers(location: String) = new Status(SEE_OTHER)(Json.obj()).withHeaders(LOCATION -> location)
+  private def seeOthers(location: String) =
+    new Status(SEE_OTHER)(Json.obj()).withHeaders(LOCATION -> location)
+
+  val logger = LoggerFactory.getLogger(this.getClass)
 
   def matchCitizen = Action.async(BodyParsers.parse.json) { implicit request =>
     requiresPrivilegedAuthentication {
       withJsonBody[CitizenMatchingRequest] { matchCitizen =>
         citizenMatchingService.matchCitizen(matchCitizen) map { matchId =>
           val selfLink = HalLink("self", s"/individuals/matching/")
-          val individualLink = HalLink("individual", s"/individuals/matching/$matchId", name = Option("GET"), title = Option("Individual Details"))
+          val individualLink = HalLink("individual",
+                                       s"/individuals/matching/$matchId",
+                                       name = Option("GET"),
+                                       title = Option("Individual Details"))
           Ok(links(selfLink, individualLink))
         }
       } recover recovery
@@ -49,13 +63,17 @@ abstract class PrivilegedCitizenMatchingController(citizenMatchingService: Citiz
 }
 
 @Singleton
-class LivePrivilegedCitizenMatchingController @Inject()(liveCitizenMatchingService: LiveCitizenMatchingService, val authConnector: ServiceAuthConnector)
-  extends PrivilegedCitizenMatchingController(liveCitizenMatchingService) {
+class LivePrivilegedCitizenMatchingController @Inject()(
+    liveCitizenMatchingService: LiveCitizenMatchingService,
+    val authConnector: AuthConnector)
+    extends PrivilegedCitizenMatchingController(liveCitizenMatchingService) {
   override val environment = PRODUCTION
 }
 
 @Singleton
-class SandboxPrivilegedCitizenMatchingController @Inject()(sandboxCitizenMatchingService: SandboxCitizenMatchingService, val authConnector: ServiceAuthConnector)
-  extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService) {
+class SandboxPrivilegedCitizenMatchingController @Inject()(
+    sandboxCitizenMatchingService: SandboxCitizenMatchingService,
+    val authConnector: AuthConnector)
+    extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService) {
   override val environment = SANDBOX
 }

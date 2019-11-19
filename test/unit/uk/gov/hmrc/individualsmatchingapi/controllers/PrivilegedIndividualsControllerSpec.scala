@@ -29,9 +29,8 @@ import play.api.mvc.Results
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
-import uk.gov.hmrc.auth.core.{Enrolment, InsufficientEnrolments}
+import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.individualsmatchingapi.config.ServiceAuthConnector
 import uk.gov.hmrc.individualsmatchingapi.controllers.{LivePrivilegedIndividualsController, SandboxPrivilegedIndividualsController}
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
@@ -49,7 +48,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with MustMatchers wit
   trait Setup {
 
     val mockCitizenMatchingService = mock[LiveCitizenMatchingService]
-    val mockAuthConnector = mock[ServiceAuthConnector]
+    val mockAuthConnector = mock[AuthConnector]
 
     val liveController = new LivePrivilegedIndividualsController(mockCitizenMatchingService, mockAuthConnector)
     val sandboxController = new SandboxPrivilegedIndividualsController(new SandboxCitizenMatchingService(), mockAuthConnector)

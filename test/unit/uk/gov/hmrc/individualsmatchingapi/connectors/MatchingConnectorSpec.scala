@@ -21,9 +21,11 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import org.joda.time.LocalDate
 import org.scalatest.{BeforeAndAfterEach, Matchers}
+import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.MatchingConnector
 import uk.gov.hmrc.individualsmatchingapi.domain._
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEach {
@@ -31,10 +33,13 @@ class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEa
   val stubHost = "localhost"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
+  val http = fakeApplication.injector.instanceOf[DefaultHttpClient]
+  val config = fakeApplication.injector.instanceOf[Configuration]
+
   trait Setup {
     implicit val hc = HeaderCarrier()
 
-    val underTest = new MatchingConnector {
+    val underTest = new MatchingConnector(config,http) {
       override val serviceUrl = "http://localhost:11122"
     }
   }

@@ -16,25 +16,34 @@
 
 package uk.gov.hmrc.individualsmatchingapi.connectors
 
-import javax.inject.Singleton
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpGet, NotFoundException}
-import uk.gov.hmrc.individualsmatchingapi.config.{ConfigSupport, WSHttp}
+import javax.inject.{Inject, Singleton}
+import play.api.Configuration
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.individualsmatchingapi.config.ConfigSupport
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
-import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenNotFoundException, InvalidNinoException}
+import uk.gov.hmrc.individualsmatchingapi.domain.{
+  CitizenDetails,
+  CitizenNotFoundException,
+  InvalidNinoException
+}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CitizenDetailsConnector extends ServicesConfig with ConfigSupport {
+class CitizenDetailsConnector @Inject()(override val config: Configuration,
+                                        http: HttpClient)
+    extends ServicesConfig
+    with ConfigSupport {
 
   val serviceUrl = baseUrl("citizen-details")
-  val http: HttpGet = WSHttp
 
-  def citizenDetails(nino: String)(implicit hc: HeaderCarrier): Future[CitizenDetails] = {
+  def citizenDetails(nino: String)(
+      implicit hc: HeaderCarrier): Future[CitizenDetails] = {
     http.GET[CitizenDetails](s"$serviceUrl/citizen-details/nino/$nino") recover {
-      case _: NotFoundException => throw new CitizenNotFoundException
+      case _: NotFoundException   => throw new CitizenNotFoundException
       case _: BadRequestException => throw new InvalidNinoException
     }
   }

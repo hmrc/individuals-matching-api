@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.individualsmatchingapi.controllers
+package uk.gov.hmrc.individualsmatchingapi.config
 
-import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import com.google.inject.AbstractModule
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.http.{DefaultHttpClient, HttpClient}
 
-import scala.concurrent.Future
+class ConfigModule(environment: Environment, configuration: Configuration)
+    extends AbstractModule {
+  override def configure(): Unit = {
+    bind(classOf[HttpClient]).to(classOf[DefaultHttpClient])
+    bind(classOf[AuthConnector]).to(classOf[DefaultAuthConnector])
 
-object MicroserviceHelloWorld extends MicroserviceHelloWorld
-
-trait MicroserviceHelloWorld extends BaseController {
-
-	def hello() = Action.async { implicit request =>
-		Future.successful(Ok("Hello world"))
-	}
+  }
 }
