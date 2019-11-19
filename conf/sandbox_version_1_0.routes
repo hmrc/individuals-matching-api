@@ -1,3 +1,0 @@
-# microservice privileged sandbox specific routes
-
-GET        /hello-world             uk.gov.hmrc.individualsmatchingapi.controllers.MicroserviceHelloWorld.hello
