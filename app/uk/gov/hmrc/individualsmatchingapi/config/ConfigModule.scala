@@ -14,26 +14,19 @@
  * limitations under the License.
  */
 
-package unit.uk.gov.hmrc.individualsmatchingapi.controllers
+package uk.gov.hmrc.individualsmatchingapi.config
 
-import org.scalatest.Matchers
-import play.api.http.Status
-import play.api.test.FakeRequest
-import uk.gov.hmrc.individualsmatchingapi.controllers.MicroserviceHelloWorld
-import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
+import com.google.inject.AbstractModule
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.http.{DefaultHttpClient, HttpClient}
 
+class ConfigModule(environment: Environment, configuration: Configuration)
+    extends AbstractModule {
+  override def configure(): Unit = {
+    bind(classOf[HttpClient]).to(classOf[DefaultHttpClient])
+    bind(classOf[AuthConnector]).to(classOf[DefaultAuthConnector])
 
-class MicroserviceHelloWorldControllerSpec extends SpecBase with Matchers {
-
-  val fakeRequest = FakeRequest("GET", "/")
-
-
-  "GET /" should {
-    "return 200" in {
-      val result = MicroserviceHelloWorld.hello()(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
   }
-
-
 }

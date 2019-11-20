@@ -33,19 +33,27 @@ import scala.concurrent.Await.result
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait BaseSpec extends FeatureSpec with BeforeAndAfterAll with BeforeAndAfterEach with Matchers with GuiceOneServerPerSuite
-  with GivenWhenThen {
+trait BaseSpec
+    extends FeatureSpec
+    with BeforeAndAfterAll
+    with BeforeAndAfterEach
+    with Matchers
+    with GuiceOneServerPerSuite
+    with GivenWhenThen {
 
   override lazy val port = 9000
-  implicit override lazy val app: Application = GuiceApplicationBuilder().configure(
-    "auditing.enabled" -> false,
-    "auditing.traceRequests" -> false,
-    "microservice.services.auth.port" -> AuthStub.port,
-    "microservice.services.citizen-details.port" -> CitizenDetailsStub.port,
-    "microservice.services.matching.port" -> MatchingStub.port,
-    "mongodb.uri" -> "mongodb://localhost:27017/nino-match-repository-it",
-    "run.mode" -> "It"
-  ).build()
+  implicit override lazy val app: Application = GuiceApplicationBuilder()
+    .configure(
+      "auditing.enabled" -> false,
+      "auditing.traceRequests" -> false,
+      "microservice.services.auth.port" -> AuthStub.port,
+      "microservice.services.citizen-details.port" -> CitizenDetailsStub.port,
+      "microservice.services.matching.port" -> MatchingStub.port,
+      "mongodb.uri" -> "mongodb://localhost:27017/nino-match-repository-it",
+      "run.mode" -> "It",
+      "versioning.unversionedContexts" -> List("/match-record")
+    )
+    .build()
 
   val timeout = Duration(5, TimeUnit.SECONDS)
   val serviceUrl = s"http://localhost:$port"
@@ -55,7 +63,8 @@ trait BaseSpec extends FeatureSpec with BeforeAndAfterAll with BeforeAndAfterEac
   val acceptHeaderV1 = ACCEPT -> "application/vnd.hmrc.1.0+json"
   val acceptHeaderP1 = ACCEPT -> "application/vnd.hmrc.P1.0+json"
 
-  protected def requestHeaders(acceptHeader: (String, String) = acceptHeaderV1) = {
+  protected def requestHeaders(
+      acceptHeader: (String, String) = acceptHeaderV1) = {
     Map(CONTENT_TYPE -> JSON, AUTHORIZATION -> authToken, acceptHeader)
   }
 
@@ -80,7 +89,8 @@ trait BaseSpec extends FeatureSpec with BeforeAndAfterAll with BeforeAndAfterEac
 }
 
 case class MockHost(port: Int) {
-  val server = new WireMockServer(WireMockConfiguration.wireMockConfig().port(port))
+  val server = new WireMockServer(
+    WireMockConfiguration.wireMockConfig().port(port))
   val mock = new WireMock("localhost", port)
   val url = s"http://localhost:$port"
 }

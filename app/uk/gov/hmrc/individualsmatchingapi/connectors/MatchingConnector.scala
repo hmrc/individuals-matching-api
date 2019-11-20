@@ -16,29 +16,41 @@
 
 package uk.gov.hmrc.individualsmatchingapi.connectors
 
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
+import play.api.Configuration
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.http.{HeaderCarrier, HttpPost}
-import uk.gov.hmrc.individualsmatchingapi.config.{ConfigSupport, WSHttp}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.individualsmatchingapi.config.ConfigSupport
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.detailsMatchRequestFormat
-import uk.gov.hmrc.individualsmatchingapi.domain.{DetailsMatchRequest, MatchingException}
+import uk.gov.hmrc.individualsmatchingapi.domain.{
+  DetailsMatchRequest,
+  MatchingException
+}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class MatchingConnector extends ServicesConfig with ConfigSupport {
+class MatchingConnector @Inject()(override val config: Configuration,
+                                  http: HttpClient)
+    extends ServicesConfig
+    with ConfigSupport {
 
   val serviceUrl = baseUrl("matching")
-  val http: HttpPost = WSHttp
 
-  def validateMatch(matchingRequest: DetailsMatchRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
-    http.POST[DetailsMatchRequest, JsValue](s"$serviceUrl/matching/perform-match/cycle3", matchingRequest).map { response =>
-      (response \ "errorCodes").asOpt[Seq[Int]] match {
-        case Some(Nil) => ()
-        case _ => throw new MatchingException
+  def validateMatch(matchingRequest: DetailsMatchRequest)(
+      implicit hc: HeaderCarrier): Future[Unit] = {
+    http
+      .POST[DetailsMatchRequest, JsValue](
+        s"$serviceUrl/matching/perform-match/cycle3",
+        matchingRequest)
+      .map { response =>
+        (response \ "errorCodes").asOpt[Seq[Int]] match {
+          case Some(Nil) => ()
+          case _         => throw new MatchingException
+        }
       }
-    }
   }
 }

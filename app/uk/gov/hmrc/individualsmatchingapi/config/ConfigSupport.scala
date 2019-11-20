@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.individualsmatchingapi.controllers
+package uk.gov.hmrc.individualsmatchingapi.config
 
-import play.api.mvc._
-import uk.gov.hmrc.play.microservice.controller.BaseController
+import akka.actor.ActorSystem
+import play.api.Mode.Mode
+import play.api.{Application, Configuration, Play}
 
-import scala.concurrent.Future
+trait ConfigSupport {
 
-object MicroserviceHelloWorld extends MicroserviceHelloWorld
+  private def current: Application = Play.current
 
-trait MicroserviceHelloWorld extends BaseController {
+  def config: Configuration = current.configuration
+  def mode: Mode = current.mode
 
-	def hello() = Action.async { implicit request =>
-		Future.successful(Ok("Hello world"))
-	}
+  def runModeConfiguration: Configuration = config
+  def appNameConfiguration: Configuration = config
+  def actorSystem: ActorSystem = current.actorSystem
 }
