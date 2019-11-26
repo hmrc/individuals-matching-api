@@ -16,28 +16,42 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
+import controllers.Assets
 import javax.inject.{Inject, Singleton}
-
 import play.api.Configuration
 import play.api.http.HttpErrorHandler
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.individualsmatchingapi.views._
-import uk.gov.hmrc.play.bootstrap.http.RequestHandler
-
-
 @Singleton
-class DocumentationController @Inject()(httpErrorHandler: HttpErrorHandler, configuration: Configuration) extends uk.gov.hmrc.api.controllers.DocumentationController(httpErrorHandler) {
-
-  private lazy val whitelistedApplicationIdsVP1 = configuration.getStringSeq("api.access.version-P1.0.whitelistedApplicationIds").getOrElse(Seq.empty)
-  private lazy val accessTypeV1 = configuration.getString("api.access.version-1.0.accessType").getOrElse("PRIVATE")
-  private lazy val whitelistedApplicationIdsV1 = configuration.getStringSeq("api.access.version-1.0.whitelistedApplicationIds").getOrElse(Seq.empty)
+class DocumentationController @Inject()(cc: ControllerComponents,
+                                        assets: Assets,
+                                        errorHandler: HttpErrorHandler,
+                                        config: Configuration)
+    extends uk.gov.hmrc.api.controllers.DocumentationController(cc,
+                                                                assets,
+                                                                errorHandler) {
+  private lazy val whitelistedApplicationIdsVP1 = config
+    .getOptional[Seq[String]](
+      "api.access.version-P1.0.whitelistedApplicationIds")
+    .getOrElse(Seq.empty)
+  private lazy val accessTypeV1 = config
+    .getOptional[String]("api.access.version-1.0.accessType")
+    .getOrElse("PRIVATE")
+  private lazy val whitelistedApplicationIdsV1 = config
+    .getOptional[Seq[String]](
+      "api.access.version-1.0.whitelistedApplicationIds")
+    .getOrElse(Seq.empty)
 
   override def definition(): Action[AnyContent] = Action {
-    Ok(txt.definition(whitelistedApplicationIdsVP1, accessTypeV1, whitelistedApplicationIdsV1)).withHeaders(CONTENT_TYPE -> JSON)
+    Ok(
+      txt.definition(whitelistedApplicationIdsVP1,
+                     accessTypeV1,
+                     whitelistedApplicationIdsV1))
+      .withHeaders(CONTENT_TYPE -> JSON)
   }
 
   def raml(version: String, file: String) = {
-    super.at(s"/public/api/conf/$version", file)
+    assets.at(s"/public/api/conf/$version", file)
   }
 
 }

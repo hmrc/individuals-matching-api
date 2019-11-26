@@ -1,4 +1,4 @@
 # microservice privileged sandbox specific routes
 
-POST        /                   @uk.gov.hmrc.individualsmatchingapi.controllers.SandboxPrivilegedCitizenMatchingController.matchCitizen
-GET         /:matchId           @uk.gov.hmrc.individualsmatchingapi.controllers.SandboxPrivilegedIndividualsController.matchedIndividual(matchId: java.lang.String)
+POST        /                   uk.gov.hmrc.individualsmatchingapi.controllers.SandboxPrivilegedCitizenMatchingController.matchCitizen
+GET         /:matchId           uk.gov.hmrc.individualsmatchingapi.controllers.SandboxPrivilegedIndividualsController.matchedIndividual(matchId: java.lang.String)

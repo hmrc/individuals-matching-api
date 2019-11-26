@@ -18,23 +18,24 @@ lazy val ComponentTest = config("component") extend Test
 
 val compile = Seq(
   ws,
-  hmrc %% "bootstrap-play-25" % "5.1.0",
-  hmrc %% "domain" % "5.6.0-play-25",
-  hmrc %% "auth-client" % "2.31.0-play-25",
-  hmrc %% "simple-reactivemongo" % "7.20.0-play-25",
-  hmrc %% "play-hal" % "1.8.0-play-25",
-  hmrc %% "play-hmrc-api" % "3.6.0-play-25"
+  hmrc %% "bootstrap-play-26" % "1.3.0",
+  hmrc %% "domain" % "5.6.0-play-26",
+  hmrc %% "auth-client" % "2.31.0-play-26",
+  hmrc %% "simple-reactivemongo" % "7.21.0-play-26",
+  hmrc %% "play-hal" % "1.9.0-play-26",
+  hmrc %% "play-hmrc-api" % "3.6.0-play-26",
+  "com.typesafe.play" %% "play-json-joda" % "2.6.10"
 )
 
 def test(scope: String = "test,it") = Seq(
-  hmrc %% "hmrctest" % "3.9.0-play-25" % scope,
-  hmrc %% "reactivemongo-test" % "4.15.0-play-25" % scope,
-  "org.scalatest" %% "scalatest" % "2.2.6" % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" %  scope,
+  hmrc %% "hmrctest" % "3.9.0-play-26" % scope,
+  hmrc %% "reactivemongo-test" % "4.15.0-play-26" % scope,
+  "org.scalatest" %% "scalatest" % "3.0.0" % scope,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" %  scope,
   "org.pegdown" % "pegdown" % "1.6.0" % scope,
   "org.mockito" % "mockito-all" % "1.10.19" % scope,
   "org.scalaj" %% "scalaj-http" % "1.1.6" % scope,
-  "com.github.tomakehurst" % "wiremock" % "2.6.0" % scope,
+  "com.github.tomakehurst" % "wiremock-jre8" % "2.21.0" % scope,
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
 )
 
@@ -48,8 +49,7 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies ++= appDependencies,
     testOptions in Test := Seq(Tests.Filter(unitFilter)),
     retrieveManaged := true,
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    routesGenerator := StaticRoutesGenerator
+    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
   )
   .settings(unmanagedResourceDirectories in Compile += baseDirectory.value / "resources")
   .configs(IntegrationTest)

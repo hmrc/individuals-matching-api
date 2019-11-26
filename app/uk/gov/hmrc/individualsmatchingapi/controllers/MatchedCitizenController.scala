@@ -17,17 +17,18 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.libs.json.Json.toJson
-import play.api.mvc.Action
-import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
+import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.matchedCitizenRecordJsonFormat
+import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class MatchedCitizenController @Inject()(
+    cc: ControllerComponents,
     citizenMatchingService: LiveCitizenMatchingService)
-    extends CommonController {
+    extends CommonController(cc) {
 
   def matchedCitizen(matchId: String) = Action.async { implicit request =>
     withUuid(matchId) { matchUuid =>

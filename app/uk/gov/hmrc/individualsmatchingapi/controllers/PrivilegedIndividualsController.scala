@@ -20,25 +20,45 @@ import javax.inject.{Inject, Singleton}
 import play.api.hal.Hal._
 import play.api.hal.HalLink
 import play.api.libs.json.Json.{obj, toJson}
-import play.api.mvc.Action
+import play.api.mvc.ControllerComponents
 import play.api.mvc.hal._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
-import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService}
+import uk.gov.hmrc.individualsmatchingapi.services.{
+  CitizenMatchingService,
+  LiveCitizenMatchingService,
+  SandboxCitizenMatchingService
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMatchingService) extends CommonController with PrivilegedAuthentication {
+abstract class PrivilegedIndividualsController(
+    citizenMatchingService: CitizenMatchingService,
+    cc: ControllerComponents)
+    extends CommonController(cc)
+    with PrivilegedAuthentication {
 
   def matchedIndividual(matchId: String) = Action.async { implicit request =>
     requiresPrivilegedAuthentication {
       withUuid(matchId) { matchUuid =>
-        citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
-          val selfLink = HalLink("self", s"/individuals/matching/$matchId")
-          val incomeLink = HalLink("income", s"/individuals/income/?matchId=$matchId", name = Option("GET"), title = Option("View individual's income"))
-          val employmentsLink = HalLink("employments", s"/individuals/employments/?matchId=$matchId", name = Option("GET"), title = Option("View individual's employments"))
-          Ok(state(obj("individual" -> toJson(citizenDetails))) ++ links(selfLink, incomeLink, employmentsLink))
+        citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map {
+          citizenDetails =>
+            val selfLink = HalLink("self", s"/individuals/matching/$matchId")
+            val incomeLink = HalLink("income",
+                                     s"/individuals/income/?matchId=$matchId",
+                                     name = Option("GET"),
+                                     title = Option("View individual's income"))
+            val employmentsLink =
+              HalLink("employments",
+                      s"/individuals/employments/?matchId=$matchId",
+                      name = Option("GET"),
+                      title = Option("View individual's employments"))
+            Ok(
+              state(obj("individual" -> toJson(citizenDetails))) ++ links(
+                selfLink,
+                incomeLink,
+                employmentsLink))
         } recover recovery
       }
     }
@@ -46,13 +66,19 @@ abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMa
 }
 
 @Singleton
-class LivePrivilegedIndividualsController @Inject()(liveCitizenMatchingService: LiveCitizenMatchingService, val authConnector: AuthConnector)
-  extends PrivilegedIndividualsController(liveCitizenMatchingService) {
+class LivePrivilegedIndividualsController @Inject()(
+    liveCitizenMatchingService: LiveCitizenMatchingService,
+    val authConnector: AuthConnector,
+    cc: ControllerComponents)
+    extends PrivilegedIndividualsController(liveCitizenMatchingService, cc) {
   override val environment = PRODUCTION
 }
 
 @Singleton
-class SandboxPrivilegedIndividualsController @Inject()(sandboxCitizenMatchingService: SandboxCitizenMatchingService, val authConnector: AuthConnector)
-  extends PrivilegedIndividualsController(sandboxCitizenMatchingService) {
+class SandboxPrivilegedIndividualsController @Inject()(
+    sandboxCitizenMatchingService: SandboxCitizenMatchingService,
+    val authConnector: AuthConnector,
+    cc: ControllerComponents)
+    extends PrivilegedIndividualsController(sandboxCitizenMatchingService, cc) {
   override val environment = SANDBOX
 }
