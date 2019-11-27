@@ -25,21 +25,26 @@ import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.MatchingConnector
 import uk.gov.hmrc.individualsmatchingapi.domain._
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEach {
+class MatchingConnectorSpec
+    extends SpecBase
+    with Matchers
+    with BeforeAndAfterEach {
   val stubPort = sys.env.getOrElse("WIREMOCK", "11122").toInt
   val stubHost = "localhost"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
   val http = fakeApplication.injector.instanceOf[DefaultHttpClient]
   val config = fakeApplication.injector.instanceOf[Configuration]
+  val servicesConfig = fakeApplication.injector.instanceOf[ServicesConfig]
 
   trait Setup {
     implicit val hc = HeaderCarrier()
 
-    val underTest = new MatchingConnector(config,http) {
+    val underTest = new MatchingConnector(config, http, servicesConfig) {
       override val serviceUrl = "http://localhost:11122"
     }
   }
@@ -56,9 +61,10 @@ class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEa
   "isMatch" should {
 
     "succeed for a citizen with matching details" in new Setup {
-      stubFor(post(urlMatching(s"/matching/perform-match/cycle3")).
-        withRequestBody(equalToJson(
-          s"""{
+      stubFor(
+        post(urlMatching(s"/matching/perform-match/cycle3"))
+          .withRequestBody(equalToJson(
+            s"""{
                 "verifyPerson": {
                 "firstName":"John",
                 "lastName":"Smith",
@@ -72,16 +78,20 @@ class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEa
                 "dateOfBirth":"1972-10-15"}]
               }
             """
-        )).willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[]}""")))
+          ))
+          .willReturn(
+            aResponse().withStatus(200).withBody("""{"errorCodes":[]}""")))
 
-      val f = underTest.validateMatch(DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))
+      val f = underTest.validateMatch(
+        DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))
       noException should be thrownBy await(f)
     }
 
     "throw matching exception for a citizen with non-matching details" in new Setup {
-      stubFor(post(urlMatching(s"/matching/perform-match/cycle3")).
-        withRequestBody(equalToJson(
-          s"""{
+      stubFor(
+        post(urlMatching(s"/matching/perform-match/cycle3"))
+          .withRequestBody(equalToJson(
+            s"""{
                 "verifyPerson": {
                 "firstName":"John",
                 "lastName":"Smith",
@@ -95,16 +105,25 @@ class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEa
                 "dateOfBirth":"1972-10-14"}]
               }
             """
-        )).willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[31,32]}""")))
+          ))
+          .willReturn(
+            aResponse().withStatus(200).withBody("""{"errorCodes":[31,32]}""")))
 
-      intercept[MatchingException](await(underTest.validateMatch(DetailsMatchRequest(citizenMatchingRequest(),
-        Seq(citizenDetails(firstName = Some("Ana"), dateOfBirth = Some(LocalDate.parse("1972-10-14"))))))))
+      intercept[MatchingException](
+        await(
+          underTest.validateMatch(
+            DetailsMatchRequest(
+              citizenMatchingRequest(),
+              Seq(citizenDetails(firstName = Some("Ana"),
+                                 dateOfBirth =
+                                   Some(LocalDate.parse("1972-10-14"))))))))
     }
 
     "throw matching exception for an invalid json response" in new Setup {
-      stubFor(post(urlMatching(s"/matching/perform-match/cycle3")).
-        withRequestBody(equalToJson(
-          s"""{
+      stubFor(
+        post(urlMatching(s"/matching/perform-match/cycle3"))
+          .withRequestBody(equalToJson(
+            s"""{
                 "verifyPerson": {
                   "firstName":"John",
                   "lastName":"Smith",
@@ -119,9 +138,12 @@ class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEa
                 }]
               }
             """
-        )).willReturn(aResponse().withStatus(200).withBody("""{"invalid":"value"}""")))
+          ))
+          .willReturn(
+            aResponse().withStatus(200).withBody("""{"invalid":"value"}""")))
 
-      intercept[MatchingException](await(underTest.validateMatch(DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))))
+      intercept[MatchingException](await(underTest.validateMatch(
+        DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))))
     }
   }
 
@@ -135,7 +157,8 @@ class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEa
   private def citizenDetails(firstName: Option[String] = Some("John"),
                              lastName: Option[String] = Option("Smith"),
                              nino: Option[String] = Some("NA000799C"),
-                             dateOfBirth: Option[LocalDate] = Some(LocalDate.parse("1972-10-15"))) = {
+                             dateOfBirth: Option[LocalDate] = Some(
+                               LocalDate.parse("1972-10-15"))) = {
     CitizenDetails(firstName, lastName, nino, dateOfBirth)
   }
 }

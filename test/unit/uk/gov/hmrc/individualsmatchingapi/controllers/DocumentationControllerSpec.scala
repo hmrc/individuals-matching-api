@@ -16,6 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
+import controllers.Assets
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.when
 import org.scalatest.Matchers
@@ -23,12 +24,15 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.Configuration
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.JsValue
-import play.api.mvc.Result
+import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.individualsmatchingapi.controllers.DocumentationController
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSugar {
+class DocumentationControllerSpec
+    extends SpecBase
+    with Matchers
+    with MockitoSugar {
 
   implicit lazy val materializer = fakeApplication.materializer
 
@@ -37,51 +41,85 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
     val HttpErrorHandler = mock[HttpErrorHandler]
 
     val request = FakeRequest()
+    val controllerComponents =
+      fakeApplication.injector.instanceOf[ControllerComponents]
+    val assets =
+      fakeApplication.injector.instanceOf[Assets]
 
-    val underTest = new DocumentationController(HttpErrorHandler, configuration)
+    val underTest =
+      new DocumentationController(controllerComponents,
+                                  assets,
+                                  HttpErrorHandler,
+                                  configuration)
 
-    when(configuration.getStringSeq("api.access.version-P1.0.whitelistedApplicationIds")).thenReturn(None)
-    when(configuration.getStringSeq("api.access.version-1.0.whitelistedApplicationIds")).thenReturn(None)
-    when(configuration.getString("api.access.version-1.0.accessType")).thenReturn(None)
+    when(
+      configuration.getOptional[Seq[String]](
+        "api.access.version-P1.0.whitelistedApplicationIds")).thenReturn(None)
+    when(
+      configuration.getOptional[Seq[String]](
+        "api.access.version-1.0.whitelistedApplicationIds")).thenReturn(None)
+    when(configuration.getOptional[String]("api.access.version-1.0.accessType"))
+      .thenReturn(None)
   }
 
   "/api/definition" should {
     "return 1.0 as PRIVATE when api.access.version-1.0.accessType is not set" in new Setup {
-      given(configuration.getString("api.access.version-1.0.accessType")).willReturn(None)
+      given(
+        configuration.getOptional[String]("api.access.version-1.0.accessType"))
+        .willReturn(None)
 
       val result = await(underTest.definition()(request))
 
-      (apiVersion(result, "1.0") \ "access" \ "type").as[String] shouldBe "PRIVATE"
+      (apiVersion(result, "1.0") \ "access" \ "type")
+        .as[String] shouldBe "PRIVATE"
     }
 
     "return 1.0 as PRIVATE when api.access.version-1.0.accessType is set to PRIVATE" in new Setup {
-      given(configuration.getString("api.access.version-1.0.accessType")).willReturn(Some("PRIVATE"))
+      given(
+        configuration.getOptional[String]("api.access.version-1.0.accessType"))
+        .willReturn(Some("PRIVATE"))
 
       val result = await(underTest.definition()(request))
 
-      (apiVersion(result, "1.0") \ "access" \ "type").as[String] shouldBe "PRIVATE"
+      (apiVersion(result, "1.0") \ "access" \ "type")
+        .as[String] shouldBe "PRIVATE"
     }
 
     "return 1.0 as PUBLIC when api.access.version-1.0.accessType is set to PUBLIC" in new Setup {
-      given(configuration.getString("api.access.version-1.0.accessType")).willReturn(Some("PUBLIC"))
+      given(
+        configuration.getOptional[String]("api.access.version-1.0.accessType"))
+        .willReturn(Some("PUBLIC"))
 
       val result = await(underTest.definition()(request))
 
-      (apiVersion(result, "1.0") \ "access" \ "type").as[String] shouldBe "PUBLIC"
+      (apiVersion(result, "1.0") \ "access" \ "type")
+        .as[String] shouldBe "PUBLIC"
     }
 
     "return whitelisted applications from the configuration" in new Setup {
-      when(configuration.getStringSeq("api.access.version-P1.0.whitelistedApplicationIds")).thenReturn(Some(Seq("appVP1")))
-      when(configuration.getStringSeq("api.access.version-1.0.whitelistedApplicationIds")).thenReturn(Some(Seq("appV1")))
+      when(
+        configuration.getOptional[Seq[String]](
+          "api.access.version-P1.0.whitelistedApplicationIds"))
+        .thenReturn(Some(Seq("appVP1")))
+      when(
+        configuration.getOptional[Seq[String]](
+          "api.access.version-1.0.whitelistedApplicationIds"))
+        .thenReturn(Some(Seq("appV1")))
 
       val result = await(underTest.definition()(request))
 
-      (apiVersion(result, "1.0") \ "access" \ "whitelistedApplicationIds").as[Seq[String]] shouldBe Seq("appV1")
-      (apiVersion(result, "P1.0") \ "access" \ "whitelistedApplicationIds").as[Seq[String]] shouldBe Seq("appVP1")
+      (apiVersion(result, "1.0") \ "access" \ "whitelistedApplicationIds")
+        .as[Seq[String]] shouldBe Seq("appV1")
+      (apiVersion(result, "P1.0") \ "access" \ "whitelistedApplicationIds")
+        .as[Seq[String]] shouldBe Seq("appVP1")
     }
   }
 
-  private def apiVersion(result: Result, version: String) = (jsonBodyOf(result) \ "api" \ "versions").as[Seq[JsValue]].find {
-    v => (v \ "version").as[String] == version
-  }.getOrElse(fail(s"api version $version is not in the definition"))
+  private def apiVersion(result: Result, version: String) =
+    (jsonBodyOf(result) \ "api" \ "versions")
+      .as[Seq[JsValue]]
+      .find { v =>
+        (v \ "version").as[String] == version
+      }
+      .getOrElse(fail(s"api version $version is not in the definition"))
 }

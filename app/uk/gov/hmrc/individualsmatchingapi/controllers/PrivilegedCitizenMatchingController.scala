@@ -20,9 +20,10 @@ import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
 import play.api.hal.Hal.links
 import play.api.hal.HalLink
-import play.api.mvc.hal._
 import play.api.libs.json.Json
-import play.api.mvc.{Action, BodyParsers}
+import play.api.mvc.hal._
+import play.api.mvc.{BodyParsers, ControllerComponents}
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenMatchingFormat
@@ -31,14 +32,13 @@ import uk.gov.hmrc.individualsmatchingapi.services.{
   LiveCitizenMatchingService,
   SandboxCitizenMatchingService
 }
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 abstract class PrivilegedCitizenMatchingController(
-    citizenMatchingService: CitizenMatchingService)
-    extends CommonController
+    citizenMatchingService: CitizenMatchingService,
+    cc: ControllerComponents)
+    extends CommonController(cc)
     with PrivilegedAuthentication {
 
   private def seeOthers(location: String) =
@@ -65,15 +65,18 @@ abstract class PrivilegedCitizenMatchingController(
 @Singleton
 class LivePrivilegedCitizenMatchingController @Inject()(
     liveCitizenMatchingService: LiveCitizenMatchingService,
-    val authConnector: AuthConnector)
-    extends PrivilegedCitizenMatchingController(liveCitizenMatchingService) {
+    val authConnector: AuthConnector,
+    cc: ControllerComponents)
+    extends PrivilegedCitizenMatchingController(liveCitizenMatchingService, cc) {
   override val environment = PRODUCTION
 }
 
 @Singleton
 class SandboxPrivilegedCitizenMatchingController @Inject()(
     sandboxCitizenMatchingService: SandboxCitizenMatchingService,
-    val authConnector: AuthConnector)
-    extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService) {
+    val authConnector: AuthConnector,
+    cc: ControllerComponents)
+    extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService,
+                                                cc) {
   override val environment = SANDBOX
 }

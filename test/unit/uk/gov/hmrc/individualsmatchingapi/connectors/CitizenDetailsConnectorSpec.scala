@@ -24,22 +24,31 @@ import org.scalatest.{BeforeAndAfterEach, Matchers}
 import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.CitizenDetailsConnector
-import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenNotFoundException, InvalidNinoException}
+import uk.gov.hmrc.individualsmatchingapi.domain.{
+  CitizenDetails,
+  CitizenNotFoundException,
+  InvalidNinoException
+}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEach {
+class CitizenDetailsConnectorSpec
+    extends SpecBase
+    with Matchers
+    with BeforeAndAfterEach {
   val stubPort = sys.env.getOrElse("WIREMOCK", "11121").toInt
   val stubHost = "localhost"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
   val http = fakeApplication.injector.instanceOf[DefaultHttpClient]
   val config = fakeApplication.injector.instanceOf[Configuration]
+  val servicesConfig = fakeApplication.injector.instanceOf[ServicesConfig]
 
   trait Setup {
     implicit val hc = HeaderCarrier()
 
-    val underTest = new CitizenDetailsConnector(config,http) {
+    val underTest = new CitizenDetailsConnector(config, http, servicesConfig) {
       override val serviceUrl = "http://localhost:11121"
     }
   }
@@ -57,9 +66,9 @@ class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndA
     val nino = "A123456AA"
 
     "retrieve citizen details for a valid nino" in new Setup {
-      stubFor(get(urlEqualTo(s"/citizen-details/nino/$nino")).
-        willReturn(aResponse().withBody(
-          s"""{
+      stubFor(
+        get(urlEqualTo(s"/citizen-details/nino/$nino"))
+          .willReturn(aResponse().withBody(s"""{
                 "name":{
                   "current":{"firstName":"Amanda","lastName":"Joseph"},
                 "previous":[]
@@ -70,13 +79,16 @@ class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndA
 
       val result = await(underTest.citizenDetails(nino))
 
-      result shouldBe CitizenDetails(Some("Amanda"), Some("Joseph"), Some(nino), Some(LocalDate.parse("1972-10-13")))
+      result shouldBe CitizenDetails(Some("Amanda"),
+                                     Some("Joseph"),
+                                     Some(nino),
+                                     Some(LocalDate.parse("1972-10-13")))
     }
 
     "retrieve citizen details for partial details" in new Setup {
-      stubFor(get(urlEqualTo(s"/citizen-details/nino/$nino")).
-        willReturn(aResponse().withBody(
-          s"""{
+      stubFor(
+        get(urlEqualTo(s"/citizen-details/nino/$nino"))
+          .willReturn(aResponse().withBody(s"""{
                 "name":{
                   "current":{"firstName":"Amanda","lastName":"Joseph"},
                   "previous":[]
@@ -86,22 +98,28 @@ class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndA
 
       val result = await(underTest.citizenDetails(nino))
 
-      result shouldBe CitizenDetails(Some("Amanda"), Some("Joseph"), Some(nino), None)
+      result shouldBe CitizenDetails(Some("Amanda"),
+                                     Some("Joseph"),
+                                     Some(nino),
+                                     None)
     }
 
     "throw citizen not found exception if nino is not found" in new Setup {
-      stubFor(get(urlEqualTo(s"/citizen-details/nino/$nino")).
-        willReturn(aResponse().withStatus(404)))
+      stubFor(
+        get(urlEqualTo(s"/citizen-details/nino/$nino"))
+          .willReturn(aResponse().withStatus(404)))
 
       intercept[CitizenNotFoundException](await(underTest.citizenDetails(nino)))
     }
 
     "throw invalid nino exception when nino is invalid" in new Setup {
       val invalidNino = "A123456A"
-      stubFor(get(urlEqualTo(s"/citizen-details/nino/$invalidNino")).
-        willReturn(aResponse().withStatus(400).withBody(s"Invalid Nino: $invalidNino")))
+      stubFor(
+        get(urlEqualTo(s"/citizen-details/nino/$invalidNino")).willReturn(
+          aResponse().withStatus(400).withBody(s"Invalid Nino: $invalidNino")))
 
-      intercept[InvalidNinoException](await(underTest.citizenDetails(invalidNino)))
+      intercept[InvalidNinoException](
+        await(underTest.citizenDetails(invalidNino)))
     }
   }
 }

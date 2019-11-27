@@ -17,6 +17,7 @@
 package uk.gov.hmrc.individualsmatchingapi.config
 
 import javax.inject.Inject
+import play.api.Configuration
 import play.api.http.{HttpConfiguration, HttpErrorHandler, HttpFilters}
 import play.api.mvc.{Handler, RequestHeader}
 import play.api.routing.Router
@@ -27,12 +28,12 @@ class IndividualMatchingApiRequestHandler @Inject()(
     router: Router,
     errorHandler: HttpErrorHandler,
     configuration: HttpConfiguration,
-    filters: HttpFilters)
-    extends RequestHandler(router, errorHandler, configuration, filters)
-    with ConfigSupport {
+    filters: HttpFilters,
+    config: Configuration)
+    extends RequestHandler(router, errorHandler, configuration, filters) {
 
   private lazy val unversionedContexts = config
-    .getStringSeq("versioning.unversionedContexts")
+    .getOptional[Seq[String]]("versioning.unversionedContexts")
     .getOrElse(Seq.empty[String])
 
   override def routeRequest(request: RequestHeader): Option[Handler] = {

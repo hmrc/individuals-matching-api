@@ -20,43 +20,50 @@ import java.util.UUID
 
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.BaseSpec
 import play.api.libs.json.Json
+import play.api.libs.json.Json.parse
 import play.api.test.Helpers.{await, _}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
-
 import scalaj.http.Http
+import uk.gov.hmrc.individualsmatchingapi.domain.ErrorNotFound
 
 class MatchedCitizenControllerSpec extends BaseSpec {
 
   val nino = "CS700100A"
 
-  feature("Live implementation of matched citizen record is open and accessible") {
+  feature(
+    "Live implementation of matched citizen record is open and accessible") {
 
     scenario("request for a matched citizen with a valid matchId") {
 
       Given("A match record exists for a given NINO")
       val ninoMatch = await(mongoRepository.create(Nino(nino)))
 
-      When("I request the matched citizen record using the corresponding valid matchId")
-      val response = Http(s"$serviceUrl/match-record/${ninoMatch.id.toString}").asString
+      When(
+        "I request the matched citizen record using the corresponding valid matchId")
+      val response =
+        Http(s"$serviceUrl/match-record/${ninoMatch.id.toString}").asString
 
       Then("The response status should be 200 (Ok)")
       response.code shouldBe OK
 
       And("The response contains the matched citizen record")
-      Json.parse(response.body) shouldBe Json.parse(s"""{"nino":"$nino","matchId":"${ninoMatch.id.toString}"}""")
+      Json.parse(response.body) shouldBe Json.parse(
+        s"""{"nino":"$nino","matchId":"${ninoMatch.id.toString}"}""")
     }
 
     scenario("request for a matched citizen with an invalid matchId") {
 
       Given("A matchId without a corresponding matched citizen record")
-      val matchId = UUID.randomUUID().toString
+      val matchId = "123"
 
       When("I request the matched citizen record using the invalid matchId")
       val response = Http(s"$serviceUrl/match-record/$matchId").asString
 
       Then("The response status should be 404 (Not Found)")
       response.code shouldBe NOT_FOUND
+      import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
+      response.body shouldBe Json.toJson(ErrorNotFound).toString()
     }
   }
 
@@ -65,7 +72,8 @@ class MatchedCitizenControllerSpec extends BaseSpec {
     scenario("Request for a sandbox matched citizen record") {
 
       When("I attempt to request a sandbox matched citizen record")
-      val response = Http(s"$serviceUrl/sandbox/match-record/$sandboxMatchId").asString
+      val response =
+        Http(s"$serviceUrl/sandbox/match-record/$sandboxMatchId").asString
 
       Then("The response status should be 404 (Not Found)")
       response.code shouldBe NOT_FOUND

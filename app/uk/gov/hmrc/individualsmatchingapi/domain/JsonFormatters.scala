@@ -19,42 +19,47 @@ package uk.gov.hmrc.individualsmatchingapi.domain
 import java.util.UUID
 
 import org.joda.time.LocalDate
+import play.api.libs.json.JodaWrites._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 import scala.language.implicitConversions
-
 object JsonFormatters {
 
   implicit val citizenMatchingFormat = Json.format[CitizenMatchingRequest]
 
   implicit val citizenDetailsFormat = new Format[CitizenDetails] {
-    override def reads(json: JsValue): JsResult[CitizenDetails] = JsSuccess(
-      CitizenDetails(
-        (json \ "name" \ "current" \ "firstName").asOpt[String],
-        (json \ "name" \ "current" \ "lastName").asOpt[String],
-        (json \ "ids" \ "nino").asOpt[String],
-        (json \ "dateOfBirth").asOpt[LocalDate](Reads.jodaLocalDateReads("ddMMyyyy"))))
+    override def reads(json: JsValue): JsResult[CitizenDetails] =
+      JsSuccess(
+        CitizenDetails(
+          (json \ "name" \ "current" \ "firstName").asOpt[String],
+          (json \ "name" \ "current" \ "lastName").asOpt[String],
+          (json \ "ids" \ "nino").asOpt[String],
+          (json \ "dateOfBirth")
+            .asOpt[LocalDate](Reads.jodaLocalDateReads("ddMMyyyy"))
+        ))
 
     override def writes(citizenDetails: CitizenDetails): JsValue =
       Json.obj("firstName" -> citizenDetails.firstName,
-        "lastName" -> citizenDetails.lastName,
-        "nino" -> citizenDetails.nino,
-        "dateOfBirth" -> citizenDetails.dateOfBirth)
+               "lastName" -> citizenDetails.lastName,
+               "nino" -> citizenDetails.nino,
+               "dateOfBirth" -> citizenDetails.dateOfBirth)
   }
 
   implicit val detailsMatchRequestFormat = new Format[DetailsMatchRequest] {
-    def reads(json: JsValue) = JsSuccess(
-      DetailsMatchRequest(
-        (json \ "verifyPerson").as[CitizenMatchingRequest],
-        (json \ "cidPersons").as[List[CitizenDetails]]))
+    def reads(json: JsValue) =
+      JsSuccess(
+        DetailsMatchRequest((json \ "verifyPerson").as[CitizenMatchingRequest],
+                            (json \ "cidPersons").as[List[CitizenDetails]]))
 
     def writes(matchingRequest: DetailsMatchRequest): JsValue =
-      Json.obj("verifyPerson" -> matchingRequest.verifyPerson, "cidPersons" -> matchingRequest.cidPersons)
+      Json.obj("verifyPerson" -> matchingRequest.verifyPerson,
+               "cidPersons" -> matchingRequest.cidPersons)
   }
 
   implicit val errorResponseWrites = new Writes[ErrorResponse] {
-    def writes(e: ErrorResponse): JsValue = Json.obj("code" -> e.errorCode, "message" -> e.message)
+    def writes(e: ErrorResponse): JsValue =
+      Json.obj("code" -> e.errorCode, "message" -> e.message)
   }
 
   implicit val errorInvalidRequestFormat = new Format[ErrorInvalidRequest] {
@@ -69,10 +74,12 @@ object JsonFormatters {
   implicit val uuidJsonFormat = new Format[UUID] {
     override def writes(uuid: UUID) = JsString(uuid.toString)
 
-    override def reads(json: JsValue) = JsSuccess(UUID.fromString(json.asInstanceOf[JsString].value))
+    override def reads(json: JsValue) =
+      JsSuccess(UUID.fromString(json.asInstanceOf[JsString].value))
   }
 
   implicit val dateTimeFormat = ReactiveMongoFormats.dateTimeFormats
   implicit val ninoMatchJsonFormat = Json.format[NinoMatch]
-  implicit val matchedCitizenRecordJsonFormat = Json.format[MatchedCitizenRecord]
+  implicit val matchedCitizenRecordJsonFormat =
+    Json.format[MatchedCitizenRecord]
 }
