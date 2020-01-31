@@ -1,4 +1,5 @@
 import play.core.PlayVersion
+import sbt.Keys.compile
 import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
@@ -45,6 +46,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(scalaSettings: _*)
   .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
+  .settings(scalafmtOnCompile := true)
   .settings(
     libraryDependencies ++= appDependencies,
     testOptions in Test := Seq(Tests.Filter(unitFilter)),
@@ -80,3 +82,11 @@ def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
   tests map {
     test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
   }
+
+lazy val compileAll = taskKey[Unit]("Compiles sources in all configurations.")
+
+compileAll := {
+  val a = (compile in Test).value
+  val b = (compile in IntegrationTest).value
+  ()
+}
