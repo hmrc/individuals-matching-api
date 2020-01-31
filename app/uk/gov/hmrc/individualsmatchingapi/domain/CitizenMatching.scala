@@ -30,7 +30,9 @@ case class CitizenMatchingRequest(firstName: String, lastName: String, nino: Str
   validate(nino.nonEmpty, "nino is required")
   validate(Nino.isValid(nino), "Malformed nino submitted")
   validate(dateOfBirth.nonEmpty, "dateOfBirth is required")
-  validate(Try(LocalDate.parse(dateOfBirth, DateTimeFormat.forPattern("yyyy-MM-dd"))).isSuccess, "dateOfBirth: invalid date format")
+  validate(
+    Try(LocalDate.parse(dateOfBirth, DateTimeFormat.forPattern("yyyy-MM-dd"))).isSuccess,
+    "dateOfBirth: invalid date format")
 
   private def validateName(fieldName: String, value: String): Unit = {
     lazy val nameRegex = """^[\p{L} `\-\'^.]{1,35}$"""
@@ -40,13 +42,16 @@ case class CitizenMatchingRequest(firstName: String, lastName: String, nino: Str
     validate(value.matches(nameRegex), s"$fieldName contains invalid characters")
   }
 
-  private def validate(requirement: => Boolean, message: String): Unit = {
-    if(!requirement)
+  private def validate(requirement: => Boolean, message: String): Unit =
+    if (!requirement)
       throw new ValidationException(message)
-  }
 }
 
-case class CitizenDetails(firstName: Option[String], lastName: Option[String], nino: Option[String], dateOfBirth: Option[LocalDate])
+case class CitizenDetails(
+  firstName: Option[String],
+  lastName: Option[String],
+  nino: Option[String],
+  dateOfBirth: Option[LocalDate])
 
 case class DetailsMatchRequest(verifyPerson: CitizenMatchingRequest, cidPersons: Seq[CitizenDetails])
 

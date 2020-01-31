@@ -28,12 +28,14 @@ import scalaj.http.{Http, HttpResponse}
 
 class VersioningSpec extends BaseSpec {
 
-  implicit override lazy val app: Application = GuiceApplicationBuilder().configure(
-    "auditing.enabled" -> false,
-    "auditing.traceRequests" -> false,
-    "microservice.services.auth.port" -> AuthStub.port,
-    "run.mode" -> "It"
-  ).build()
+  implicit override lazy val app: Application = GuiceApplicationBuilder()
+    .configure(
+      "auditing.enabled"                -> false,
+      "auditing.traceRequests"          -> false,
+      "microservice.services.auth.port" -> AuthStub.port,
+      "run.mode"                        -> "It"
+    )
+    .build()
 
   feature("Versioning") {
 
@@ -47,8 +49,7 @@ class VersioningSpec extends BaseSpec {
 
       And("The response body should be for api version P1")
       Json.parse(response.body) shouldBe
-        Json.parse(
-          s"""
+        Json.parse(s"""
             {
               "_links": {
                 "income": {
@@ -95,7 +96,10 @@ class VersioningSpec extends BaseSpec {
     scenario("Requests with an accept header with an invalid version") {
 
       When("A request to the match citizen endpoint is made with version 10.0 accept header")
-      val response = invokeWithHeaders(s"/sandbox/$sandboxMatchId", AUTHORIZATION -> authToken, ACCEPT -> "application/vnd.hmrc.10.0+json")
+      val response = invokeWithHeaders(
+        s"/sandbox/$sandboxMatchId",
+        AUTHORIZATION -> authToken,
+        ACCEPT        -> "application/vnd.hmrc.10.0+json")
 
       Then("The response status should be 404 (Not Found)")
       response.code shouldBe NOT_FOUND

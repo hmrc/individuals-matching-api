@@ -34,24 +34,20 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait BaseSpec
-    extends FeatureSpec
-    with BeforeAndAfterAll
-    with BeforeAndAfterEach
-    with Matchers
-    with GuiceOneServerPerSuite
+    extends FeatureSpec with BeforeAndAfterAll with BeforeAndAfterEach with Matchers with GuiceOneServerPerSuite
     with GivenWhenThen {
 
   override lazy val port = 9000
   implicit override lazy val app: Application = GuiceApplicationBuilder()
     .configure(
-      "auditing.enabled" -> false,
-      "auditing.traceRequests" -> false,
-      "microservice.services.auth.port" -> AuthStub.port,
+      "auditing.enabled"                           -> false,
+      "auditing.traceRequests"                     -> false,
+      "microservice.services.auth.port"            -> AuthStub.port,
       "microservice.services.citizen-details.port" -> CitizenDetailsStub.port,
-      "microservice.services.matching.port" -> MatchingStub.port,
-      "mongodb.uri" -> "mongodb://localhost:27017/nino-match-repository-it",
-      "run.mode" -> "It",
-      "versioning.unversionedContexts" -> List("/match-record")
+      "microservice.services.matching.port"        -> MatchingStub.port,
+      "mongodb.uri"                                -> "mongodb://localhost:27017/nino-match-repository-it",
+      "run.mode"                                   -> "It",
+      "versioning.unversionedContexts"             -> List("/match-record")
     )
     .build()
 
@@ -63,14 +59,11 @@ trait BaseSpec
   val acceptHeaderV1 = ACCEPT -> "application/vnd.hmrc.1.0+json"
   val acceptHeaderP1 = ACCEPT -> "application/vnd.hmrc.P1.0+json"
 
-  protected def requestHeaders(
-      acceptHeader: (String, String) = acceptHeaderV1) = {
+  protected def requestHeaders(acceptHeader: (String, String) = acceptHeaderV1) =
     Map(CONTENT_TYPE -> JSON, AUTHORIZATION -> authToken, acceptHeader)
-  }
 
-  protected def errorResponse(message: String) = {
+  protected def errorResponse(message: String) =
     s"""{"code":"INVALID_REQUEST","message":"$message"}"""
-  }
 
   override protected def beforeEach(): Unit = {
     mocks.foreach(m => if (!m.server.isRunning) m.server.start())
@@ -78,9 +71,8 @@ trait BaseSpec
     result(mongoRepository.ensureIndexes, timeout)
   }
 
-  override protected def afterEach(): Unit = {
+  override protected def afterEach(): Unit =
     mocks.foreach(_.mock.resetMappings())
-  }
 
   override def afterAll(): Unit = {
     mocks.foreach(_.server.stop())
@@ -89,8 +81,7 @@ trait BaseSpec
 }
 
 case class MockHost(port: Int) {
-  val server = new WireMockServer(
-    WireMockConfiguration.wireMockConfig().port(port))
+  val server = new WireMockServer(WireMockConfiguration.wireMockConfig().port(port))
   val mock = new WireMock("localhost", port)
   val url = s"http://localhost:$port"
 }

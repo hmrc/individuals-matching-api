@@ -24,19 +24,12 @@ import org.scalatest.{BeforeAndAfterEach, Matchers}
 import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.CitizenDetailsConnector
-import uk.gov.hmrc.individualsmatchingapi.domain.{
-  CitizenDetails,
-  CitizenNotFoundException,
-  InvalidNinoException
-}
+import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenNotFoundException, InvalidNinoException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-class CitizenDetailsConnectorSpec
-    extends SpecBase
-    with Matchers
-    with BeforeAndAfterEach {
+class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEach {
   val stubPort = sys.env.getOrElse("WIREMOCK", "11121").toInt
   val stubHost = "localhost"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
@@ -79,10 +72,7 @@ class CitizenDetailsConnectorSpec
 
       val result = await(underTest.citizenDetails(nino))
 
-      result shouldBe CitizenDetails(Some("Amanda"),
-                                     Some("Joseph"),
-                                     Some(nino),
-                                     Some(LocalDate.parse("1972-10-13")))
+      result shouldBe CitizenDetails(Some("Amanda"), Some("Joseph"), Some(nino), Some(LocalDate.parse("1972-10-13")))
     }
 
     "retrieve citizen details for partial details" in new Setup {
@@ -98,10 +88,7 @@ class CitizenDetailsConnectorSpec
 
       val result = await(underTest.citizenDetails(nino))
 
-      result shouldBe CitizenDetails(Some("Amanda"),
-                                     Some("Joseph"),
-                                     Some(nino),
-                                     None)
+      result shouldBe CitizenDetails(Some("Amanda"), Some("Joseph"), Some(nino), None)
     }
 
     "throw citizen not found exception if nino is not found" in new Setup {
@@ -115,11 +102,10 @@ class CitizenDetailsConnectorSpec
     "throw invalid nino exception when nino is invalid" in new Setup {
       val invalidNino = "A123456A"
       stubFor(
-        get(urlEqualTo(s"/citizen-details/nino/$invalidNino")).willReturn(
-          aResponse().withStatus(400).withBody(s"Invalid Nino: $invalidNino")))
+        get(urlEqualTo(s"/citizen-details/nino/$invalidNino"))
+          .willReturn(aResponse().withStatus(400).withBody(s"Invalid Nino: $invalidNino")))
 
-      intercept[InvalidNinoException](
-        await(underTest.citizenDetails(invalidNino)))
+      intercept[InvalidNinoException](await(underTest.citizenDetails(invalidNino)))
     }
   }
 }

@@ -21,10 +21,7 @@ import play.api.Configuration
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.detailsMatchRequestFormat
-import uk.gov.hmrc.individualsmatchingapi.domain.{
-  DetailsMatchRequest,
-  MatchingException
-}
+import uk.gov.hmrc.individualsmatchingapi.domain.{DetailsMatchRequest, MatchingException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -32,23 +29,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class MatchingConnector @Inject()(config: Configuration,
-                                  http: HttpClient,
-                                  servicesConfig: ServicesConfig) {
+class MatchingConnector @Inject()(config: Configuration, http: HttpClient, servicesConfig: ServicesConfig) {
 
   val serviceUrl = servicesConfig.baseUrl("matching")
 
-  def validateMatch(matchingRequest: DetailsMatchRequest)(
-      implicit hc: HeaderCarrier): Future[Unit] = {
+  def validateMatch(matchingRequest: DetailsMatchRequest)(implicit hc: HeaderCarrier): Future[Unit] =
     http
-      .POST[DetailsMatchRequest, JsValue](
-        s"$serviceUrl/matching/perform-match/cycle3",
-        matchingRequest)
+      .POST[DetailsMatchRequest, JsValue](s"$serviceUrl/matching/perform-match/cycle3", matchingRequest)
       .map { response =>
         (response \ "errorCodes").asOpt[Seq[Int]] match {
           case Some(Nil) => ()
           case _         => throw new MatchingException
         }
       }
-  }
 }

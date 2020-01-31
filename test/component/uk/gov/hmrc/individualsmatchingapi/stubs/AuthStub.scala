@@ -25,26 +25,26 @@ import uk.gov.hmrc.auth.core.Enrolment
 
 object AuthStub extends MockHost(22000) {
 
-  def willAuthorizePrivilegedAuthToken(authBearerToken: String): StubMapping = {
-    mock.register(post(urlEqualTo("/auth/authorise"))
-      .withRequestBody(equalToJson(privilegedAuthority.toString()))
-      .withHeader(AUTHORIZATION, equalTo(authBearerToken))
-      .willReturn(aResponse()
-        .withStatus(Status.OK)
-        .withBody("""{"internalId": "some-id"}""")))
-  }
+  def willAuthorizePrivilegedAuthToken(authBearerToken: String): StubMapping =
+    mock.register(
+      post(urlEqualTo("/auth/authorise"))
+        .withRequestBody(equalToJson(privilegedAuthority.toString()))
+        .withHeader(AUTHORIZATION, equalTo(authBearerToken))
+        .willReturn(aResponse()
+          .withStatus(Status.OK)
+          .withBody("""{"internalId": "some-id"}""")))
 
-  def willNotAuthorizePrivilegedAuthToken(authBearerToken: String): StubMapping = {
-    mock.register(post(urlEqualTo("/auth/authorise"))
-      .withRequestBody(equalToJson(privilegedAuthority.toString()))
-      .withHeader(AUTHORIZATION, equalTo(authBearerToken))
-      .willReturn(aResponse()
-        .withStatus(Status.UNAUTHORIZED)
-        .withHeader(HeaderNames.WWW_AUTHENTICATE, """MDTP detail="InsufficientConfidenceLevel"""")))
-  }
+  def willNotAuthorizePrivilegedAuthToken(authBearerToken: String): StubMapping =
+    mock.register(
+      post(urlEqualTo("/auth/authorise"))
+        .withRequestBody(equalToJson(privilegedAuthority.toString()))
+        .withHeader(AUTHORIZATION, equalTo(authBearerToken))
+        .willReturn(aResponse()
+          .withStatus(Status.UNAUTHORIZED)
+          .withHeader(HeaderNames.WWW_AUTHENTICATE, """MDTP detail="InsufficientConfidenceLevel"""")))
 
   val privilegedAuthority = Json.obj(
     "authorise" -> Json.arr(Json.toJson(Enrolment("read:individuals-matching"))),
-    "retrieve" -> JsArray()
+    "retrieve"  -> JsArray()
   )
 }

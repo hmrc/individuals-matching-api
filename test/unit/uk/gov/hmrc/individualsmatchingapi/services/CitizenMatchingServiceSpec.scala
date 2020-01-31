@@ -65,10 +65,10 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
 
     "return matchId for a matched citizen" in new Setup {
 
-      when(mockCitizenDetailsConnector.
-        citizenDetails(refEq(ninoString))(any[HeaderCarrier])).thenReturn(Future.successful(details))
-      when(mockMatchingConnector.validateMatch(refEq(detailsMatchRequest))(any[HeaderCarrier])).
-        thenReturn(Future.successful(()))
+      when(mockCitizenDetailsConnector.citizenDetails(refEq(ninoString))(any[HeaderCarrier]))
+        .thenReturn(Future.successful(details))
+      when(mockMatchingConnector.validateMatch(refEq(detailsMatchRequest))(any[HeaderCarrier]))
+        .thenReturn(Future.successful(()))
       when(mockNinoMatchRepository.create(refEq(nino))).thenReturn(Future.successful(ninoMatch))
 
       val result = await(liveService.matchCitizen(citizenMatchingRequest))
@@ -77,25 +77,25 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     }
 
     "propagate exception when citizen details are not found" in new Setup {
-      when(mockCitizenDetailsConnector.
-        citizenDetails(refEq(ninoString))(any[HeaderCarrier])).thenReturn(Future.failed(new CitizenNotFoundException))
+      when(mockCitizenDetailsConnector.citizenDetails(refEq(ninoString))(any[HeaderCarrier]))
+        .thenReturn(Future.failed(new CitizenNotFoundException))
 
       intercept[CitizenNotFoundException](await(liveService.matchCitizen(citizenMatchingRequest)))
       verifyZeroInteractions(mockMatchingConnector, mockNinoMatchRepository)
     }
 
     "propagate exception for an invalid nino" in new Setup {
-      when(mockCitizenDetailsConnector.
-        citizenDetails(refEq(ninoString))(any[HeaderCarrier])).thenReturn(Future.failed(new InvalidNinoException))
+      when(mockCitizenDetailsConnector.citizenDetails(refEq(ninoString))(any[HeaderCarrier]))
+        .thenReturn(Future.failed(new InvalidNinoException))
 
       intercept[InvalidNinoException](await(liveService.matchCitizen(citizenMatchingRequest)))
     }
 
     "propagate exception for a non-match" in new Setup {
-      when(mockCitizenDetailsConnector.
-        citizenDetails(refEq(ninoString))(any[HeaderCarrier])).thenReturn(Future.successful(details))
-      when(mockMatchingConnector.validateMatch(refEq(detailsMatchRequest))(any[HeaderCarrier])).
-        thenReturn(Future.failed(new MatchingException))
+      when(mockCitizenDetailsConnector.citizenDetails(refEq(ninoString))(any[HeaderCarrier]))
+        .thenReturn(Future.successful(details))
+      when(mockMatchingConnector.validateMatch(refEq(detailsMatchRequest))(any[HeaderCarrier]))
+        .thenReturn(Future.failed(new MatchingException))
 
       intercept[MatchingException](await(liveService.matchCitizen(citizenMatchingRequest)))
     }
@@ -183,7 +183,8 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     }
 
     "throw matching exception for an invalid dateOfBirth" in new Setup {
-      intercept[MatchingException](await(sandboxService.matchCitizen(aCitizenMatchingRequest(dateOfBirth = "1971-01-15"))))
+      intercept[MatchingException](
+        await(sandboxService.matchCitizen(aCitizenMatchingRequest(dateOfBirth = "1971-01-15"))))
     }
   }
 
@@ -206,21 +207,20 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     }
   }
 
-  def aCitizenMatchingRequest(firstName: String = "Amanda",
-                              lastName: String = "Joseph",
-                              nino: String = ninoString,
-                              dateOfBirth: String = "1960-01-15") = {
+  def aCitizenMatchingRequest(
+    firstName: String = "Amanda",
+    lastName: String = "Joseph",
+    nino: String = ninoString,
+    dateOfBirth: String = "1960-01-15") =
     CitizenMatchingRequest(firstName, lastName, nino, dateOfBirth)
-  }
 
-  def aDetailsMatchRequest(citizenMatchingRequest: CitizenMatchingRequest, citizenDetails: CitizenDetails) = {
+  def aDetailsMatchRequest(citizenMatchingRequest: CitizenMatchingRequest, citizenDetails: CitizenDetails) =
     DetailsMatchRequest(citizenMatchingRequest, Seq(citizenDetails))
-  }
 
-  def citizenDetails(firstName: Option[String] = Some("Amanda"),
-                     lastName: Option[String] = Some("Joseph"),
-                     nino: Option[String] = Some(ninoString),
-                     dateOfBirth: Option[String] = Some("1960-01-15")) = {
+  def citizenDetails(
+    firstName: Option[String] = Some("Amanda"),
+    lastName: Option[String] = Some("Joseph"),
+    nino: Option[String] = Some(ninoString),
+    dateOfBirth: Option[String] = Some("1960-01-15")) =
     CitizenDetails(firstName, lastName, nino, dateOfBirth.map(LocalDate.parse(_)))
-  }
 }

@@ -21,10 +21,11 @@ import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenMatchin
 
 object MatchingStub extends MockHost(22002) {
 
-  def performMatchReturnsNoErrorCodes(matchingRequest: CitizenMatchingRequest, citizenDetails: CitizenDetails) = {
-    mock.register(post(urlPathEqualTo(s"/matching/perform-match/cycle3"))
-      .withRequestBody(equalToJson(
-        s"""{
+  def performMatchReturnsNoErrorCodes(matchingRequest: CitizenMatchingRequest, citizenDetails: CitizenDetails) =
+    mock.register(
+      post(urlPathEqualTo(s"/matching/perform-match/cycle3"))
+        .withRequestBody(equalToJson(
+          s"""{
               "verifyPerson": {
               "firstName":"${matchingRequest.firstName}",
               "lastName":"${matchingRequest.lastName}",
@@ -38,13 +39,14 @@ object MatchingStub extends MockHost(22002) {
               "dateOfBirth":"${citizenDetails.dateOfBirth.get}"}]
             }
           """
-      )).willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[]}""")))
-  }
+        ))
+        .willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[]}""")))
 
-  def performMatchReturnsErrorCodes(matchingRequest: CitizenMatchingRequest, citizenDetails: CitizenDetails) = {
-    mock.register(post(urlPathEqualTo(s"/matching/perform-match/cycle3"))
-      .withRequestBody(equalToJson(
-        s"""{
+  def performMatchReturnsErrorCodes(matchingRequest: CitizenMatchingRequest, citizenDetails: CitizenDetails) =
+    mock.register(
+      post(urlPathEqualTo(s"/matching/perform-match/cycle3"))
+        .withRequestBody(equalToJson(
+          s"""{
               "verifyPerson": {
               "firstName":"${matchingRequest.firstName}",
               "lastName":"${matchingRequest.lastName}",
@@ -58,6 +60,6 @@ object MatchingStub extends MockHost(22002) {
               "dateOfBirth":"${citizenDetails.dateOfBirth.get}"}]
             }
           """
-      )).willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[31,34]}""")))
-  }
+        ))
+        .willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[31,34]}""")))
 }

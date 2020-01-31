@@ -29,19 +29,13 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.MatchedCitizenController
-import uk.gov.hmrc.individualsmatchingapi.domain.{
-  MatchNotFoundException,
-  MatchedCitizenRecord
-}
+import uk.gov.hmrc.individualsmatchingapi.domain.{MatchNotFoundException, MatchedCitizenRecord}
 import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import scala.concurrent.Future
 
-class MatchedCitizenControllerSpec
-    extends SpecBase
-    with Matchers
-    with MockitoSugar {
+class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSugar {
   implicit lazy val materializer = fakeApplication.materializer
 
   trait Setup {
@@ -56,20 +50,16 @@ class MatchedCitizenControllerSpec
     val controllerComponents =
       fakeApplication.injector.instanceOf[ControllerComponents]
 
-    val matchedCitizenController = new MatchedCitizenController(
-      controllerComponents,
-      mockCitizenMatchingService)
+    val matchedCitizenController = new MatchedCitizenController(controllerComponents, mockCitizenMatchingService)
   }
 
   "matched citizen controller" should {
 
     "return 200 (OK) for a valid matchId" in new Setup {
-      when(
-        mockCitizenMatchingService.fetchMatchedCitizenRecord(refEq(matchId))(
-          any[HeaderCarrier])).thenReturn(matchedCitizenRecord)
+      when(mockCitizenMatchingService.fetchMatchedCitizenRecord(refEq(matchId))(any[HeaderCarrier]))
+        .thenReturn(matchedCitizenRecord)
 
-      val result = await(
-        matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest))
+      val result = await(matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest))
 
       status(result) shouldBe OK
       jsonBodyOf(result) shouldBe Json.parse(
@@ -78,13 +68,10 @@ class MatchedCitizenControllerSpec
     }
 
     "return 404 (Not Found) for an invalid matchId" in new Setup {
-      when(
-        mockCitizenMatchingService.fetchMatchedCitizenRecord(refEq(matchId))(
-          any[HeaderCarrier]))
+      when(mockCitizenMatchingService.fetchMatchedCitizenRecord(refEq(matchId))(any[HeaderCarrier]))
         .thenReturn(Future.failed(new MatchNotFoundException))
 
-      val result = await(
-        matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest))
+      val result = await(matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest))
 
       status(result) shouldBe NOT_FOUND
       jsonBodyOf(result) shouldBe Json.parse(

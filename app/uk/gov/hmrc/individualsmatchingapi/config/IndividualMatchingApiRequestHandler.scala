@@ -25,11 +25,11 @@ import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils._
 import uk.gov.hmrc.play.bootstrap.http.RequestHandler
 
 class IndividualMatchingApiRequestHandler @Inject()(
-    router: Router,
-    errorHandler: HttpErrorHandler,
-    configuration: HttpConfiguration,
-    filters: HttpFilters,
-    config: Configuration)
+  router: Router,
+  errorHandler: HttpErrorHandler,
+  configuration: HttpConfiguration,
+  filters: HttpFilters,
+  config: Configuration)
     extends RequestHandler(router, errorHandler, configuration, filters) {
 
   private lazy val unversionedContexts = config

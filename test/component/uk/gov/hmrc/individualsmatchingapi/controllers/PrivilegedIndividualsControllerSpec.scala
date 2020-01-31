@@ -49,8 +49,7 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
       response.code shouldBe Status.OK
 
       And("The response contains a valid payload")
-      Json.parse(response.body) shouldBe Json.parse(
-        s"""
+      Json.parse(response.body) shouldBe Json.parse(s"""
            {
              "_links":{
                "income":{
@@ -86,8 +85,7 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
       response.code shouldBe Status.OK
 
       And("The response contains a valid payload")
-      Json.parse(response.body) shouldBe Json.parse(
-        s"""
+      Json.parse(response.body) shouldBe Json.parse(s"""
            {
              "_links":{
                "income":{

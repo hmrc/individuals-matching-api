@@ -36,14 +36,22 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NinoMatchRepository @Inject() (mongoConnectionProvider: MongoConnectionProvider, configuration: Configuration)
-  extends ReactiveRepository[NinoMatch, UUID]("ninoMatch", mongoConnectionProvider.mongoDatabase, JsonFormatters.ninoMatchJsonFormat, JsonFormatters.uuidJsonFormat) {
+class NinoMatchRepository @Inject()(mongoConnectionProvider: MongoConnectionProvider, configuration: Configuration)
+    extends ReactiveRepository[NinoMatch, UUID](
+      "ninoMatch",
+      mongoConnectionProvider.mongoDatabase,
+      JsonFormatters.ninoMatchJsonFormat,
+      JsonFormatters.uuidJsonFormat) {
 
   private lazy val ninoMatchTtl = configuration.getInt("mongo.ninoMatchTtlInSeconds").getOrElse(60 * 60 * 5)
 
   override lazy val indexes = Seq(
     Index(Seq(("id", Ascending)), Some("idIndex"), background = true, unique = true),
-    Index(Seq(("createdAt", Ascending)), Some("createdAtIndex"), options = BSONDocument("expireAfterSeconds" -> ninoMatchTtl), background = true)
+    Index(
+      Seq(("createdAt", Ascending)),
+      Some("createdAtIndex"),
+      options = BSONDocument("expireAfterSeconds" -> ninoMatchTtl),
+      background = true)
   )
 
   def create(nino: Nino): Future[NinoMatch] = {
@@ -56,9 +64,12 @@ class NinoMatchRepository @Inject() (mongoConnectionProvider: MongoConnectionPro
 
   def read(uuid: UUID): Future[Option[NinoMatch]] = findById(uuid)
 
-  override def findById(id: UUID, readPreference: ReadPreference)(implicit ec: ExecutionContext): Future[Option[NinoMatch]] = collection.find(Json.obj("id" -> id.toString)).one[NinoMatch]
+  override def findById(id: UUID, readPreference: ReadPreference)(
+    implicit ec: ExecutionContext): Future[Option[NinoMatch]] =
+    collection.find(Json.obj("id" -> id.toString)).one[NinoMatch]
 
-  override def bulkInsert(entities: Seq[NinoMatch])(implicit ec: ExecutionContext): Future[MultiBulkWriteResult] = throw new UnsupportedOperationException
+  override def bulkInsert(entities: Seq[NinoMatch])(implicit ec: ExecutionContext): Future[MultiBulkWriteResult] =
+    throw new UnsupportedOperationException
 
   private def generateUuid = randomUUID()
 }

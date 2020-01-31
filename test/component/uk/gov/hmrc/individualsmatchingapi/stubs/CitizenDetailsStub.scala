@@ -21,11 +21,13 @@ import play.api.http.Status
 
 object CitizenDetailsStub extends MockHost(22001) {
 
-  def getByNinoReturnsCitizenDetails(nino: String, firstName: String, lastName: String, dateOfBirth: String) = {
-    mock.register(get(urlPathEqualTo(s"/citizen-details/nino/$nino"))
-      .willReturn(aResponse().withStatus(Status.OK)
-        .withBody(
-          s"""{
+  def getByNinoReturnsCitizenDetails(nino: String, firstName: String, lastName: String, dateOfBirth: String) =
+    mock.register(
+      get(urlPathEqualTo(s"/citizen-details/nino/$nino"))
+        .willReturn(
+          aResponse()
+            .withStatus(Status.OK)
+            .withBody(s"""{
                 "name":{
                   "current":{"firstName":"$firstName","lastName":"$lastName"},
                   "previous":[]
@@ -33,10 +35,9 @@ object CitizenDetailsStub extends MockHost(22001) {
                 "ids":{"sautr":"2432552635","nino":"$nino"},
                 "dateOfBirth":"$dateOfBirth"
               }""")))
-  }
 
-  def getByNinoReturnsError(nino: String, errorCode: Int, body: String = ""): Unit = {
-    mock.register(get(urlPathEqualTo(s"/citizen-details/nino/$nino"))
-      .willReturn(aResponse().withStatus(errorCode).withBody(body)))
-  }
+  def getByNinoReturnsError(nino: String, errorCode: Int, body: String = ""): Unit =
+    mock.register(
+      get(urlPathEqualTo(s"/citizen-details/nino/$nino"))
+        .willReturn(aResponse().withStatus(errorCode).withBody(body)))
 }
