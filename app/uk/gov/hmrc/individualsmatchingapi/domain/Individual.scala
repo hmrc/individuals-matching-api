@@ -22,11 +22,7 @@ import org.joda.time.LocalDate
 import org.joda.time.LocalDate._
 import uk.gov.hmrc.domain.Nino
 
-case class Individual(matchId: UUID,
-                      nino: String,
-                      firstName: String,
-                      lastName: String,
-                      dateOfBirth: LocalDate)
+case class Individual(matchId: UUID, nino: String, firstName: String, lastName: String, dateOfBirth: LocalDate)
 
 object SandboxData {
 
@@ -40,10 +36,5 @@ object SandboxData {
 
   private lazy val individuals = Seq(amanda())
 
-  private def amanda() = Individual(
-    sandboxMatchId,
-    sandboxNino.nino,
-    "Amanda",
-    "Joseph",
-    parse("1960-01-15"))
+  private def amanda() = Individual(sandboxMatchId, sandboxNino.nino, "Amanda", "Joseph", parse("1960-01-15"))
 }

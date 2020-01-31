@@ -27,19 +27,14 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenMatchingFormat
-import uk.gov.hmrc.individualsmatchingapi.services.{
-  CitizenMatchingService,
-  LiveCitizenMatchingService,
-  SandboxCitizenMatchingService
-}
+import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 abstract class PrivilegedCitizenMatchingController(
-    citizenMatchingService: CitizenMatchingService,
-    cc: ControllerComponents)
-    extends CommonController(cc)
-    with PrivilegedAuthentication {
+  citizenMatchingService: CitizenMatchingService,
+  cc: ControllerComponents)
+    extends CommonController(cc) with PrivilegedAuthentication {
 
   private def seeOthers(location: String) =
     new Status(SEE_OTHER)(Json.obj()).withHeaders(LOCATION -> location)
@@ -51,10 +46,11 @@ abstract class PrivilegedCitizenMatchingController(
       withJsonBody[CitizenMatchingRequest] { matchCitizen =>
         citizenMatchingService.matchCitizen(matchCitizen) map { matchId =>
           val selfLink = HalLink("self", s"/individuals/matching/")
-          val individualLink = HalLink("individual",
-                                       s"/individuals/matching/$matchId",
-                                       name = Option("GET"),
-                                       title = Option("Individual Details"))
+          val individualLink = HalLink(
+            "individual",
+            s"/individuals/matching/$matchId",
+            name = Option("GET"),
+            title = Option("Individual Details"))
           Ok(links(selfLink, individualLink))
         }
       } recover recovery
@@ -64,19 +60,18 @@ abstract class PrivilegedCitizenMatchingController(
 
 @Singleton
 class LivePrivilegedCitizenMatchingController @Inject()(
-    liveCitizenMatchingService: LiveCitizenMatchingService,
-    val authConnector: AuthConnector,
-    cc: ControllerComponents)
+  liveCitizenMatchingService: LiveCitizenMatchingService,
+  val authConnector: AuthConnector,
+  cc: ControllerComponents)
     extends PrivilegedCitizenMatchingController(liveCitizenMatchingService, cc) {
   override val environment = PRODUCTION
 }
 
 @Singleton
 class SandboxPrivilegedCitizenMatchingController @Inject()(
-    sandboxCitizenMatchingService: SandboxCitizenMatchingService,
-    val authConnector: AuthConnector,
-    cc: ControllerComponents)
-    extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService,
-                                                cc) {
+  sandboxCitizenMatchingService: SandboxCitizenMatchingService,
+  val authConnector: AuthConnector,
+  cc: ControllerComponents)
+    extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService, cc) {
   override val environment = SANDBOX
 }

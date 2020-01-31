@@ -40,21 +40,22 @@ object JsonFormatters {
         ))
 
     override def writes(citizenDetails: CitizenDetails): JsValue =
-      Json.obj("firstName" -> citizenDetails.firstName,
-               "lastName" -> citizenDetails.lastName,
-               "nino" -> citizenDetails.nino,
-               "dateOfBirth" -> citizenDetails.dateOfBirth)
+      Json.obj(
+        "firstName"   -> citizenDetails.firstName,
+        "lastName"    -> citizenDetails.lastName,
+        "nino"        -> citizenDetails.nino,
+        "dateOfBirth" -> citizenDetails.dateOfBirth)
   }
 
   implicit val detailsMatchRequestFormat = new Format[DetailsMatchRequest] {
     def reads(json: JsValue) =
       JsSuccess(
-        DetailsMatchRequest((json \ "verifyPerson").as[CitizenMatchingRequest],
-                            (json \ "cidPersons").as[List[CitizenDetails]]))
+        DetailsMatchRequest(
+          (json \ "verifyPerson").as[CitizenMatchingRequest],
+          (json \ "cidPersons").as[List[CitizenDetails]]))
 
     def writes(matchingRequest: DetailsMatchRequest): JsValue =
-      Json.obj("verifyPerson" -> matchingRequest.verifyPerson,
-               "cidPersons" -> matchingRequest.cidPersons)
+      Json.obj("verifyPerson" -> matchingRequest.verifyPerson, "cidPersons" -> matchingRequest.cidPersons)
   }
 
   implicit val errorResponseWrites = new Writes[ErrorResponse] {

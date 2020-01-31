@@ -29,10 +29,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-class MatchingConnectorSpec
-    extends SpecBase
-    with Matchers
-    with BeforeAndAfterEach {
+class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEach {
   val stubPort = sys.env.getOrElse("WIREMOCK", "11122").toInt
   val stubHost = "localhost"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
@@ -79,11 +76,9 @@ class MatchingConnectorSpec
               }
             """
           ))
-          .willReturn(
-            aResponse().withStatus(200).withBody("""{"errorCodes":[]}""")))
+          .willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[]}""")))
 
-      val f = underTest.validateMatch(
-        DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))
+      val f = underTest.validateMatch(DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))
       noException should be thrownBy await(f)
     }
 
@@ -106,17 +101,13 @@ class MatchingConnectorSpec
               }
             """
           ))
-          .willReturn(
-            aResponse().withStatus(200).withBody("""{"errorCodes":[31,32]}""")))
+          .willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[31,32]}""")))
 
       intercept[MatchingException](
         await(
-          underTest.validateMatch(
-            DetailsMatchRequest(
-              citizenMatchingRequest(),
-              Seq(citizenDetails(firstName = Some("Ana"),
-                                 dateOfBirth =
-                                   Some(LocalDate.parse("1972-10-14"))))))))
+          underTest.validateMatch(DetailsMatchRequest(
+            citizenMatchingRequest(),
+            Seq(citizenDetails(firstName = Some("Ana"), dateOfBirth = Some(LocalDate.parse("1972-10-14"))))))))
     }
 
     "throw matching exception for an invalid json response" in new Setup {
@@ -139,26 +130,24 @@ class MatchingConnectorSpec
               }
             """
           ))
-          .willReturn(
-            aResponse().withStatus(200).withBody("""{"invalid":"value"}""")))
+          .willReturn(aResponse().withStatus(200).withBody("""{"invalid":"value"}""")))
 
-      intercept[MatchingException](await(underTest.validateMatch(
-        DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))))
+      intercept[MatchingException](
+        await(underTest.validateMatch(DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))))
     }
   }
 
-  private def citizenMatchingRequest(firstName: String = "John",
-                                     lastName: String = "Smith",
-                                     nino: String = "NA000799C",
-                                     dateOfBirth: String = "1972-10-15") = {
+  private def citizenMatchingRequest(
+    firstName: String = "John",
+    lastName: String = "Smith",
+    nino: String = "NA000799C",
+    dateOfBirth: String = "1972-10-15") =
     CitizenMatchingRequest(firstName, lastName, nino, dateOfBirth)
-  }
 
-  private def citizenDetails(firstName: Option[String] = Some("John"),
-                             lastName: Option[String] = Option("Smith"),
-                             nino: Option[String] = Some("NA000799C"),
-                             dateOfBirth: Option[LocalDate] = Some(
-                               LocalDate.parse("1972-10-15"))) = {
+  private def citizenDetails(
+    firstName: Option[String] = Some("John"),
+    lastName: Option[String] = Option("Smith"),
+    nino: Option[String] = Some("NA000799C"),
+    dateOfBirth: Option[LocalDate] = Some(LocalDate.parse("1972-10-15"))) =
     CitizenDetails(firstName, lastName, nino, dateOfBirth)
-  }
 }

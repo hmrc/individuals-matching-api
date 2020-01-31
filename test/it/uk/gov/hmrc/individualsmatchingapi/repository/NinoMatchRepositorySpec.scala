@@ -37,7 +37,8 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with MongoSpecSuppo
 
   val bindModules: Seq[GuiceableModule] = Seq()
 
-  override lazy val fakeApplication = buildFakeApplication(Configuration("mongodb.uri" -> mongoUri, "mongo.ninoMatchTtlInSeconds" -> ninoMatchTtl))
+  override lazy val fakeApplication = buildFakeApplication(
+    Configuration("mongodb.uri" -> mongoUri, "mongo.ninoMatchTtlInSeconds" -> ninoMatchTtl))
 
   val nino = Nino("AB123456A")
   val ninoMatchRepository = fakeApplication.injector.instanceOf[NinoMatchRepository]
@@ -84,7 +85,7 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with MongoSpecSuppo
       val ninoMatch1 = await(ninoMatchRepository.create(nino))
       val ninoMatch2 = await(ninoMatchRepository.create(nino))
 
-      ninoMatch1 shouldNot be (ninoMatch2)
+      ninoMatch1 shouldNot be(ninoMatch2)
     }
 
   }

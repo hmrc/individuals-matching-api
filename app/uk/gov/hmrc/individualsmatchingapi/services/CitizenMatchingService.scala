@@ -21,10 +21,7 @@ import javax.inject.{Inject, Singleton}
 
 import org.joda.time.LocalDate
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.individualsmatchingapi.connectors.{
-  CitizenDetailsConnector,
-  MatchingConnector
-}
+import uk.gov.hmrc.individualsmatchingapi.connectors.{CitizenDetailsConnector, MatchingConnector}
 import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
 
@@ -34,72 +31,56 @@ import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.http.HeaderCarrier
 
 trait CitizenMatchingService {
-  def matchCitizen(citizenMatchingRequest: CitizenMatchingRequest)(
-      implicit hc: HeaderCarrier): Future[UUID]
+  def matchCitizen(citizenMatchingRequest: CitizenMatchingRequest)(implicit hc: HeaderCarrier): Future[UUID]
 
-  def fetchCitizenDetailsByMatchId(matchId: UUID)(
-      implicit hc: HeaderCarrier): Future[CitizenDetails]
+  def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier): Future[CitizenDetails]
 
-  def fetchMatchedCitizenRecord(matchId: UUID)(
-      implicit hc: HeaderCarrier): Future[MatchedCitizenRecord]
+  def fetchMatchedCitizenRecord(matchId: UUID)(implicit hc: HeaderCarrier): Future[MatchedCitizenRecord]
 }
 
 @Singleton
 class LiveCitizenMatchingService @Inject()(
-    liveNinoMatchRepository: NinoMatchRepository,
-    citizenDetailsConnector: CitizenDetailsConnector,
-    matchingConnector: MatchingConnector)
+  liveNinoMatchRepository: NinoMatchRepository,
+  citizenDetailsConnector: CitizenDetailsConnector,
+  matchingConnector: MatchingConnector)
     extends CitizenMatchingService {
 
-  override def matchCitizen(citizenMatchingRequest: CitizenMatchingRequest)(
-      implicit hc: HeaderCarrier): Future[UUID] = {
-
+  override def matchCitizen(citizenMatchingRequest: CitizenMatchingRequest)(implicit hc: HeaderCarrier): Future[UUID] =
     for {
-      details <- citizenDetailsConnector.citizenDetails(
-        citizenMatchingRequest.nino)
-      _ <- matchingConnector.validateMatch(
-        DetailsMatchRequest(citizenMatchingRequest, Seq(details)))
-      ninoMatch <- liveNinoMatchRepository.create(
-        Nino(citizenMatchingRequest.nino))
+      details   <- citizenDetailsConnector.citizenDetails(citizenMatchingRequest.nino)
+      _         <- matchingConnector.validateMatch(DetailsMatchRequest(citizenMatchingRequest, Seq(details)))
+      ninoMatch <- liveNinoMatchRepository.create(Nino(citizenMatchingRequest.nino))
     } yield ninoMatch.id
-  }
 
-  override def fetchCitizenDetailsByMatchId(matchId: UUID)(
-      implicit hc: HeaderCarrier) =
+  override def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier) =
     liveNinoMatchRepository.read(matchId) flatMap {
       case Some(ninoMatch) =>
         citizenDetailsConnector.citizenDetails(ninoMatch.nino.nino)
       case _ => failed(new MatchNotFoundException)
     }
 
-  override def fetchMatchedCitizenRecord(matchId: UUID)(
-      implicit hc: HeaderCarrier) = {
+  override def fetchMatchedCitizenRecord(matchId: UUID)(implicit hc: HeaderCarrier) =
     liveNinoMatchRepository.read(matchId) flatMap {
       case Some(ninoMatch) =>
         successful(MatchedCitizenRecord(ninoMatch.nino, ninoMatch.id))
       case _ => failed(new MatchNotFoundException)
     }
-  }
 }
 
 @Singleton
 class SandboxCitizenMatchingService extends CitizenMatchingService {
 
   override def matchCitizen(citizenMatchingRequest: CitizenMatchingRequest)(
-      implicit hc: HeaderCarrier): Future[UUID] = {
+    implicit hc: HeaderCarrier): Future[UUID] = {
 
     def firstNLetters(length: Int, value: String): String =
       value.trim.take(length)
 
     def isFirstNameMatch(requestName: String, individualName: String) =
-      firstNLetters(1, requestName) equalsIgnoreCase firstNLetters(
-        1,
-        individualName)
+      firstNLetters(1, requestName) equalsIgnoreCase firstNLetters(1, individualName)
 
     def isLastNameMatch(requestLastName: String, individualLastName: String) =
-      firstNLetters(3, requestLastName) equalsIgnoreCase firstNLetters(
-        3,
-        individualLastName)
+      firstNLetters(3, requestLastName) equalsIgnoreCase firstNLetters(3, individualLastName)
 
     def isMatch(individual: Individual) =
       isFirstNameMatch(citizenMatchingRequest.firstName, individual.firstName) &&
@@ -113,18 +94,18 @@ class SandboxCitizenMatchingService extends CitizenMatchingService {
     }
   }
 
-  override def fetchCitizenDetailsByMatchId(matchId: UUID)(
-      implicit hc: HeaderCarrier) =
+  override def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier) =
     SandboxData.findByMatchId(matchId) match {
       case Some(individual) =>
         successful(
-          CitizenDetails(Option(individual.firstName),
-                         Option(individual.lastName),
-                         Option(individual.nino),
-                         Option(individual.dateOfBirth)))
+          CitizenDetails(
+            Option(individual.firstName),
+            Option(individual.lastName),
+            Option(individual.nino),
+            Option(individual.dateOfBirth)))
       case _ => failed(new MatchNotFoundException)
     }
 
-  override def fetchMatchedCitizenRecord(matchId: UUID)(
-      implicit hc: HeaderCarrier) = failed(new NotImplementedException)
+  override def fetchMatchedCitizenRecord(matchId: UUID)(implicit hc: HeaderCarrier) =
+    failed(new NotImplementedException)
 }

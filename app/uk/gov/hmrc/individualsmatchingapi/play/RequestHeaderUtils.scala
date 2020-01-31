@@ -25,9 +25,8 @@ object RequestHeaderUtils {
 
   private val uriRegex = "(/[a-zA-Z0-9-_]*)/?.*$".r
 
-  def extractUriContext(requestHeader: RequestHeader) = {
+  def extractUriContext(requestHeader: RequestHeader) =
     (uriRegex.findFirstMatchIn(requestHeader.uri) map (_.group(1))).get
-  }
 
   def getVersionedRequest(originalRequest: RequestHeader) = {
     val version = getVersion(originalRequest)
@@ -42,10 +41,9 @@ object RequestHeaderUtils {
       acceptHeaderRegex.findFirstMatchIn(acceptHeaderValue) map (_.group(1))
     } getOrElse "1.0"
 
-  private def versionedUri(urlPath: String, version: String) = {
+  private def versionedUri(urlPath: String, version: String) =
     urlPath match {
       case "/" => s"/v$version"
       case uri => s"/v$version$urlPath"
     }
-  }
 }

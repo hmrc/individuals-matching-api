@@ -31,16 +31,14 @@ class MatchedCitizenControllerSpec extends BaseSpec {
 
   val nino = "CS700100A"
 
-  feature(
-    "Live implementation of matched citizen record is open and accessible") {
+  feature("Live implementation of matched citizen record is open and accessible") {
 
     scenario("request for a matched citizen with a valid matchId") {
 
       Given("A match record exists for a given NINO")
       val ninoMatch = await(mongoRepository.create(Nino(nino)))
 
-      When(
-        "I request the matched citizen record using the corresponding valid matchId")
+      When("I request the matched citizen record using the corresponding valid matchId")
       val response =
         Http(s"$serviceUrl/match-record/${ninoMatch.id.toString}").asString
 
@@ -48,8 +46,7 @@ class MatchedCitizenControllerSpec extends BaseSpec {
       response.code shouldBe OK
 
       And("The response contains the matched citizen record")
-      Json.parse(response.body) shouldBe Json.parse(
-        s"""{"nino":"$nino","matchId":"${ninoMatch.id.toString}"}""")
+      Json.parse(response.body) shouldBe Json.parse(s"""{"nino":"$nino","matchId":"${ninoMatch.id.toString}"}""")
     }
 
     scenario("request for a matched citizen with an invalid matchId") {

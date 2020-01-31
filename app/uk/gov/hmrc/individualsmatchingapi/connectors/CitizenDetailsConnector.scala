@@ -20,11 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
-import uk.gov.hmrc.individualsmatchingapi.domain.{
-  CitizenDetails,
-  CitizenNotFoundException,
-  InvalidNinoException
-}
+import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenNotFoundException, InvalidNinoException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -32,17 +28,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CitizenDetailsConnector @Inject()(config: Configuration,
-                                        http: HttpClient,
-                                        serviceConfig: ServicesConfig) {
+class CitizenDetailsConnector @Inject()(config: Configuration, http: HttpClient, serviceConfig: ServicesConfig) {
 
   val serviceUrl = serviceConfig.baseUrl("citizen-details")
 
-  def citizenDetails(nino: String)(
-      implicit hc: HeaderCarrier): Future[CitizenDetails] = {
+  def citizenDetails(nino: String)(implicit hc: HeaderCarrier): Future[CitizenDetails] =
     http.GET[CitizenDetails](s"$serviceUrl/citizen-details/nino/$nino") recover {
       case _: NotFoundException   => throw new CitizenNotFoundException
       case _: BadRequestException => throw new InvalidNinoException
     }
-  }
 }

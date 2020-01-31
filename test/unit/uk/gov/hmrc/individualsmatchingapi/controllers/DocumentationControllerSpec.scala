@@ -29,10 +29,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.individualsmatchingapi.controllers.DocumentationController
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-class DocumentationControllerSpec
-    extends SpecBase
-    with Matchers
-    with MockitoSugar {
+class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSugar {
 
   implicit lazy val materializer = fakeApplication.materializer
 
@@ -47,25 +44,17 @@ class DocumentationControllerSpec
       fakeApplication.injector.instanceOf[Assets]
 
     val underTest =
-      new DocumentationController(controllerComponents,
-                                  assets,
-                                  HttpErrorHandler,
-                                  configuration)
+      new DocumentationController(controllerComponents, assets, HttpErrorHandler, configuration)
 
-    when(
-      configuration.getOptional[Seq[String]](
-        "api.access.version-P1.0.whitelistedApplicationIds")).thenReturn(None)
-    when(
-      configuration.getOptional[Seq[String]](
-        "api.access.version-1.0.whitelistedApplicationIds")).thenReturn(None)
+    when(configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds")).thenReturn(None)
+    when(configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds")).thenReturn(None)
     when(configuration.getOptional[String]("api.access.version-1.0.accessType"))
       .thenReturn(None)
   }
 
   "/api/definition" should {
     "return 1.0 as PRIVATE when api.access.version-1.0.accessType is not set" in new Setup {
-      given(
-        configuration.getOptional[String]("api.access.version-1.0.accessType"))
+      given(configuration.getOptional[String]("api.access.version-1.0.accessType"))
         .willReturn(None)
 
       val result = await(underTest.definition()(request))
@@ -75,8 +64,7 @@ class DocumentationControllerSpec
     }
 
     "return 1.0 as PRIVATE when api.access.version-1.0.accessType is set to PRIVATE" in new Setup {
-      given(
-        configuration.getOptional[String]("api.access.version-1.0.accessType"))
+      given(configuration.getOptional[String]("api.access.version-1.0.accessType"))
         .willReturn(Some("PRIVATE"))
 
       val result = await(underTest.definition()(request))
@@ -86,8 +74,7 @@ class DocumentationControllerSpec
     }
 
     "return 1.0 as PUBLIC when api.access.version-1.0.accessType is set to PUBLIC" in new Setup {
-      given(
-        configuration.getOptional[String]("api.access.version-1.0.accessType"))
+      given(configuration.getOptional[String]("api.access.version-1.0.accessType"))
         .willReturn(Some("PUBLIC"))
 
       val result = await(underTest.definition()(request))
@@ -97,13 +84,9 @@ class DocumentationControllerSpec
     }
 
     "return whitelisted applications from the configuration" in new Setup {
-      when(
-        configuration.getOptional[Seq[String]](
-          "api.access.version-P1.0.whitelistedApplicationIds"))
+      when(configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds"))
         .thenReturn(Some(Seq("appVP1")))
-      when(
-        configuration.getOptional[Seq[String]](
-          "api.access.version-1.0.whitelistedApplicationIds"))
+      when(configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds"))
         .thenReturn(Some(Seq("appV1")))
 
       val result = await(underTest.definition()(request))
