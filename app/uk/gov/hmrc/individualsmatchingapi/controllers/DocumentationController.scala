@@ -30,18 +30,18 @@ class DocumentationController @Inject()(
   errorHandler: HttpErrorHandler,
   config: Configuration)
     extends BackendController(cc) {
-  private lazy val whitelistedApplicationIdsVP1 = config
-    .getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds")
+  private lazy val allowListedApplicationIdsVP1 = config
+    .getOptional[Seq[String]]("api.access.version-P1.0.allowListedApplicationIds")
     .getOrElse(Seq.empty)
   private lazy val accessTypeV1 = config
     .getOptional[String]("api.access.version-1.0.accessType")
     .getOrElse("PRIVATE")
-  private lazy val whitelistedApplicationIdsV1 = config
-    .getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds")
+  private lazy val allowListedApplicationIdsV1 = config
+    .getOptional[Seq[String]]("api.access.version-1.0.allowListedApplicationIds")
     .getOrElse(Seq.empty)
 
   def definition(): Action[AnyContent] = Action {
-    Ok(txt.definition(whitelistedApplicationIdsVP1, accessTypeV1, whitelistedApplicationIdsV1))
+    Ok(txt.definition(allowListedApplicationIdsVP1, accessTypeV1, allowListedApplicationIdsV1))
       .withHeaders(CONTENT_TYPE -> JSON)
   }
   def documentation(
