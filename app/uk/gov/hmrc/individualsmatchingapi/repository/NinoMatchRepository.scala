@@ -32,11 +32,11 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.domain.{JsonFormatters, NinoMatch}
 import uk.gov.hmrc.mongo.ReactiveRepository
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NinoMatchRepository @Inject()(mongoConnectionProvider: MongoConnectionProvider, configuration: Configuration)
+class NinoMatchRepository @Inject()(mongoConnectionProvider: MongoConnectionProvider, configuration: Configuration)(
+  implicit ec: ExecutionContext)
     extends ReactiveRepository[NinoMatch, UUID](
       "ninoMatch",
       mongoConnectionProvider.mongoDatabase,

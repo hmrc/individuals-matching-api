@@ -20,15 +20,16 @@ import controllers.Assets
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.http.HttpErrorHandler
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import uk.gov.hmrc.individualsmatchingapi.views._
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 @Singleton
 class DocumentationController @Inject()(
   cc: ControllerComponents,
   assets: Assets,
   errorHandler: HttpErrorHandler,
   config: Configuration)
-    extends uk.gov.hmrc.api.controllers.DocumentationController(cc, assets, errorHandler) {
+    extends BackendController(cc) {
   private lazy val whitelistedApplicationIdsVP1 = config
     .getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds")
     .getOrElse(Seq.empty)
@@ -39,10 +40,15 @@ class DocumentationController @Inject()(
     .getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds")
     .getOrElse(Seq.empty)
 
-  override def definition(): Action[AnyContent] = Action {
+  def definition(): Action[AnyContent] = Action {
     Ok(txt.definition(whitelistedApplicationIdsVP1, accessTypeV1, whitelistedApplicationIdsV1))
       .withHeaders(CONTENT_TYPE -> JSON)
   }
+  def documentation(
+    version: String,
+    endpointName: String
+  ): Action[AnyContent] =
+    assets.at(s"/public/api/documentation/$version", s"${endpointName.replaceAll(" ", "-")}.xml")
 
   def raml(version: String, file: String) =
     assets.at(s"/public/api/conf/$version", file)

@@ -20,6 +20,7 @@ import java.util.UUID
 
 import org.joda.time.LocalDate
 import play.api.libs.json.JodaWrites._
+import play.api.libs.json.JodaReads._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -36,7 +37,7 @@ object JsonFormatters {
           (json \ "name" \ "current" \ "lastName").asOpt[String],
           (json \ "ids" \ "nino").asOpt[String],
           (json \ "dateOfBirth")
-            .asOpt[LocalDate](Reads.jodaLocalDateReads("ddMMyyyy"))
+            .asOpt[LocalDate](jodaLocalDateReads("ddMMyyyy"))
         ))
 
     override def writes(citizenDetails: CitizenDetails): JsValue =

@@ -19,9 +19,9 @@ package component.uk.gov.hmrc.individualsmatchingapi.controllers
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.{AuthStub, BaseSpec, CitizenDetailsStub, MatchingStub}
 import org.joda.time.LocalDate
 import play.api.http.Status._
-import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
 import play.api.test.Helpers.{BAD_REQUEST, NOT_FOUND}
+import play.libs.Json
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenMatchingRequest, ErrorInvalidRequest, ErrorMatchingFailed, JsonFormatters}
