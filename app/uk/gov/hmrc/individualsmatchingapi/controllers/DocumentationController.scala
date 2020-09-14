@@ -20,7 +20,7 @@ import controllers.Assets
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.http.HttpErrorHandler
-import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.individualsmatchingapi.views._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 @Singleton
