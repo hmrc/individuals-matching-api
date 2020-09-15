@@ -18,7 +18,7 @@ package uk.gov.hmrc.individualsmatchingapi.domain
 
 import java.util.UUID
 
-import org.joda.time.{DateTime}
+import org.joda.time.{DateTime, DateTimeZone}
 import uk.gov.hmrc.domain.Nino
 
-case class NinoMatch(nino: Nino, id: UUID, createdAt: DateTime = DateTime.now())
+case class NinoMatch(nino: Nino, id: UUID, createdAt: DateTime = DateTime.now.withZone(DateTimeZone.UTC))
