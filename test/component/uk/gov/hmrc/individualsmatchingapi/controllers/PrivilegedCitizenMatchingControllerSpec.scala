@@ -21,7 +21,7 @@ import org.joda.time.LocalDate
 import play.api.http.Status._
 import play.api.libs.json.Json.parse
 import play.api.test.Helpers.{BAD_REQUEST, NOT_FOUND}
-import play.libs.Json
+import play.api.libs.json.Json
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenMatchingRequest, ErrorInvalidRequest, ErrorMatchingFailed, JsonFormatters}

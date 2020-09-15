@@ -39,7 +39,7 @@ val compile = Seq(
   hmrc                %% "simple-reactivemongo"      % "7.30.0-play-26",
   hmrc                %% "play-hal"                  % "2.1.0-play-26",
   hmrc                %% "play-hmrc-api"             % "4.1.0-play-26",
-  "com.typesafe.play" %% "play-json-joda"            % "2.9.0"
+  "com.typesafe.play" %% "play-json-joda"            % "2.6.14"
 )
 
 def test(scope: String = "test,it") = Seq(
