@@ -36,7 +36,6 @@ import uk.gov.hmrc.individualsmatchingapi.controllers.{LivePrivilegedCitizenMatc
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import scala.concurrent.Future

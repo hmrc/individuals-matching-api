@@ -33,24 +33,24 @@ dependencyOverrides += "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion
 
 val compile = Seq(
   ws,
-  hmrc                %% "bootstrap-play-26"    % "1.3.0",
-  hmrc                %% "domain"               % "5.6.0-play-26",
-  hmrc                %% "auth-client"          % "2.33.0-play-26",
-  hmrc                %% "simple-reactivemongo" % "7.23.0-play-26",
-  hmrc                %% "play-hal"             % "1.9.0-play-26",
-  hmrc                %% "play-hmrc-api"        % "4.1.0-play-26",
-  "com.typesafe.play" %% "play-json-joda"       % "2.6.14"
+  hmrc                %% "bootstrap-backend-play-26" % "2.24.0",
+  hmrc                %% "domain"                    % "5.9.0-play-26",
+  hmrc                %% "auth-client"               % "3.0.0-play-26",
+  hmrc                %% "simple-reactivemongo"      % "7.30.0-play-26",
+  hmrc                %% "play-hal"                  % "2.1.0-play-26",
+  hmrc                %% "play-hmrc-api"             % "4.1.0-play-26",
+  "com.typesafe.play" %% "play-json-joda"            % "2.6.14"
 )
 
 def test(scope: String = "test,it") = Seq(
   hmrc                     %% "hmrctest"           % "3.9.0-play-26"     % scope,
-  hmrc                     %% "reactivemongo-test" % "4.16.0-play-26"    % scope,
+  hmrc                     %% "reactivemongo-test" % "4.21.0-play-26"    % scope,
   "org.scalatest"          %% "scalatest"          % "3.0.8"             % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2"             % scope,
   "org.pegdown"            % "pegdown"             % "1.6.0"             % scope,
   "org.mockito"            % "mockito-all"         % "1.10.19"           % scope,
   "org.scalaj"             %% "scalaj-http"        % "2.4.2"             % scope,
-  "com.github.tomakehurst" % "wiremock-jre8"       % "2.26.0"            % scope,
+  "com.github.tomakehurst" % "wiremock-jre8"       % "2.27.1"            % scope,
   "com.typesafe.play"      %% "play-test"          % PlayVersion.current % scope
 )
 
@@ -65,6 +65,7 @@ lazy val microservice =
     .settings(playSettings: _*)
     .settings(scalaSettings: _*)
     .settings(publishingSettings: _*)
+    .settings(scalaVersion := "2.12.11")
     .settings(defaultSettings(): _*)
     .settings(scalafmtOnCompile := true)
     .settings(

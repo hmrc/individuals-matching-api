@@ -19,9 +19,8 @@ package component.uk.gov.hmrc.individualsmatchingapi.controllers
 import java.util.UUID
 
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.BaseSpec
-import play.api.libs.json.Json
-import play.api.libs.json.Json.parse
 import play.api.test.Helpers.{await, _}
+import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import scalaj.http.Http
