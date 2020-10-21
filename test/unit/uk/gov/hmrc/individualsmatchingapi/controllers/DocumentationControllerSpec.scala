@@ -46,8 +46,8 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
     val underTest =
       new DocumentationController(controllerComponents, assets, HttpErrorHandler, configuration)
 
-    when(configuration.getOptional[Seq[String]]("api.access.version-P1.0.allowListedApplicationIds")).thenReturn(None)
-    when(configuration.getOptional[Seq[String]]("api.access.version-1.0.allowListedApplicationIds")).thenReturn(None)
+    when(configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds")).thenReturn(None)
+    when(configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds")).thenReturn(None)
     when(configuration.getOptional[String]("api.access.version-1.0.accessType"))
       .thenReturn(None)
   }
@@ -83,17 +83,17 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
         .as[String] shouldBe "PUBLIC"
     }
 
-    "return allowListed applications from the configuration" in new Setup {
-      when(configuration.getOptional[Seq[String]]("api.access.version-P1.0.allowListedApplicationIds"))
+    "return whitelisted applications from the configuration" in new Setup {
+      when(configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds"))
         .thenReturn(Some(Seq("appVP1")))
-      when(configuration.getOptional[Seq[String]]("api.access.version-1.0.allowListedApplicationIds"))
+      when(configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds"))
         .thenReturn(Some(Seq("appV1")))
 
       val result = await(underTest.definition()(request))
 
-      (apiVersion(result, "1.0") \ "access" \ "allowListedApplicationIds")
+      (apiVersion(result, "1.0") \ "access" \ "whitelistedApplicationIds")
         .as[Seq[String]] shouldBe Seq("appV1")
-      (apiVersion(result, "P1.0") \ "access" \ "allowListedApplicationIds")
+      (apiVersion(result, "P1.0") \ "access" \ "whitelistedApplicationIds")
         .as[Seq[String]] shouldBe Seq("appVP1")
     }
   }
