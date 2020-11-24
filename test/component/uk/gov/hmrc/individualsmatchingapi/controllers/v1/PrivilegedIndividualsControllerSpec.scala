@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package component.uk.gov.hmrc.individualsmatchingapi.controllers
+package component.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.{AuthStub, BaseSpec, CitizenDetailsStub}
 import play.api.http.Status
 import play.api.libs.json.Json
+import scalaj.http.Http
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 
 import scala.concurrent.Await.result
-import scalaj.http.Http
 
 class PrivilegedIndividualsControllerSpec extends BaseSpec {
 

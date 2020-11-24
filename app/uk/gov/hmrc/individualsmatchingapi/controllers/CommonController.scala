@@ -21,6 +21,8 @@ import java.util.UUID
 import javax.inject.Inject
 import play.api.libs.json._
 import play.api.mvc.{ControllerComponents, Request, Result}
+import uk.gov.hmrc.auth.core.authorise.Predicate
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolment}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
@@ -67,6 +69,25 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
 trait PrivilegedAuthentication extends AuthorisedFunctions {
 
   val environment: String
+
+  def authPredicate(scopes: Iterable[String]): Predicate =
+    scopes.map(Enrolment(_): Predicate).reduce(_ and _)
+
+  def requiresPrivilegedAuthentication(endpointScopes: Iterable[String])(
+    implicit hc: HeaderCarrier): Future[List[String]] = {
+
+    if (endpointScopes.isEmpty) throw new Exception("No scopes defined")
+
+    if (environment == Environment.SANDBOX)
+      Future.successful(endpointScopes.toList)
+    else {
+      authorised(authPredicate(endpointScopes))
+        .retrieve(Retrievals.allEnrolments) {
+          case scopes =>
+            Future.successful(scopes.enrolments.map(e => e.key).toList)
+        }
+    }
+  }
 
   def requiresPrivilegedAuthentication(body: => Future[Result])(implicit hc: HeaderCarrier): Future[Result] =
     if (environment == SANDBOX) body
