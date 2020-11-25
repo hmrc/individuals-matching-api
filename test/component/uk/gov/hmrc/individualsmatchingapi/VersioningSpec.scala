@@ -18,12 +18,12 @@ package component.uk.gov.hmrc.individualsmatchingapi
 
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.{AuthStub, BaseSpec}
 import play.api.Application
+import play.api.http.Status
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.{ACCEPT, AUTHORIZATION}
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
-
 import scalaj.http.{Http, HttpResponse}
 
 class VersioningSpec extends BaseSpec {
@@ -73,6 +73,18 @@ class VersioningSpec extends BaseSpec {
                 "dateOfBirth": "1960-01-15"
               }
             }""")
+    }
+
+    scenario("Requests with an accept header version P2") {
+
+      When("A request to the match citizen endpoint is made with version P2 accept header")
+      val response = invokeWithHeaders(s"/sandbox/$sandboxMatchId", AUTHORIZATION -> authToken, acceptHeaderP2)
+
+      Then("The response status should be 500")
+      response.code shouldBe Status.INTERNAL_SERVER_ERROR
+
+      And("The response contains a valid payload")
+      response.body shouldBe "{\"statusCode\":500,\"message\":\"NOT_IMPLEMENTED\"}"
     }
 
     scenario("Requests without an accept header default to version 1") {

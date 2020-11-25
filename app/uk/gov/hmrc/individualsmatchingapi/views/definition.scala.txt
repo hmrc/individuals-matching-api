@@ -1,5 +1,5 @@
 @import play.api.libs.json.Json
-@(whitelistedApplicationIdsVP1: Seq[String], accessTypeV1: String, whitelistedApplicationIdsV1: Seq[String])
+@(whitelistedApplicationIdsVP1: Seq[String], whitelistedApplicationIdsVP2: Seq[String], accessTypeV1: String, whitelistedApplicationIdsV1: Seq[String])
 {
   "scopes": [
     {
@@ -13,6 +13,11 @@
     "description": "Match an individual against HMRC's records",
     "context": "individuals/matching",
     "versions": [
+      {
+        "version": "P2.0",
+        "status": "PUBLISHED",
+        "access" : {"type":"PRIVATE", "whitelistedApplicationIds": @Json.toJson(whitelistedApplicationIdsVP2)}
+      },
       {
         "version": "P1.0",
         "status": "PUBLISHED",
