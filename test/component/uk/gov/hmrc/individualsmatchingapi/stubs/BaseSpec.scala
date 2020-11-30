@@ -58,6 +58,7 @@ trait BaseSpec
   val authToken = "Bearer AUTH_TOKEN"
   val acceptHeaderV1 = ACCEPT -> "application/vnd.hmrc.1.0+json"
   val acceptHeaderP1 = ACCEPT -> "application/vnd.hmrc.P1.0+json"
+  val acceptHeaderP2 = ACCEPT -> "application/vnd.hmrc.P2.0+json"
 
   protected def requestHeaders(acceptHeader: (String, String) = acceptHeaderV1) =
     Map(CONTENT_TYPE -> JSON, AUTHORIZATION -> authToken, acceptHeader)

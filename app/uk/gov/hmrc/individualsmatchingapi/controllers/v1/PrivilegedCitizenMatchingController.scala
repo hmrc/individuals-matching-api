@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.individualsmatchingapi.controllers
+package uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
@@ -25,6 +25,7 @@ import play.api.mvc.hal._
 import play.api.mvc.{BodyParsers, ControllerComponents}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
+import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenMatchingFormat
 import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService}
