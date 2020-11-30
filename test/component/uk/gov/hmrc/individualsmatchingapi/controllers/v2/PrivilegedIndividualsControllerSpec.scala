@@ -28,14 +28,29 @@ import scala.concurrent.Await.result
 class PrivilegedIndividualsControllerSpec extends BaseSpec {
 
   val nino = "NA000799C"
-  val scopes = List("read:individuals-matching")
+  val scopes = List(
+    "read:individuals-matching-hmcts-c2",
+    "read:individuals-matching-hmcts-c3",
+    "read:individuals-matching-hmcts-c4",
+    "read:individuals-matching-laa-c1",
+    "read:individuals-matching-laa-c2",
+    "read:individuals-matching-laa-c3",
+    "read:individuals-matching-laa-c4",
+    "read:individuals-matching-lsani-c1",
+    "read:individuals-matching-lsani-c3",
+    "read:individuals-matching-nicts-c4"
+  )
+
+  val validScopes = List(
+    "read:individuals-matching-laa-c1"
+  )
 
   feature("matched individual is open and accessible") {
 
     scenario("valid request to the live implementation") {
 
       Given("A valid privileged Auth bearer token")
-      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes)
+      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)
 
       And("A valid nino match exist")
       val matchId = result(mongoRepository.create(Nino(nino)), timeout).id.toString
@@ -46,11 +61,45 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
       When("I request available resources for a matched individual")
       val response = Http(s"$serviceUrl/$matchId").headers(requestHeaders(acceptHeaderP2)).asString
 
-      Then("The response status should be 500")
-      response.code shouldBe Status.INTERNAL_SERVER_ERROR
+      Then("The response status should be 200 (Ok)")
+      response.code shouldBe Status.OK
 
       And("The response contains a valid payload")
-      response.body shouldBe "{\"statusCode\":500,\"message\":\"NOT_IMPLEMENTED\"}"
+      Json.parse(response.body) shouldBe Json.parse(s"""
+         {
+           "_links":{
+               "benefits-and-credits": {
+               "href": "/individuals/benefits-and-credits/?matchId=$matchId",
+               "name": "GET",
+               "title": "View individual's benefits and credits"
+             },
+             "details": {
+               "href": "/individuals/details/?matchId=$matchId",
+               "name": "GET",
+               "title": "View individual's details"
+             },
+             "employments": {
+               "href": "/individuals/employments/?matchId=$matchId",
+               "name": "GET",
+               "title": "View individual's employments"
+             },
+             "income": {
+               "href": "/individuals/income/?matchId=$matchId",
+               "name": "GET",
+               "title": "View individual's income"
+             },
+             "self":{
+               "href":"/individuals/matching/$matchId"
+             }
+           },
+           "individual": {
+             "firstName":"John",
+             "lastName":"Smith",
+             "nino":"$nino",
+             "dateOfBirth":"1972-10-13"
+           }
+         }
+       """)
     }
 
     scenario("valid request to the sandbox implementation") {
@@ -58,11 +107,45 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
       When("I request available resources for a matched individual")
       val response = Http(s"$serviceUrl/sandbox/$sandboxMatchId").headers(requestHeaders(acceptHeaderP2)).asString
 
-      Then("The response status should be 500")
-      response.code shouldBe Status.INTERNAL_SERVER_ERROR
+      Then("The response status should be 200 (Ok)")
+      response.code shouldBe Status.OK
 
       And("The response contains a valid payload")
-      response.body shouldBe "{\"statusCode\":500,\"message\":\"NOT_IMPLEMENTED\"}"
+      Json.parse(response.body) shouldBe Json.parse(s"""
+         {
+           "_links":{
+               "benefits-and-credits": {
+               "href": "/individuals/benefits-and-credits/?matchId=$sandboxMatchId",
+               "name": "GET",
+               "title": "View individual's benefits and credits"
+             },
+             "details": {
+               "href": "/individuals/details/?matchId=$sandboxMatchId",
+               "name": "GET",
+               "title": "View individual's details"
+             },
+             "employments": {
+               "href": "/individuals/employments/?matchId=$sandboxMatchId",
+               "name": "GET",
+               "title": "View individual's employments"
+             },
+             "income": {
+               "href": "/individuals/income/?matchId=$sandboxMatchId",
+               "name": "GET",
+               "title": "View individual's income"
+             },
+             "self":{
+               "href":"/individuals/matching/$sandboxMatchId"
+             }
+           },
+           "individual": {
+             "firstName":"Amanda",
+             "lastName":"Joseph",
+             "nino":"NA000799C",
+             "dateOfBirth":"1960-01-15"
+           }
+         }
+       """)
     }
   }
 }

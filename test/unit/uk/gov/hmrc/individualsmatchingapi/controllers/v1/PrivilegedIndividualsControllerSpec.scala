@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package unit.uk.gov.hmrc.individualsmatchingapi.controllers
+package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
 import java.util.UUID
 

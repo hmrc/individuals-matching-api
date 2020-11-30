@@ -18,73 +18,29 @@ package uk.gov.hmrc.individualsmatchingapi.services
 
 import javax.inject.Inject
 import play.api.Configuration
-import uk.gov.hmrc.individualsmatchingapi.config.ApiConfig
+import uk.gov.hmrc.individualsmatchingapi.config.{ApiConfig, EndpointConfig}
 
 class ScopesService @Inject()(configuration: Configuration) {
 
   private[services] lazy val apiConfig =
     configuration.get[ApiConfig]("api-config")
 
-  private[services] def getScopeItemsKeys(scope: String): List[String] =
+  private[services] def getScopeItemsKeys(scope: String): Iterable[String] =
     apiConfig
       .getScope(scope)
-      .map(s => s.fields)
+      .map(s => s.endpoints)
       .getOrElse(List())
 
-  def getScopeItems(scope: String): List[String] =
-    getScopeItemsKeys(scope)
-      .flatMap(fieldId => apiConfig.endpoints.flatMap(e => e.fields.get(fieldId)))
+  def getAllScopes: Iterable[String] = apiConfig.scopes.map(_.name).sorted
 
-  private[services] def getEndpointFieldKeys(endpointKey: String): Iterable[String] =
-    apiConfig
-      .getEndpoint(endpointKey)
-      .map(endpoint => endpoint.fields.keys.toList.sorted)
-      .getOrElse(List())
-
-  private[services] def getFieldNames(keys: Iterable[String]): Iterable[String] =
+  private[services] def getAccessibleEndpoints(scopes: Iterable[String]): Iterable[String] = {
+    val scopeKeys = scopes.flatMap(s => getScopeItemsKeys(s)).toList
     apiConfig.endpoints
-      .map(e => e.fields)
-      .flatMap(value => keys.map(value.get))
-      .flatten
-
-  def getAllScopes: List[String] = apiConfig.scopes.map(_.name).sorted
-
-  def getValidItemsFor(scopes: List[String], endpoint: String): Iterable[String] = {
-    val uniqueDataFields = scopes.flatMap(getScopeItemsKeys).distinct
-    val endpointDataItems = getEndpointFieldKeys(endpoint).toSet
-    val authorizedDataItemsOnEndpoint =
-      uniqueDataFields.filter(endpointDataItems.contains)
-    getFieldNames(authorizedDataItemsOnEndpoint)
-  }
-
-  private[services] def getAccessibleEndpoints(scopes: List[String]): Iterable[String] = {
-    val scopeKeys = scopes.flatMap(s => getScopeItemsKeys(s))
-    apiConfig.endpoints
-      .filter(endpoint => endpoint.fields.keySet.exists(scopeKeys.contains))
+      .filter(endpoint => scopeKeys.contains(endpoint.key))
       .map(endpoint => endpoint.name)
   }
 
-  def getEndpointLink(endpoint: String): Option[String] =
-    apiConfig.getEndpoint(endpoint).map(c => c.link)
-
-  def getLinks(scopes: List[String]): Map[String, String] =
+  def getEndpoints(scopes: Iterable[String]): Iterable[EndpointConfig] =
     getAccessibleEndpoints(scopes)
-      .flatMap(endpoint => apiConfig.getEndpoint(endpoint).map(c => (c.name, c.link)))
-      .toMap
-
-  def getEndPointScopes(endpointKey: String): Iterable[String] = {
-    val keys = apiConfig
-      .getEndpoint(endpointKey)
-      .map(endpoint => endpoint.fields.keys.toList.sorted)
-      .getOrElse(List())
-
-    apiConfig.scopes
-      .filter(
-        s => s.fields.toSet.intersect(keys.toSet).nonEmpty
-      )
-      .map(
-        s => s.name
-      )
-      .sorted
-  }
+      .flatMap(endpoint => apiConfig.getEndpoint(endpoint))
 }

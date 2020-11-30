@@ -42,7 +42,20 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
   val matchingRequest =
     CitizenMatchingRequest(firstName, lastName, nino, dateOfBirthSensibleformat)
 
-  val scopes = List("read:individuals-matching")
+  val scopes = List(
+    "read:individuals-matching-hmcts-c2",
+    "read:individuals-matching-hmcts-c3",
+    "read:individuals-matching-hmcts-c4",
+    "read:individuals-matching-laa-c1",
+    "read:individuals-matching-laa-c2",
+    "read:individuals-matching-laa-c3",
+    "read:individuals-matching-laa-c4",
+    "read:individuals-matching-lsani-c1",
+    "read:individuals-matching-lsani-c3",
+    "read:individuals-matching-nicts-c4"
+  )
+
+  val validScopes = List("read:individuals-matching-hmcts-c2")
 
   feature("citizen matching is open and accessible") {
 
@@ -54,17 +67,31 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
         .headers(requestHeaders(acceptHeaderP2))
         .asString
 
-      Then("The response status should be 500")
-      response.code shouldBe Status.INTERNAL_SERVER_ERROR
+      Then("The response status should be 200 (Ok)")
+      response.code shouldBe OK
 
       And("The response contains a valid payload")
-      response.body shouldBe "{\"statusCode\":500,\"message\":\"NOT_IMPLEMENTED\"}"
+      parse(response.body) shouldBe parse(
+        s"""
+           {
+             "_links": {
+               "individual": {
+                 "href": "/individuals/matching/$sandboxMatchId",
+                 "name": "GET",
+                 "title": "Individual Details"
+               },
+               "self": {
+                 "href": "/individuals/matching/"
+               }
+             }
+           }"""
+      )
     }
 
     scenario("Valid request to the live implementation. Individual's details match existing citizen records") {
 
       Given("A valid privileged Auth bearer token")
-      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes)
+      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)
 
       And("Citizen exists for the given NINO")
       CitizenDetailsStub.getByNinoReturnsCitizenDetails(nino, firstName, lastName, dateOfBirthDesFormat)
@@ -80,13 +107,27 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       Then("a single ninoMatch record is stored in mongo with its corresponding NINO and generated matchId")
       val ninoMatchRecords =
         Await.result(mongoRepository.find("nino" -> nino), 3 second)
-      ninoMatchRecords.size shouldBe 0
+      ninoMatchRecords.size shouldBe 1
 
-      Then("The response status should be 500")
-      response.code shouldBe Status.INTERNAL_SERVER_ERROR
+      And("The response status should be 200 (Ok)")
+      response.code shouldBe OK
 
       And("The response contains a valid payload")
-      response.body shouldBe "{\"statusCode\":500,\"message\":\"NOT_IMPLEMENTED\"}"
+      parse(response.body) shouldBe parse(
+        s"""
+           {
+             "_links": {
+               "individual": {
+                 "href": "/individuals/matching/${ninoMatchRecords.head.id}",
+                 "name": "GET",
+                 "title": "Individual Details"
+               },
+               "self": {
+                 "href": "/individuals/matching/"
+               }
+             }
+           }"""
+      )
     }
   }
 
@@ -94,7 +135,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     scenario("No match. Individual's details do not match existing citizen records") {
 
       Given("A valid privileged Auth bearer token")
-      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes)
+      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)
 
       And("Citizen exists for the given NINO")
       CitizenDetailsStub.getByNinoReturnsCitizenDetails("CS700100A", firstName, lastName, "13091972")
@@ -107,17 +148,17 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       When("I request a citizen's details match")
       val response = requestMatch(matchingRequest)
 
-      Then("The response status should be 500")
-      response.code shouldBe Status.INTERNAL_SERVER_ERROR
+      Then("The response status should be 403 (Forbidden)")
+      response.code shouldBe FORBIDDEN
 
       And("The correct error message is returned")
-      response.body shouldBe "{\"statusCode\":500,\"message\":\"NOT_IMPLEMENTED\"}"
+      parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
     }
 
     scenario("Citizen does not exist for the given NINO") {
 
       Given("A valid privileged Auth bearer token")
-      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes)
+      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)
 
       And("Citizen for the given NINO cannot be found")
       CitizenDetailsStub.getByNinoReturnsError(nino, NOT_FOUND)
@@ -125,17 +166,17 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       When("I request a citizen's details match")
       val response = requestMatch(matchingRequest)
 
-      Then("The response status should be 500")
-      response.code shouldBe Status.INTERNAL_SERVER_ERROR
+      Then("The response status should be 403 (Forbidden)")
+      response.code shouldBe FORBIDDEN
 
       And("The correct error message is returned")
-      response.body shouldBe "{\"statusCode\":500,\"message\":\"NOT_IMPLEMENTED\"}"
+      parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
     }
 
     scenario("Invalid NINO provided") {
 
       Given("A valid privileged Auth bearer token")
-      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes)
+      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)
 
       And("The given NINO is invalid")
       CitizenDetailsStub.getByNinoReturnsError(nino, BAD_REQUEST, s"invalid nino: $nino")
@@ -143,18 +184,18 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       When("I request a citizen's details match")
       val response = requestMatch(matchingRequest)
 
-      Then("The response status should be 500")
-      response.code shouldBe Status.INTERNAL_SERVER_ERROR
+      Then("The response status should be 403 (Forbidden)")
+      response.code shouldBe FORBIDDEN
 
       And("The correct error message is returned")
-      response.body shouldBe "{\"statusCode\":500,\"message\":\"NOT_IMPLEMENTED\"}"
+      parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
     }
   }
 
   scenario("NINO provided with wrong format") {
 
     Given("A valid privileged Auth bearer token")
-    AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes)
+    AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)
 
     And("The given NINO is invalid")
     CitizenDetailsStub.getByNinoReturnsError(nino, BAD_REQUEST, s"invalid nino: $nino")
@@ -162,11 +203,13 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     When("I request a citizen's details match")
     val response = requestMatch(matchingRequest, s => s.replace(nino, "ABC"))
 
-    Then("The response status should be 500")
-    response.code shouldBe Status.INTERNAL_SERVER_ERROR
+    Then("The response status should be 403 (Forbidden)")
+    response.code shouldBe BAD_REQUEST
 
     And("The correct error message is returned")
-    response.body shouldBe "{\"statusCode\":500,\"message\":\"NOT_IMPLEMENTED\"}"
+    print(s" customized reposne ${parse(response.body)}")
+    parse(response.body) shouldBe
+      JsonFormatters.errorInvalidRequestFormat.writes(ErrorInvalidRequest("Malformed nino submitted"))
   }
 
   def requestMatch(
