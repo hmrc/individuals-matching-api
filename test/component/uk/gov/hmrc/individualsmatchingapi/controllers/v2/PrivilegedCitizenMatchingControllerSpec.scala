@@ -18,7 +18,6 @@ package component.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.{AuthStub, BaseSpec, CitizenDetailsStub, MatchingStub}
 import org.joda.time.LocalDate
-import play.api.http.Status
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
@@ -55,7 +54,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     "read:individuals-matching-nicts-c4"
   )
 
-  val validScopes = List("read:individuals-matching-hmcts-c2")
+  val validScopes = List("read:individuals-matching-laa-c3")
 
   feature("citizen matching is open and accessible") {
 

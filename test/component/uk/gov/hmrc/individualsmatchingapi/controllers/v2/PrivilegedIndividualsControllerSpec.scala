@@ -42,7 +42,7 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
   )
 
   val validScopes = List(
-    "read:individuals-matching-laa-c1"
+    "read:individuals-matching-laa-c3"
   )
 
   feature("matched individual is open and accessible") {
