@@ -18,7 +18,6 @@ package uk.gov.hmrc.individualsmatchingapi.config
 
 import com.typesafe.config.Config
 import play.api.ConfigLoader
-import uk.gov.hmrc.individualsmatchingapi.services.PathTree
 
 import scala.collection.JavaConverters._
 
@@ -32,55 +31,43 @@ case class ApiConfig(scopes: List[ScopeConfig], endpoints: List[EndpointConfig])
 
 }
 
-case class ScopeConfig(name: String, fields: List[String]) {}
+case class ScopeConfig(name: String, endpoints: List[String]) {}
 
-case class EndpointConfig(name: String, link: String, fields: Map[String, String])
+case class EndpointConfig(key: String, name: String, link: String, title: String)
 
 object ApiConfig {
 
   implicit val configLoader: ConfigLoader[ApiConfig] =
-    new ConfigLoader[ApiConfig] {
-      def load(rootConfig: Config, path: String): ApiConfig = {
-        val config = rootConfig.getConfig(path)
+    (rootConfig: Config, path: String) => {
+      val config = rootConfig.getConfig(path)
 
-        def parseConfig(path: String): PathTree = {
-          val keys: List[String] = config
-            .getConfig(path)
-            .entrySet()
-            .asScala
-            .map(x => x.getKey.replaceAllLiterally("\"", ""))
-            .toList
+      def getKeys(path2: String): Iterable[String] =
+        config
+          .getConfig(path2)
+          .entrySet()
+          .asScala
+          .map(x => x.getKey.replaceAllLiterally("\"", ""))
+          .map(x => x.split("\\.").head)
 
-          PathTree(keys, "\\.")
-        }
+      val endpointConfig: List[EndpointConfig] = getKeys("endpoints")
+        .map(
+          key =>
+            EndpointConfig(
+              key = config.getString(s"endpoints.$key.key"),
+              name = key,
+              link = config.getString(s"endpoints.$key.endpoint"),
+              title = config.getString(s"endpoints.$key.title")
+          ))
+        .toList
 
-        val endpointTree = parseConfig("endpoints")
-        val endpointConfig: List[EndpointConfig] = endpointTree.listChildren
-          .flatMap(
-            key =>
-              endpointTree
-                .getChild(key)
-                .flatMap(node => node.getChild("fields"))
-                .map(node =>
-                  EndpointConfig(
-                    name = key,
-                    link = config.getString(s"endpoints.$key.endpoint"),
-                    fields = node.listChildren.toList.sorted
-                      .map(field => (field, config.getString(s"endpoints.$key.fields.$field")))
-                      .toMap
-                )))
-          .toList
+      val scopesConfig: List[ScopeConfig] = getKeys("scopes")
+        .map(key =>
+          ScopeConfig(name = key, endpoints = config.getStringList(s"""scopes."$key".endpoints""").asScala.toList))
+        .toList
 
-        val scopeTree = parseConfig("scopes")
-        val scopeConfig = scopeTree.listChildren
-          .map(key =>
-            ScopeConfig(name = key, fields = config.getStringList(s"""scopes."$key".fields""").asScala.toList))
-          .toList
-
-        ApiConfig(
-          scopes = scopeConfig,
-          endpoints = endpointConfig
-        )
-      }
+      ApiConfig(
+        scopes = scopesConfig,
+        endpoints = endpointConfig
+      )
     }
 }

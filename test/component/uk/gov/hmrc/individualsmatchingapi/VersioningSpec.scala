@@ -80,11 +80,45 @@ class VersioningSpec extends BaseSpec {
       When("A request to the match citizen endpoint is made with version P2 accept header")
       val response = invokeWithHeaders(s"/sandbox/$sandboxMatchId", AUTHORIZATION -> authToken, acceptHeaderP2)
 
-      Then("The response status should be 500")
-      response.code shouldBe Status.INTERNAL_SERVER_ERROR
+      Then("The response status should be 200 (Ok)")
+      response.code shouldBe OK
 
-      And("The response contains a valid payload")
-      response.body shouldBe "{\"statusCode\":500,\"message\":\"NOT_IMPLEMENTED\"}"
+      And("The response body should be for api version P1")
+      Json.parse(response.body) shouldBe
+        Json.parse(s"""
+            {
+              "_links": {
+                "benefits-and-credits": {
+                  "href": "/individuals/benefits-and-credits/?matchId=$sandboxMatchId",
+                  "name": "GET",
+                  "title": "View individual's benefits and credits"
+                },
+                "details": {
+                  "href": "/individuals/details/?matchId=$sandboxMatchId",
+                  "name": "GET",
+                  "title": "View individual's details"
+                },
+                "employments": {
+                  "href": "/individuals/employments/?matchId=$sandboxMatchId",
+                  "name": "GET",
+                  "title": "View individual's employments"
+                },
+                "income": {
+                  "href": "/individuals/income/?matchId=$sandboxMatchId",
+                  "name": "GET",
+                  "title": "View individual's income"
+                },
+                "self": {
+                  "href"  : "/individuals/matching/$sandboxMatchId"
+                }
+              },
+              "individual": {
+                "firstName": "Amanda",
+                "lastName": "Joseph",
+                "nino": "NA000799C",
+                "dateOfBirth": "1960-01-15"
+              }
+            }""")
     }
 
     scenario("Requests without an accept header default to version 1") {
