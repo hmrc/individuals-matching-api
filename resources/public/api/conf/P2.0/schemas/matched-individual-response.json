@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Individuals Matching",
+  "type": "object",
+  "properties": {
+    "_links": {
+      "type": "object",
+      "properties": {
+        "income": {
+          "type": "object",
+          "description": "The Uniform Resource Identifier (URI) for the endpoint to get an individual's income data",
+          "properties": {
+            "href": {
+              "type": "string",
+              "example": "/individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
+            },
+            "name": {
+              "type": "string",
+              "example": "GET"
+            },
+            "title": {
+              "type": "string",
+              "example": "Get an individual's income data"
+            }
+          }
+        },
+        "employments": {
+          "type": "object",
+          "description": "The URI for the endpoint to get an individual's employment data.",
+          "properties": {
+            "href": {
+              "type": "string",
+              "example": "/individuals/employments/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
+            },
+            "name": {
+              "type": "string",
+              "example": "GET"
+            },
+            "title": {
+              "type": "string",
+              "example": "Get an individual's employment data"
+            }
+          }
+        },
+        "benefits-and-credits": {
+          "type": "object",
+          "description": "The URI for the endpoint to get the individual's benefits and credits data.",
+          "properties": {
+            "href": {
+              "type": "string",
+              "example": "/individuals/benefits-and-credits/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
+            },
+            "name": {
+              "type": "string",
+              "example": "GET"
+            },
+            "title": {
+              "type": "string",
+              "example": "Get an individual's benefits and credits data"
+            }
+          }
+        },
+        "details": {
+          "type": "object",
+          "description": "The URI for the endpoint to get the individual's details.",
+          "properties": {
+            "href": {
+              "type": "string",
+              "example": "/individuals/details/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
+            },
+            "name": {
+              "type": "string",
+              "example": "GET"
+            },
+            "title": {
+              "type": "string",
+              "example": "Get the individual's details"
+            }
+          }
+        },
+        "self": {
+          "type": "object",
+          "description": "The URI to this resource",
+          "properties": {
+            "href": {
+              "type": "string",
+              "example": "/individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430"
+            }
+          },
+          "required": ["href"]
+        }
+      },
+      "required": ["self"]
+    },
+    "individual": {
+      "type": "object",
+      "description": "The matched individual.",
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "description": "The individual's first name"
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The individual's last name"
+        },
+        "nino": {
+          "type": "string",
+          "format": "NINO",
+          "description": "The individual's national insurance number"
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "format": "date",
+          "description": "The individual's date of birth"
+        }
+      },
+      "required": ["firstName", "lastName", "nino", "dateOfBirth"]
+    }
+  },
+  "required": ["_links", "individual"]
+}
