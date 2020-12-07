@@ -2,7 +2,7 @@
 ---
 
 title: Individuals Matching
-version: P1.0
+version: P2.0
 protocols: [ HTTPS ]
 baseUri: https://api.service.hmrc.gov.uk/
 
@@ -33,7 +33,7 @@ uses:
       is: [headers.acceptHeader]
       headers:
         Authorization:
-          description: OAuth 2.0 Bearer Token with the read:individuals-matching scope.
+          description: OAuth 2.0 Bearer Token with the scopes you have been assigned.
           type: string
           required: true
           example: Bearer <BEARER_TOKEN>
@@ -82,11 +82,9 @@ uses:
       description: !include docs/matched-individual-endpoint-description.md
       is: [headers.acceptHeader]
       (annotations.sandboxData): !include sandbox/matched-individual-request.md
-      (annotations.scope): "read:individuals-matching"
-      securedBy: [ sec.oauth_2_0: { scopes: [ "read:individuals-matching" ] } ]
       headers:
         Authorization:
-          description: OAuth 2.0 Bearer Token with the read:individuals-matching scope.
+          description: OAuth 2.0 Bearer Token with the scopes you have been assigned.
           type: string
           required: true
           example: Bearer <BEARER_TOKEN>
