@@ -6,6 +6,11 @@
       "key": "read:individuals-matching",
       "name": "match individual from their details",
       "description": "Match individual from their details"
+    },
+    {
+      "key": "read:the-scopes-you-have-been-assigned",
+      "name": "The scopes you have been assigned",
+      "description": "An OAuth 2.0 Bearer Token with the scopes you have been assigned"
     }
   ],
   "api": {
