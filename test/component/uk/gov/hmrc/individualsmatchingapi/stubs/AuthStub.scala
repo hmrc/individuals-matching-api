@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 object AuthStub extends MockHost(22000) {
 
   def authPredicate(scopes: Iterable[String]): Predicate =
-    scopes.map(Enrolment(_): Predicate).reduce(_ and _)
+    scopes.map(Enrolment(_): Predicate).reduce(_ or _)
 
   private def privilegedAuthority(scope: String) = obj(
     "authorise" -> arr(toJson(Enrolment(scope))),

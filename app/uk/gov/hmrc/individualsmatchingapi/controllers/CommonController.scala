@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
   val environment: String
 
   def authPredicate(scopes: Iterable[String]): Predicate =
-    scopes.map(Enrolment(_): Predicate).reduce(_ and _)
+    scopes.map(Enrolment(_): Predicate).reduce(_ or _)
 
   def requiresPrivilegedAuthentication(endpointScopes: Iterable[String])(f: Iterable[String] => Future[Result])(
     implicit hc: HeaderCarrier): Future[Result] = {
@@ -83,7 +83,7 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
     else {
       authorised(authPredicate(endpointScopes))
         .retrieve(Retrievals.allEnrolments) {
-          case scopes => f(scopes.enrolments.map(e => e.key))
+          case scopes => f(scopes.enrolments.map(e => e.key).toList)
         }
     }
   }
