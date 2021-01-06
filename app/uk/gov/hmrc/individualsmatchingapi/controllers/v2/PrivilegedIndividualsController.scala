@@ -39,15 +39,15 @@ abstract class PrivilegedIndividualsController(
 
   def matchedIndividual(matchId: String) = Action.async { implicit request =>
     requiresPrivilegedAuthentication(scopeService.getAllScopes) { authScopes =>
-      withCorrelationId { () =>
-        withUuid(matchId) { matchUuid =>
-          citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
-            val selfLink = HalLink("self", s"/individuals/matching/$matchId")
-            val data = obj("individual" -> toJson(citizenDetails))
-            Ok(state(data) ++ linksSeq(getApiLinks(matchId, authScopes) ++ Seq(selfLink)))
-          }
+      //withCorrelationId { () =>
+      withUuid(matchId) { matchUuid =>
+        citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
+          val selfLink = HalLink("self", s"/individuals/matching/$matchId")
+          val data = obj("individual" -> toJson(citizenDetails))
+          Ok(state(data) ++ linksSeq(getApiLinks(matchId, authScopes) ++ Seq(selfLink)))
         }
       }
+      //}
     } recover recovery
   }
 

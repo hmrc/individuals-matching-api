@@ -42,21 +42,20 @@ abstract class PrivilegedCitizenMatchingController(
 
   def matchCitizen = Action.async(BodyParsers.parse.json) { implicit request =>
     requiresPrivilegedAuthentication(scopeService.getAllScopes) { _ =>
-      withCorrelationId { () =>
-        withJsonBody[CitizenMatchingRequest] { matchCitizen =>
-          citizenMatchingService.matchCitizen(matchCitizen) map { matchId =>
-            val selfLink = HalLink("self", s"/individuals/matching/")
-            val individualLink = HalLink(
-              "individual",
-              s"/individuals/matching/$matchId",
-              name = Option("GET"),
-              title = Option("Individual Details"))
-            Ok(links(selfLink, individualLink))
-          }
+      //withCorrelationId { () =>
+      withJsonBody[CitizenMatchingRequest] { matchCitizen =>
+        citizenMatchingService.matchCitizen(matchCitizen) map { matchId =>
+          val selfLink = HalLink("self", s"/individuals/matching/")
+          val individualLink = HalLink(
+            "individual",
+            s"/individuals/matching/$matchId",
+            name = Option("GET"),
+            title = Option("Individual Details"))
+          Ok(links(selfLink, individualLink))
         }
-      } recover recovery
-
-    }
+      }
+      //}
+    } recover recovery
   }
 }
 

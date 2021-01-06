@@ -35,15 +35,15 @@ import scala.util.{Failure, Success, Try}
 
 abstract class CommonController @Inject()(cc: ControllerComponents) extends BackendController(cc) {
 
-  protected def withCorrelationId[T](f: () => Future[Result])(implicit request: Request[T]): Future[Result] =
-    request.headers.get("CorrelationId") match {
-      case Some(uuidString) =>
-        Try(UUID.fromString(uuidString)) match {
-          case Success(_) => f()
-          case _          => successful(ErrorInvalidRequest("Malformed CorrelationId").toHttpResponse)
-        }
-      case None => successful(ErrorInvalidRequest("CorrelationId is required").toHttpResponse)
-    }
+//  protected def withCorrelationId[T](f: () => Future[Result])(implicit request: Request[T]): Future[Result] =
+//    request.headers.get("CorrelationId") match {
+//      case Some(uuidString) =>
+//        Try(UUID.fromString(uuidString)) match {
+//          case Success(_) => f()
+//          case _          => successful(ErrorInvalidRequest("Malformed CorrelationId").toHttpResponse)
+//        }
+//      case None => successful(ErrorInvalidRequest("CorrelationId is required").toHttpResponse)
+//    }
 
   override protected def withJsonBody[T](
     f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
@@ -80,7 +80,7 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
   val environment: String
 
   def authPredicate(scopes: Iterable[String]): Predicate =
-    scopes.map(Enrolment(_): Predicate).reduce(_ and _)
+    scopes.map(Enrolment(_): Predicate).reduce(_ or _)
 
   def requiresPrivilegedAuthentication(endpointScopes: Iterable[String])(f: Iterable[String] => Future[Result])(
     implicit hc: HeaderCarrier): Future[Result] = {

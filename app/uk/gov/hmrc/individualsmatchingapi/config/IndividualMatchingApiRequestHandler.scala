@@ -16,13 +16,21 @@
 
 package uk.gov.hmrc.individualsmatchingapi.config
 
+import java.util.UUID
+
 import javax.inject.Inject
 import play.api.Configuration
 import play.api.http.{HttpConfiguration, HttpErrorHandler, HttpFilters}
-import play.api.mvc.{Handler, RequestHeader}
+import play.api.mvc.{Handler, RequestHeader, Result}
 import play.api.routing.Router
+import uk.gov.hmrc.http.BadRequestException
+import uk.gov.hmrc.individualsmatchingapi.domain.ErrorInvalidRequest
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils._
 import uk.gov.hmrc.play.bootstrap.http.RequestHandler
+
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
+import scala.util.{Success, Try}
 
 class IndividualMatchingApiRequestHandler @Inject()(
   router: Router,
@@ -37,7 +45,10 @@ class IndividualMatchingApiRequestHandler @Inject()(
     .getOrElse(Seq.empty[String])
 
   override def routeRequest(request: RequestHeader): Option[Handler] = {
+
+    extractCorrelationId(request)
     val requestContext = extractUriContext(request)
+
     if (unversionedContexts.contains(requestContext)) {
       super.routeRequest(request)
     } else {
