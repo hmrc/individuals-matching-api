@@ -35,16 +35,6 @@ import scala.util.{Failure, Success, Try}
 
 abstract class CommonController @Inject()(cc: ControllerComponents) extends BackendController(cc) {
 
-//  protected def withCorrelationId[T](f: () => Future[Result])(implicit request: Request[T]): Future[Result] =
-//    request.headers.get("CorrelationId") match {
-//      case Some(uuidString) =>
-//        Try(UUID.fromString(uuidString)) match {
-//          case Success(_) => f()
-//          case _          => successful(ErrorInvalidRequest("Malformed CorrelationId").toHttpResponse)
-//        }
-//      case None => successful(ErrorInvalidRequest("CorrelationId is required").toHttpResponse)
-//    }
-
   override protected def withJsonBody[T](
     f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
     Try(request.body.validate[T]) match {
