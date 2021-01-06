@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,8 @@ class PrivilegedCitizenMatchingControllerSpec
 
   trait Setup extends ScopesConfigHelper {
 
+    val sampleCorrelationId = "188e9400-b636-4a3b-80ba-230a8c72b92a"
+
     val fakeRequest = FakeRequest()
 
     val controllerComponents = fakeApplication.injector.instanceOf[ControllerComponents]
@@ -84,7 +86,8 @@ class PrivilegedCitizenMatchingControllerSpec
       when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.successful(matchId))
 
-      val eventualResult = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
+      val eventualResult = liveController.matchCitizen()(
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe OK
       contentAsJson(eventualResult) mustBe parse(
@@ -115,7 +118,8 @@ class PrivilegedCitizenMatchingControllerSpec
         "dateOfBirth" -> "1900-01-01"
       )
 
-      val res = liveController.matchCitizen()(fakeRequest.withBody(payload))
+      val res =
+        liveController.matchCitizen()(fakeRequest.withBody(payload).withHeaders(("CorrelationId", sampleCorrelationId)))
       status(res) mustBe OK
     }
 
@@ -123,7 +127,9 @@ class PrivilegedCitizenMatchingControllerSpec
       when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new CitizenNotFoundException))
 
-      val eventualResult = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
+      val eventualResult = liveController.matchCitizen()(
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       status(eventualResult) mustBe FORBIDDEN
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -136,7 +142,8 @@ class PrivilegedCitizenMatchingControllerSpec
       when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new MatchingException))
 
-      val eventualResult = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
+      val eventualResult = liveController.matchCitizen()(
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe FORBIDDEN
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -149,7 +156,8 @@ class PrivilegedCitizenMatchingControllerSpec
       when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new InvalidNinoException()))
 
-      val eventualResult = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
+      val eventualResult = liveController.matchCitizen()(
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe FORBIDDEN
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -162,7 +170,8 @@ class PrivilegedCitizenMatchingControllerSpec
       var requestBody =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
       var eventualResult =
-        liveController.matchCitizen()(fakeRequest.withBody(requestBody))
+        liveController.matchCitizen()(
+          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe BAD_REQUEST
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -171,7 +180,8 @@ class PrivilegedCitizenMatchingControllerSpec
       )
 
       requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
-      eventualResult = liveController.matchCitizen()(fakeRequest.withBody(requestBody))
+      eventualResult = liveController.matchCitizen()(
+        fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe BAD_REQUEST
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -184,7 +194,8 @@ class PrivilegedCitizenMatchingControllerSpec
       val requestBody =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"AB1234567","dateOfBirth":"2020-01-31"}""")
       val eventualResult =
-        liveController.matchCitizen()(fakeRequest.withBody(requestBody))
+        liveController.matchCitizen()(
+          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe BAD_REQUEST
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -202,7 +213,8 @@ class PrivilegedCitizenMatchingControllerSpec
       )
 
       val res =
-        liveController.matchCitizen()(fakeRequest.withBody(emptyFirstName))
+        liveController.matchCitizen()(
+          fakeRequest.withBody(emptyFirstName).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "firstName is required")
@@ -217,7 +229,8 @@ class PrivilegedCitizenMatchingControllerSpec
       )
 
       val res =
-        liveController.matchCitizen()(fakeRequest.withBody(emptyLastName))
+        liveController.matchCitizen()(
+          fakeRequest.withBody(emptyLastName).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "lastName is required")
@@ -232,7 +245,8 @@ class PrivilegedCitizenMatchingControllerSpec
       )
 
       val res =
-        liveController.matchCitizen()(fakeRequest.withBody(firstNameTooLong))
+        liveController.matchCitizen()(
+          fakeRequest.withBody(firstNameTooLong).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json
@@ -248,7 +262,8 @@ class PrivilegedCitizenMatchingControllerSpec
       )
 
       val res =
-        liveController.matchCitizen()(fakeRequest.withBody(lastNameTooLong))
+        liveController.matchCitizen()(
+          fakeRequest.withBody(lastNameTooLong).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json
@@ -264,7 +279,8 @@ class PrivilegedCitizenMatchingControllerSpec
       )
 
       val res =
-        liveController.matchCitizen()(fakeRequest.withBody(invalidFirstName))
+        liveController.matchCitizen()(
+          fakeRequest.withBody(invalidFirstName).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json
@@ -280,7 +296,8 @@ class PrivilegedCitizenMatchingControllerSpec
       )
 
       val res =
-        liveController.matchCitizen()(fakeRequest.withBody(invalidFirstName))
+        liveController.matchCitizen()(
+          fakeRequest.withBody(invalidFirstName).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json
@@ -295,7 +312,9 @@ class PrivilegedCitizenMatchingControllerSpec
         .willReturn(failed(new InsufficientEnrolments()))
 
       intercept[InsufficientEnrolments] {
-        await(liveController.matchCitizen()(fakeRequest.withBody(requestBody)))
+        await(
+          liveController.matchCitizen()(
+            fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId))))
       }
 
       verifyZeroInteractions(mockLiveCitizenMatchingService)
@@ -307,7 +326,8 @@ class PrivilegedCitizenMatchingControllerSpec
     val matchId = UUID.randomUUID()
 
     "return 200 (Ok) for the sandbox matchId" in new Setup {
-      val eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
+      val eventualResult = sandboxController.matchCitizen()(
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe OK
       contentAsJson(eventualResult) mustBe parse(
@@ -329,7 +349,10 @@ class PrivilegedCitizenMatchingControllerSpec
 
     "return 403 (Forbidden) for a citizen not found" in new Setup {
       val eventualResult =
-        sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest(firstName = "José"))))
+        sandboxController.matchCitizen()(
+          fakeRequest
+            .withBody(parse(matchingRequest(firstName = "José")))
+            .withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe FORBIDDEN
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -340,7 +363,10 @@ class PrivilegedCitizenMatchingControllerSpec
 
     "return 403 (Forbidden) when nino does not match a sandbox individual" in new Setup {
       val eventualResult =
-        sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest(nino = "AA000799C"))))
+        sandboxController.matchCitizen()(
+          fakeRequest
+            .withBody(parse(matchingRequest(nino = "AA000799C")))
+            .withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe FORBIDDEN
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -351,7 +377,10 @@ class PrivilegedCitizenMatchingControllerSpec
 
     "return 403 (Forbidden) when an invalid nino exception is thrown" in new Setup {
       val eventualResult =
-        sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest(nino = "NA000799D"))))
+        sandboxController.matchCitizen()(
+          fakeRequest
+            .withBody(parse(matchingRequest(nino = "NA000799D")))
+            .withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe FORBIDDEN
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -364,7 +393,8 @@ class PrivilegedCitizenMatchingControllerSpec
       var requestBody =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
       var eventualResult =
-        sandboxController.matchCitizen()(fakeRequest.withBody(requestBody))
+        sandboxController.matchCitizen()(
+          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe BAD_REQUEST
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -373,7 +403,8 @@ class PrivilegedCitizenMatchingControllerSpec
       )
 
       requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
-      eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(requestBody))
+      eventualResult = sandboxController.matchCitizen()(
+        fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe BAD_REQUEST
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -386,7 +417,8 @@ class PrivilegedCitizenMatchingControllerSpec
       val requestBody =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"AB1234567","dateOfBirth":"2020-01-31"}""")
       val eventualResult =
-        sandboxController.matchCitizen()(fakeRequest.withBody(requestBody))
+        sandboxController.matchCitizen()(
+          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe BAD_REQUEST
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -396,10 +428,36 @@ class PrivilegedCitizenMatchingControllerSpec
     }
 
     "not require bearer token authentication" in new Setup {
-      val eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
+      val eventualResult = sandboxController.matchCitizen()(
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe OK
       verifyZeroInteractions(mockAuthConnector)
+    }
+
+    "return 400 (Bad Request) when CorrelationId is missing" in new Setup {
+      val requestBody =
+        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-31"}""")
+      val eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(requestBody))
+
+      status(eventualResult) mustBe BAD_REQUEST
+      contentAsJson(eventualResult) mustBe Json.obj(
+        "code"    -> "INVALID_REQUEST",
+        "message" -> "CorrelationId is required"
+      )
+    }
+
+    "return 400 (Bad Request) when CorrelationId is malformed" in new Setup {
+      val requestBody =
+        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-31"}""")
+      val eventualResult = sandboxController.matchCitizen()(
+        fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", "fakeCorrelationId")))
+
+      status(eventualResult) mustBe BAD_REQUEST
+      contentAsJson(eventualResult) mustBe Json.obj(
+        "code"    -> "INVALID_REQUEST",
+        "message" -> "Malformed CorrelationId"
+      )
     }
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,13 @@ abstract class PrivilegedIndividualsController(
 
   def matchedIndividual(matchId: String) = Action.async { implicit request =>
     requiresPrivilegedAuthentication(scopeService.getAllScopes) { authScopes =>
-      withUuid(matchId) { matchUuid =>
-        citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
-          val selfLink = HalLink("self", s"/individuals/matching/$matchId")
-          val data = obj("individual" -> toJson(citizenDetails))
-          Ok(state(data) ++ linksSeq(getApiLinks(matchId, authScopes) ++ Seq(selfLink)))
+      withCorrelationId { () =>
+        withUuid(matchId) { matchUuid =>
+          citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
+            val selfLink = HalLink("self", s"/individuals/matching/$matchId")
+            val data = obj("individual" -> toJson(citizenDetails))
+            Ok(state(data) ++ linksSeq(getApiLinks(matchId, authScopes) ++ Seq(selfLink)))
+          }
         }
       }
     } recover recovery

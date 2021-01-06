@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,9 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
 import java.util.UUID
-
 import javax.inject.Inject
 import play.api.libs.json._
-import play.api.mvc.{ControllerComponents, Request, Result}
+import play.api.mvc.{AnyContent, ControllerComponents, Request, Result}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolment}
@@ -35,6 +34,16 @@ import scala.concurrent.Future.successful
 import scala.util.{Failure, Success, Try}
 
 abstract class CommonController @Inject()(cc: ControllerComponents) extends BackendController(cc) {
+
+  protected def withCorrelationId[T](f: () => Future[Result])(implicit request: Request[T]): Future[Result] =
+    request.headers.get("CorrelationId") match {
+      case Some(uuidString) =>
+        Try(UUID.fromString(uuidString)) match {
+          case Success(_) => f()
+          case _          => successful(ErrorInvalidRequest("Malformed CorrelationId").toHttpResponse)
+        }
+      case None => successful(ErrorInvalidRequest("CorrelationId is required").toHttpResponse)
+    }
 
   override protected def withJsonBody[T](
     f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =

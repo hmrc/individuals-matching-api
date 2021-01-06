@@ -93,6 +93,11 @@ uses:
           type: string
           required: true
           example: Bearer <BEARER_TOKEN>
+        CorrelationId:
+          description: A CorreclationId provided by you.
+          type: string
+          required: true
+          example: "188e9400-b636-4a3b-80ba-230a8c72b92a"
       responses:
         200:
           description: The individual's details for the given match id

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,11 @@ class VersioningSpec extends BaseSpec {
     scenario("Requests with an accept header version P2") {
 
       When("A request to the match citizen endpoint is made with version P2 accept header")
-      val response = invokeWithHeaders(s"/sandbox/$sandboxMatchId", AUTHORIZATION -> authToken, acceptHeaderP2)
+      val response = invokeWithHeaders(
+        s"/sandbox/$sandboxMatchId",
+        AUTHORIZATION -> authToken,
+        acceptHeaderP2,
+        testCorrelationHeader)
 
       Then("The response status should be 200 (Ok)")
       response.code shouldBe OK
