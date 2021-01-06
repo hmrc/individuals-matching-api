@@ -38,7 +38,6 @@ class IndividualMatchingApiRequestHandler @Inject()(
 
   override def routeRequest(request: RequestHeader): Option[Handler] = {
 
-    extractCorrelationId(request)
     val requestContext = extractUriContext(request)
 
     if (unversionedContexts.contains(requestContext)) {

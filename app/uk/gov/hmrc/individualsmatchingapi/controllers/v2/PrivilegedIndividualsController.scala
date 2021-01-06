@@ -27,6 +27,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
+import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.extractCorrelationId
 import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
 
 import scala.concurrent.ExecutionContext
@@ -38,6 +39,7 @@ abstract class PrivilegedIndividualsController(
     extends CommonController(cc) with PrivilegedAuthentication {
 
   def matchedIndividual(matchId: String) = Action.async { implicit request =>
+    extractCorrelationId(request)
     requiresPrivilegedAuthentication(scopeService.getAllScopes) { authScopes =>
       withUuid(matchId) { matchUuid =>
         citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>

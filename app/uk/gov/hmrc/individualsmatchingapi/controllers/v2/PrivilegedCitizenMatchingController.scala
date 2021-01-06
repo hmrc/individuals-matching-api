@@ -29,6 +29,7 @@ import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
+import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils._
 
 import scala.concurrent.ExecutionContext
 
@@ -41,6 +42,7 @@ abstract class PrivilegedCitizenMatchingController(
   val logger = LoggerFactory.getLogger(this.getClass)
 
   def matchCitizen = Action.async(BodyParsers.parse.json) { implicit request =>
+    extractCorrelationId(request)
     requiresPrivilegedAuthentication(scopeService.getAllScopes) { _ =>
       withJsonBody[CitizenMatchingRequest] { matchCitizen =>
         citizenMatchingService.matchCitizen(matchCitizen) map { matchId =>
