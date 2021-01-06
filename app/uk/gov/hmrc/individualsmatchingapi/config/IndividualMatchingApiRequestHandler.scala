@@ -37,7 +37,9 @@ class IndividualMatchingApiRequestHandler @Inject()(
     .getOrElse(Seq.empty[String])
 
   override def routeRequest(request: RequestHeader): Option[Handler] = {
+
     val requestContext = extractUriContext(request)
+
     if (unversionedContexts.contains(requestContext)) {
       super.routeRequest(request)
     } else {

@@ -17,7 +17,6 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import java.util.UUID
-
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{verifyZeroInteractions, when}
@@ -31,7 +30,7 @@ import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.{LivePrivilegedCitizenMatchingController, SandboxPrivilegedCitizenMatchingController}
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain._
@@ -438,26 +437,23 @@ class PrivilegedCitizenMatchingControllerSpec
     "return 400 (Bad Request) when CorrelationId is missing" in new Setup {
       val requestBody =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-31"}""")
-      val eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(requestBody))
+      val exception =
+        intercept[BadRequestException](sandboxController.matchCitizen()(fakeRequest.withBody(requestBody)))
 
-      status(eventualResult) mustBe BAD_REQUEST
-      contentAsJson(eventualResult) mustBe Json.obj(
-        "code"    -> "INVALID_REQUEST",
-        "message" -> "CorrelationId is required"
-      )
+      exception.message mustBe "CorrelationId is required"
+      exception.responseCode mustBe BAD_REQUEST
     }
 
     "return 400 (Bad Request) when CorrelationId is malformed" in new Setup {
       val requestBody =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-31"}""")
-      val eventualResult = sandboxController.matchCitizen()(
-        fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", "fakeCorrelationId")))
 
-      status(eventualResult) mustBe BAD_REQUEST
-      contentAsJson(eventualResult) mustBe Json.obj(
-        "code"    -> "INVALID_REQUEST",
-        "message" -> "Malformed CorrelationId"
-      )
+      val exception = intercept[BadRequestException](
+        sandboxController.matchCitizen()(
+          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", "fakeCorrelationId"))))
+
+      exception.message mustBe "Malformed CorrelationId"
+      exception.responseCode mustBe BAD_REQUEST
     }
   }
 
