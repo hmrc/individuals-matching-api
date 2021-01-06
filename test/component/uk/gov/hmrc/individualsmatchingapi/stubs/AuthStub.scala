@@ -28,7 +28,7 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 object AuthStub extends MockHost(22000) {
 
   def authPredicate(scopes: Iterable[String]): Predicate =
-    scopes.map(Enrolment(_): Predicate).reduce(_ and _)
+    scopes.map(Enrolment(_): Predicate).reduce(_ or _)
 
   private def privilegedAuthority(scope: String) = obj(
     "authorise" -> arr(toJson(Enrolment(scope))),

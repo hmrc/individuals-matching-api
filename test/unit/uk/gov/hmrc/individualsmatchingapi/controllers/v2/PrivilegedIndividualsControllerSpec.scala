@@ -17,7 +17,6 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import java.util.UUID
-
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{verifyZeroInteractions, when}
@@ -31,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.{LivePrivilegedIndividualsController, SandboxPrivilegedIndividualsController}
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
@@ -125,22 +124,25 @@ class PrivilegedIndividualsControllerSpec
       when(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
         .thenReturn(failed(new MatchNotFoundException))
 
-      val eventualResult =
-        liveController.matchedIndividual(uuid.toString).apply(FakeRequest().withHeaders(("CorrelationId", "test")))
-      status(eventualResult) mustBe BAD_REQUEST
-      contentAsJson(eventualResult) mustBe Json.parse(
-        """{"code":"INVALID_REQUEST","message":"Malformed CorrelationId"}""")
+      val exception =
+        intercept[BadRequestException](
+          liveController
+            .matchedIndividual(uuid.toString)
+            .apply(FakeRequest().withHeaders(("CorrelationId", "test"))))
+
+      exception.message mustBe "Malformed CorrelationId"
+      exception.responseCode mustBe BAD_REQUEST
     }
 
     "respond with http 400 (Bad Request) for a missing CorrelationId" in new Setup {
       when(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
         .thenReturn(failed(new MatchNotFoundException))
 
-      val eventualResult =
-        liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
-      status(eventualResult) mustBe BAD_REQUEST
-      contentAsJson(eventualResult) mustBe Json.parse(
-        """{"code":"INVALID_REQUEST","message":"CorrelationId is required"}""")
+      val exception =
+        intercept[BadRequestException](liveController.matchedIndividual(uuid.toString).apply(FakeRequest()))
+
+      exception.message mustBe "CorrelationId is required"
+      exception.responseCode mustBe BAD_REQUEST
     }
   }
 
