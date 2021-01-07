@@ -50,7 +50,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
     when(configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds")).thenReturn(None)
     when(configuration.getOptional[String]("api.access.version-1.0.accessType"))
       .thenReturn(None)
-    when(configuration.getOptional[Seq[String]]("api.access.version-P2.0.whitelistedApplicationIds"))
+    when(configuration.getOptional[Seq[String]]("api.access.version-2.0.whitelistedApplicationIds"))
       .thenReturn(None)
   }
 
@@ -86,7 +86,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
     }
 
     "return whitelisted applications from the configuration" in new Setup {
-      when(configuration.getOptional[Seq[String]]("api.access.version-P2.0.whitelistedApplicationIds"))
+      when(configuration.getOptional[Seq[String]]("api.access.version-2.0.whitelistedApplicationIds"))
         .thenReturn(Some(Seq("appVP2")))
       when(configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds"))
         .thenReturn(Some(Seq("appVP1")))
@@ -99,7 +99,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
         .as[Seq[String]] shouldBe Seq("appV1")
       (apiVersion(result, "P1.0") \ "access" \ "whitelistedApplicationIds")
         .as[Seq[String]] shouldBe Seq("appVP1")
-      (apiVersion(result, "P2.0") \ "access" \ "whitelistedApplicationIds")
+      (apiVersion(result, "2.0") \ "access" \ "whitelistedApplicationIds")
         .as[Seq[String]] shouldBe Seq("appVP2")
     }
   }
