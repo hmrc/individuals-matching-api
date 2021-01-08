@@ -69,7 +69,7 @@
     "context": "individuals/matching",
     "versions": [
       {
-        "version": "P2.0",
+        "version": "2.0",
         "status": "PUBLISHED",
         "access" : {"type":"PRIVATE", "whitelistedApplicationIds": @Json.toJson(whitelistedApplicationIdsVP2)}
       },
