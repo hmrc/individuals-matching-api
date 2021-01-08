@@ -2,8 +2,8 @@
 
 ->         /vP1.0/sandbox          sandbox_version_P1_0.Routes
 ->         /vP1.0                  api_version_P1_0.Routes
-->         /vP2.0/sandbox          sandbox_version_P2_0.Routes
-->         /vP2.0                  api_version_P2_0.Routes
+->         /v2.0/sandbox           sandbox_version_2_0.Routes
+->         /v2.0                   api_version_2_0.Routes
 ->         /                       app.Routes
 ->         /                       definition.Routes
 ->         /                       health.Routes
