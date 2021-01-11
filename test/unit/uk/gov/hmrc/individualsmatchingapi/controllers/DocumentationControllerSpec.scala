@@ -52,6 +52,8 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
       .thenReturn(None)
     when(configuration.getOptional[Seq[String]]("api.access.version-2.0.whitelistedApplicationIds"))
       .thenReturn(None)
+    when(configuration.getOptional[String]("api.access.version-2.0.status")).thenReturn(None)
+    when(configuration.getOptional[Boolean]("api.access.version-2.0.endpointsEnabled")).thenReturn(None)
   }
 
   "/api/definition" should {
@@ -85,9 +87,46 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
         .as[String] shouldBe "PUBLIC"
     }
 
+    "return 2.0 as BETA when api.access.version-2.0.status is not set" in new Setup {
+
+      val result = await(underTest.definition()(request))
+
+      (apiVersion(result, "2.0") \ "status")
+        .as[String] shouldBe "BETA"
+    }
+
+    "return 2.0 as ALPHA when api.access.version-2.0.status is set" in new Setup {
+      given(configuration.getOptional[String]("api.access.version-2.0.status"))
+        .willReturn(Some("ALPHA"))
+
+      val result = await(underTest.definition()(request))
+
+      (apiVersion(result, "2.0") \ "status")
+        .as[String] shouldBe "ALPHA"
+    }
+
+    "return endpoints enabled true when api.access.version-2.0.endpointsEnabled is not set" in new Setup {
+
+      val result = await(underTest.definition()(request))
+
+      (apiVersion(result, "2.0") \ "endpointsEnabled")
+        .as[Boolean] shouldBe true
+    }
+
+    "return endpoints enabled false when api.access.version-2.0.endpointsEnabled is set" in new Setup {
+
+      given(configuration.getOptional[Boolean]("api.access.version-2.0.endpointsEnabled"))
+        .willReturn(Some(false))
+
+      val result = await(underTest.definition()(request))
+
+      (apiVersion(result, "2.0") \ "endpointsEnabled")
+        .as[Boolean] shouldBe false
+    }
+
     "return whitelisted applications from the configuration" in new Setup {
       when(configuration.getOptional[Seq[String]]("api.access.version-2.0.whitelistedApplicationIds"))
-        .thenReturn(Some(Seq("appVP2")))
+        .thenReturn(Some(Seq("appV2")))
       when(configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds"))
         .thenReturn(Some(Seq("appVP1")))
       when(configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds"))
@@ -100,7 +139,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
       (apiVersion(result, "P1.0") \ "access" \ "whitelistedApplicationIds")
         .as[Seq[String]] shouldBe Seq("appVP1")
       (apiVersion(result, "2.0") \ "access" \ "whitelistedApplicationIds")
-        .as[Seq[String]] shouldBe Seq("appVP2")
+        .as[Seq[String]] shouldBe Seq("appV2")
     }
   }
 
