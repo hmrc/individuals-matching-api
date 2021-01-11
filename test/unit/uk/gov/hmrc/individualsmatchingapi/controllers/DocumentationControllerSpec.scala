@@ -95,7 +95,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
         .as[String] shouldBe "BETA"
     }
 
-    "return 2.0 as ALPHA when api.access.version-2.0.status is not set" in new Setup {
+    "return 2.0 as ALPHA when api.access.version-2.0.status is set" in new Setup {
       given(configuration.getOptional[String]("api.access.version-2.0.status"))
         .willReturn(Some("ALPHA"))
 
@@ -113,7 +113,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
         .as[Boolean] shouldBe true
     }
 
-    "return endpoints enabled false when api.access.version-2.0.endpointsEnabled is not set" in new Setup {
+    "return endpoints enabled false when api.access.version-2.0.endpointsEnabled is set" in new Setup {
 
       given(configuration.getOptional[Boolean]("api.access.version-2.0.endpointsEnabled"))
         .willReturn(Some(false))
