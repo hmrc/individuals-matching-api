@@ -82,7 +82,7 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
     else {
       authorised(authPredicate(endpointScopes))
         .retrieve(Retrievals.allEnrolments) {
-          case scopes => f(scopes.enrolments.map(e => e.key))
+          case scopes => f(scopes.enrolments.map(e => e.key).toList)
         }
     }
   }

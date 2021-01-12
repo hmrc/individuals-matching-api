@@ -56,9 +56,10 @@ trait BaseSpec
   val mocks = Seq(AuthStub, CitizenDetailsStub, MatchingStub)
   val mongoRepository = app.injector.instanceOf[NinoMatchRepository]
   val authToken = "Bearer AUTH_TOKEN"
+
   val acceptHeaderV1 = ACCEPT                        -> "application/vnd.hmrc.1.0+json"
   val acceptHeaderP1 = ACCEPT                        -> "application/vnd.hmrc.P1.0+json"
-  val acceptHeaderP2 = ACCEPT                        -> "application/vnd.hmrc.P2.0+json"
+  val acceptHeaderP2 = ACCEPT                        -> "application/vnd.hmrc.2.0+json"
   val testCorrelationHeader = "CorrelationId"        -> "188e9400-b636-4a3b-80ba-230a8c72b92a"
   val invalidTestCorrelationHeader = "CorrelationId" -> "test"
 

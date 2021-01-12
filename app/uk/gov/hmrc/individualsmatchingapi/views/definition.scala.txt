@@ -1,11 +1,68 @@
 @import play.api.libs.json.Json
-@(whitelistedApplicationIdsVP1: Seq[String], whitelistedApplicationIdsVP2: Seq[String], accessTypeV1: String, whitelistedApplicationIdsV1: Seq[String])
+@(
+  whitelistedApplicationIdsVP1: Seq[String],
+  whitelistedApplicationIdsVP2: Seq[String],
+  accessTypeV1: String,
+  whitelistedApplicationIdsV1: Seq[String],
+  v2EndpointsEnabled: Boolean,
+  v2Status: String
+)
 {
   "scopes": [
     {
       "key": "read:individuals-matching",
       "name": "match individual from their details",
       "description": "Match individual from their details"
+    },
+    {
+      "key": "read:individuals-matching-laa-c1",
+      "name": "match individual from their details for laa use case 1",
+      "description": "Scope for LAA use case 1 to match an individual from their details"
+    },
+    {
+      "key": "read:individuals-matching-laa-c2",
+      "name": "match individual from their details for laa use case 2",
+      "description": "Scope for LAA use case 2 to match an individual from their details"
+    },
+    {
+      "key": "read:individuals-matching-laa-c3",
+      "name": "match individual from their details for laa use case 3",
+      "description": "Scope for LAA use case 3 to match an individual from their details"
+    },
+    {
+      "key": "read:individuals-matching-laa-c4",
+      "name": "match individual from their details for laa use case 4",
+      "description": "Scope for LAA use case 4 to match an individual from their details"
+    },
+    {
+      "key": "read:individuals-matching-hmcts-c2",
+      "name": "match individual from their details for hmcts use case 2",
+      "description": "Scope for HMCTS use case 2 to match an individual from their details"
+    },
+    {
+      "key": "read:individuals-matching-hmcts-c3",
+      "name": "match individual from their details for hmcts use case 3",
+      "description": "Scope for HMCTS use case 3 to match an individual from their details"
+    },
+    {
+      "key": "read:individuals-matching-hmcts-c4",
+      "name": "match individual from their details for hmcts use case 4",
+      "description": "Scope for HMCTS use case 4 to match an individual from their details"
+    },
+    {
+      "key": "read:individuals-matching-lsani-c1",
+      "name": "match individual from their details for lsani use case 1",
+      "description": "Scope for LSANI use case 1 to match an individual from their details"
+    },
+    {
+      "key": "read:individuals-matching-lsani-c3",
+      "name": "match individual from their details for lsani use case 3",
+      "description": "Scope for LSANI use case 3 to match an individual from their details"
+    },
+    {
+      "key": "read:individuals-matching-nictsejo-c4",
+      "name": "match individual from their details for nictsejo use case 4",
+      "description": "Scope for NICTSEJO use case 4 to match an individual from their details"
     },
     {
       "key": "read:the-scopes-you-have-been-assigned",
@@ -19,11 +76,6 @@
     "context": "individuals/matching",
     "versions": [
       {
-        "version": "P2.0",
-        "status": "PUBLISHED",
-        "access" : {"type":"PRIVATE", "whitelistedApplicationIds": @Json.toJson(whitelistedApplicationIdsVP2)}
-      },
-      {
         "version": "P1.0",
         "status": "PUBLISHED",
         "access" : {"type":"PRIVATE", "whitelistedApplicationIds": @Json.toJson(whitelistedApplicationIdsVP1)}
@@ -32,6 +84,12 @@
         "version": "1.0",
         "status": "PUBLISHED",
         "access" : {"type":"@accessTypeV1", "whitelistedApplicationIds": @Json.toJson(whitelistedApplicationIdsV1)}
+      },
+      {
+        "version": "2.0",
+        "status":@Json.toJson(v2Status),
+        "endpointsEnabled":@Json.toJson(v2EndpointsEnabled),
+        "access" : {"type":"PRIVATE", "whitelistedApplicationIds": @Json.toJson(whitelistedApplicationIdsVP2)}
       }
     ]
   }
