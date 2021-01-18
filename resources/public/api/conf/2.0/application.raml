@@ -28,8 +28,8 @@ uses:
   /:
     post:
       (annotations.sandboxData): !include sandbox/match-request.md
-      (annotations.scope): "read:the-scopes-you-have-been-assigned"
-      securedBy: [ sec.oauth_2_0: { scopes: [ "read:the-scopes-you-have-been-assigned" ] } ]
+      (annotations.scope): "assigned"
+      securedBy: [ sec.oauth_2_0: { scopes: [ "assigned" ] } ]
       displayName: Match an individual's details against HMRC data
       description: !include docs/match-endpoint-description.md
       is: [headers.acceptHeader]
@@ -83,8 +83,8 @@ uses:
       displayName: Retrieve matched individual's details
       description: !include docs/matched-individual-endpoint-description.md
       is: [headers.acceptHeader]
-      (annotations.scope): "read:the-scopes-you-have-been-assigned"
-      securedBy: [ sec.oauth_2_0: { scopes: [ "read:the-scopes-you-have-been-assigned" ] } ]
+      (annotations.scope): "assigned"
+      securedBy: [ sec.oauth_2_0: { scopes: [ "assigned" ] } ]
       (annotations.sandboxData): !include sandbox/matched-individual-request.md
       headers:
         Authorization:
