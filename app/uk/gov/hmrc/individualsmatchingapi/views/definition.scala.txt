@@ -65,7 +65,7 @@
       "description": "Scope for NICTSEJO use case 4 to match an individual from their details"
     },
     {
-      "key": "read:the-scopes-you-have-been-assigned",
+      "key": "assigned",
       "name": "The scopes you have been assigned",
       "description": "An OAuth 2.0 Bearer Token with the scopes you have been assigned"
     }
