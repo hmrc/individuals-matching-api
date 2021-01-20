@@ -34,16 +34,10 @@ uses:
       description: !include docs/match-endpoint-description.md
       is: [headers.acceptHeader]
       headers:
-        Authorization:
-          description: OAuth 2.0 Bearer Token with the scopes you have been assigned.
+        correlationId:
+          description: A UUID, used for traceability purposes.
           type: string
-          required: true
-          example: Bearer <BEARER_TOKEN>
-        Content-Type:
-          description: Specifies the content-type of the body.
-          type: string
-          required: true
-          example: application/json
+          example: 58072660-1df9-4deb-b4ca-cd2d7f96e480
       body:
         application/json:
           type: !include schemas/match-request.json
@@ -87,11 +81,10 @@ uses:
       securedBy: [ sec.oauth_2_0: { scopes: [ "assigned" ] } ]
       (annotations.sandboxData): !include sandbox/matched-individual-request.md
       headers:
-        Authorization:
-          description: OAuth 2.0 Bearer Token with the scopes you have been assigned.
+        correlationId:
+          description: A UUID, used for traceability purposes.
           type: string
-          required: true
-          example: Bearer <BEARER_TOKEN>
+          example: 58072660-1df9-4deb-b4ca-cd2d7f96e480
       responses:
         200:
           description: The individual's details for the given match id

@@ -5,40 +5,45 @@
   "properties": {
     "_links": {
       "type": "object",
+      "description": "A list of links for possible actions related to this endpoint.",
       "properties": {
         "income": {
           "type": "object",
-          "description": "The Uniform Resource Identifier (URI) for the endpoint to get an individual's income data",
+          "description": "The Uniform Resource Identifier (URI) for the endpoint to get the individual's income data.",
           "properties": {
             "href": {
               "type": "string",
+              "description": "The URL of the endpoint.",
               "example": "/individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
             },
             "name": {
               "type": "string",
+              "description": "The HTTP Action to use on this endpoint.",
               "example": "GET"
             },
             "title": {
               "type": "string",
-              "example": "Get an individual's income data"
+              "description": "Get the individual's income data"
             }
           }
         },
         "employments": {
           "type": "object",
-          "description": "The URI for the endpoint to get an individual's employment data.",
+          "description": "The URI for the endpoint to get the individual's employment data.",
           "properties": {
             "href": {
               "type": "string",
+              "description": "The URL of the endpoint.",
               "example": "/individuals/employments/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
             },
             "name": {
               "type": "string",
+              "description": "The HTTP Action to use on this endpoint.",
               "example": "GET"
             },
             "title": {
               "type": "string",
-              "example": "Get an individual's employment data"
+              "description": "Get the individual's employment data"
             }
           }
         },
@@ -48,15 +53,17 @@
           "properties": {
             "href": {
               "type": "string",
+              "description": "The URL of the endpoint.",
               "example": "/individuals/benefits-and-credits/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
             },
             "name": {
               "type": "string",
+              "description": "The HTTP Action to use on this endpoint.",
               "example": "GET"
             },
             "title": {
               "type": "string",
-              "example": "Get an individual's benefits and credits data"
+              "description": "Get the individual's details"
             }
           }
         },
@@ -66,10 +73,12 @@
           "properties": {
             "href": {
               "type": "string",
+              "description": "The URL of the endpoint.",
               "example": "/individuals/details/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430"
             },
             "name": {
               "type": "string",
+              "description": "The HTTP Action to use on this endpoint.",
               "example": "GET"
             },
             "title": {
@@ -80,10 +89,11 @@
         },
         "self": {
           "type": "object",
-          "description": "The URI to this resource",
+          "description": "The URI for this endpoint.",
           "properties": {
             "href": {
               "type": "string",
+              "description": "The URL of the endpoint.",
               "example": "/individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430"
             }
           },
@@ -98,21 +108,21 @@
       "properties": {
         "firstName": {
           "type": "string",
-          "description": "The individual's first name"
+          "description": "The individual's first name."
         },
         "lastName": {
           "type": "string",
-          "description": "The individual's last name"
+          "description": "The individual's last name."
         },
         "nino": {
           "type": "string",
           "format": "NINO",
-          "description": "The individual's national insurance number"
+          "description": "The individual's National Insurance number."
         },
         "dateOfBirth": {
           "type": "string",
           "format": "date",
-          "description": "The individual's date of birth"
+          "description": "The individual's date of birth. In the format: YYYY-MM-DD"
         }
       },
       "required": ["firstName", "lastName", "nino", "dateOfBirth"]
