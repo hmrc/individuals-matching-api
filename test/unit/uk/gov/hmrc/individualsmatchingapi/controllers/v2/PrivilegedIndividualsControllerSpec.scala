@@ -17,7 +17,6 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import java.util.UUID
-
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{verifyZeroInteractions, when}
@@ -31,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.{LivePrivilegedIndividualsController, SandboxPrivilegedIndividualsController}
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
@@ -47,6 +46,7 @@ class PrivilegedIndividualsControllerSpec
 
   implicit val headerCarrier = new HeaderCarrier()
   val uuid = UUID.randomUUID()
+  val sampleCorrelationId = "188e9400-b636-4a3b-80ba-230a8c72b92a"
 
   trait Setup extends ScopesConfigHelper {
 
@@ -82,7 +82,9 @@ class PrivilegedIndividualsControllerSpec
         .thenReturn(failed(new MatchNotFoundException))
 
       val eventualResult =
-        liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
+        liveController
+          .matchedIndividual(uuid.toString)
+          .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId)))
       status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.parse(
         """{"code":"NOT_FOUND","message":"The resource can not be found"}""")
@@ -92,7 +94,9 @@ class PrivilegedIndividualsControllerSpec
       given(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
         .willReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult =
-        liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
+        liveController
+          .matchedIndividual(uuid.toString)
+          .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId)))
       status(eventualResult) mustBe OK
       contentAsJson(eventualResult) mustBe Json.parse(response(uuid, "Joe", "Bloggs", "AB123456C", "1969-01-15"))
     }
@@ -107,10 +111,38 @@ class PrivilegedIndividualsControllerSpec
         .thenReturn(failed(new MatchNotFoundException))
 
       intercept[InsufficientEnrolments] {
-        await(liveController.matchedIndividual(uuid.toString).apply(FakeRequest()))
+        await(
+          liveController
+            .matchedIndividual(uuid.toString)
+            .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId))))
       }
 
       verifyZeroInteractions(mockCitizenMatchingService)
+    }
+
+    "respond with http 400 (Bad Request) for a malformed CorrelationId" in new Setup {
+      when(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
+        .thenReturn(failed(new MatchNotFoundException))
+
+      val exception =
+        intercept[BadRequestException](
+          liveController
+            .matchedIndividual(uuid.toString)
+            .apply(FakeRequest().withHeaders(("CorrelationId", "test"))))
+
+      exception.message mustBe "Malformed CorrelationId"
+      exception.responseCode mustBe BAD_REQUEST
+    }
+
+    "respond with http 400 (Bad Request) for a missing CorrelationId" in new Setup {
+      when(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
+        .thenReturn(failed(new MatchNotFoundException))
+
+      val exception =
+        intercept[BadRequestException](liveController.matchedIndividual(uuid.toString).apply(FakeRequest()))
+
+      exception.message mustBe "CorrelationId is required"
+      exception.responseCode mustBe BAD_REQUEST
     }
   }
 
@@ -118,7 +150,9 @@ class PrivilegedIndividualsControllerSpec
 
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
       val eventualResult =
-        sandboxController.matchedIndividual(uuid.toString).apply(FakeRequest())
+        sandboxController
+          .matchedIndividual(uuid.toString)
+          .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId)))
       status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.parse(
         """{"code":"NOT_FOUND","message":"The resource can not be found"}""")
@@ -127,7 +161,7 @@ class PrivilegedIndividualsControllerSpec
     "respond with http 200 (ok) for sandbox valid matchId and citizen details exist" in new Setup {
       val eventualResult = sandboxController
         .matchedIndividual(sandboxMatchId.toString)
-        .apply(FakeRequest())
+        .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId)))
       status(eventualResult) mustBe OK
       contentAsJson(eventualResult) mustBe Json.parse(response(sandboxMatchId))
     }
@@ -135,7 +169,7 @@ class PrivilegedIndividualsControllerSpec
     "not require bearer token authentication" in new Setup {
       val eventualResult = sandboxController
         .matchedIndividual(sandboxMatchId.toString)
-        .apply(FakeRequest())
+        .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId)))
       status(eventualResult) mustBe OK
       verifyZeroInteractions(mockAuthConnector)
     }

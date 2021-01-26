@@ -17,10 +17,9 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
 import java.util.UUID
-
 import javax.inject.Inject
 import play.api.libs.json._
-import play.api.mvc.{ControllerComponents, Request, Result}
+import play.api.mvc.{AnyContent, ControllerComponents, Request, Result}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolment}

@@ -16,8 +16,16 @@
 
 package uk.gov.hmrc.individualsmatchingapi.play
 
+import java.util.UUID
+
 import play.api.http.HeaderNames.ACCEPT
-import play.api.mvc.RequestHeader
+import play.api.mvc.{Request, RequestHeader, Result}
+import uk.gov.hmrc.http.BadRequestException
+import uk.gov.hmrc.individualsmatchingapi.domain.ErrorInvalidRequest
+
+import scala.concurrent.Future
+import scala.concurrent.Future.successful
+import scala.util.{Success, Try}
 
 object RequestHeaderUtils {
 
@@ -27,6 +35,16 @@ object RequestHeaderUtils {
 
   def extractUriContext(requestHeader: RequestHeader) =
     (uriRegex.findFirstMatchIn(requestHeader.uri) map (_.group(1))).get
+
+  def extractCorrelationId(requestHeader: RequestHeader) =
+    requestHeader.headers.get("CorrelationId") match {
+      case Some(uuidString) =>
+        Try(UUID.fromString(uuidString)) match {
+          case Success(_) => UUID.fromString(uuidString)
+          case _          => throw new BadRequestException("Malformed CorrelationId")
+        }
+      case None => throw new BadRequestException("CorrelationId is required")
+    }
 
   def getVersionedRequest(originalRequest: RequestHeader) = {
     val version = getVersion(originalRequest)

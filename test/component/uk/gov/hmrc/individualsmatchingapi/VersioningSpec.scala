@@ -78,7 +78,11 @@ class VersioningSpec extends BaseSpec {
     scenario("Requests with an accept header version P2") {
 
       When("A request to the match citizen endpoint is made with version P2 accept header")
-      val response = invokeWithHeaders(s"/sandbox/$sandboxMatchId", AUTHORIZATION -> authToken, acceptHeaderP2)
+      val response = invokeWithHeaders(
+        s"/sandbox/$sandboxMatchId",
+        AUTHORIZATION -> authToken,
+        acceptHeaderP2,
+        testCorrelationHeader)
 
       Then("The response status should be 200 (Ok)")
       response.code shouldBe OK
