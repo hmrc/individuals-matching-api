@@ -77,7 +77,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
                "individual": {
                  "href": "/individuals/matching/$sandboxMatchId",
                  "name": "GET",
-                 "title": "Individual Details"
+                 "title": "Get a matched individual’s information"
                },
                "self": {
                  "href": "/individuals/matching/"
@@ -119,7 +119,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
                "individual": {
                  "href": "/individuals/matching/${ninoMatchRecords.head.id}",
                  "name": "GET",
-                 "title": "Individual Details"
+                 "title": "Get a matched individual’s information"
                },
                "self": {
                  "href": "/individuals/matching/"

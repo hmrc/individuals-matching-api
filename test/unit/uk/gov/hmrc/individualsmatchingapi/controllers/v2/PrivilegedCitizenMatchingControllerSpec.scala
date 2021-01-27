@@ -96,7 +96,7 @@ class PrivilegedCitizenMatchingControllerSpec
                  "individual": {
                    "href": "/individuals/matching/$matchId",
                    "name": "GET",
-                   "title": "Individual Details"
+                   "title": "Get a matched individual’s information"
                  },
                  "self": {
                    "href": "/individuals/matching/"
@@ -336,7 +336,7 @@ class PrivilegedCitizenMatchingControllerSpec
                  "individual": {
                    "href": "/individuals/matching/$sandboxMatchId",
                    "name": "GET",
-                   "title": "Individual Details"
+                   "title": "Get a matched individual’s information"
                  },
                  "self": {
                    "href": "/individuals/matching/"
