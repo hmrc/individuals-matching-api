@@ -3,22 +3,22 @@
     "income": {
       "href": "/individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430",
       "name": "GET",
-      "title": "View individual's income"
+      "title": "Get the individual's income data"
     },
     "employments": {
       "href": "/individuals/employments/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430",
       "name": "GET",
-      "title": "View individual's employments"
+      "title": "Get the individual's employment data"
     },
     "benefits-and-credits": {
       "href": "/individuals/benefits-and-credits/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430",
       "name": "GET",
-      "title": "View individual's benefits and credits"
+      "title": "Get the individual's benefits and credits data"
     },
     "details": {
       "href": "/individuals/details/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430",
       "name": "GET",
-      "title": "View individual's details"
+      "title": "Get the individual's details"
     },
     "self": {
       "href": "/individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430"
