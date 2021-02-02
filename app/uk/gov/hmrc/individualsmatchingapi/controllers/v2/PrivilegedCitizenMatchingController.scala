@@ -51,7 +51,7 @@ abstract class PrivilegedCitizenMatchingController(
             "individual",
             s"/individuals/matching/$matchId",
             name = Option("GET"),
-            title = Option("Individual Details"))
+            title = Option("Get a matched individual’s information"))
           Ok(links(selfLink, individualLink))
         }
       } recover recovery

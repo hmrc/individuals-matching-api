@@ -63,7 +63,7 @@
             },
             "title": {
               "type": "string",
-              "description": "Get the individual's details"
+              "description": "Get the individual's benefits and credits data"
             }
           }
         },

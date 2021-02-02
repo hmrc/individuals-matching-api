@@ -95,22 +95,22 @@ class VersioningSpec extends BaseSpec {
                 "benefits-and-credits": {
                   "href": "/individuals/benefits-and-credits/?matchId=$sandboxMatchId",
                   "name": "GET",
-                  "title": "View individual's benefits and credits"
+                  "title": "Get the individual's benefits and credits data"
                 },
                 "details": {
                   "href": "/individuals/details/?matchId=$sandboxMatchId",
                   "name": "GET",
-                  "title": "View individual's details"
+                  "title": "Get the individual's details"
                 },
                 "employments": {
                   "href": "/individuals/employments/?matchId=$sandboxMatchId",
                   "name": "GET",
-                  "title": "View individual's employments"
+                  "title": "Get the individual's employment data"
                 },
                 "income": {
                   "href": "/individuals/income/?matchId=$sandboxMatchId",
                   "name": "GET",
-                  "title": "View individual's income"
+                  "title": "Get the individual's income data"
                 },
                 "self": {
                   "href"  : "/individuals/matching/$sandboxMatchId"
