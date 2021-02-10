@@ -110,12 +110,15 @@ class PrivilegedIndividualsControllerSpec
       when(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
         .thenReturn(failed(new MatchNotFoundException))
 
-      intercept[InsufficientEnrolments] {
-        await(
-          liveController
-            .matchedIndividual(uuid.toString)
-            .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId))))
-      }
+      val eventualResult = liveController
+        .matchedIndividual(uuid.toString)
+        .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId)))
+
+      status(eventualResult) mustBe UNAUTHORIZED
+      contentAsJson(eventualResult) mustBe Json.obj(
+        "code"    -> "UNAUTHORIZED",
+        "message" -> "Insufficient Enrolments"
+      )
 
       verifyZeroInteractions(mockCitizenMatchingService)
     }

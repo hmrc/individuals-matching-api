@@ -54,8 +54,8 @@ abstract class PrivilegedCitizenMatchingController(
             title = Option("Get a matched individual’s information"))
           Ok(links(selfLink, individualLink))
         }
-      } recover recovery
-    }
+      }
+    } recover recoveryV2
   }
 }
 
