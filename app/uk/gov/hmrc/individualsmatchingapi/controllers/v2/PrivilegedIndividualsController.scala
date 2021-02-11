@@ -16,39 +16,52 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
-import javax.inject.{Inject, Singleton}
-import play.api.hal.Hal.{links, linksSeq, state}
-import play.api.hal.{HalLink, HalResource}
-import play.api.libs.json.JsValue
-import play.api.mvc.hal._
+import play.api.hal.Hal.{linksSeq, state}
+import play.api.hal.HalLink
+import play.api.libs.json.Json
 import play.api.libs.json.Json.{obj, toJson}
 import play.api.mvc.ControllerComponents
+import play.api.mvc.hal._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
+import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
-import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.extractCorrelationId
+import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
+import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.{maybeCorrelationId, validateCorrelationId}
 import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 abstract class PrivilegedIndividualsController(
   citizenMatchingService: CitizenMatchingService,
   scopeService: ScopesService,
+  implicit val auditHelper: AuditHelper,
   cc: ControllerComponents)(implicit val ec: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
   def matchedIndividual(matchId: String) = Action.async { implicit request =>
-    extractCorrelationId(request)
-    requiresPrivilegedAuthentication(scopeService.getAllScopes) { authScopes =>
+    authenticate(scopeService.getAllScopes, matchId) { authScopes =>
+      val correlationId = validateCorrelationId(request)
+
       withUuid(matchId) { matchUuid =>
         citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
           val selfLink = HalLink("self", s"/individuals/matching/$matchId")
           val data = obj("individual" -> toJson(citizenDetails))
-          Ok(state(data) ++ linksSeq(getApiLinks(matchId, authScopes) ++ Seq(selfLink)))
+          val response = state(data) ++ linksSeq(getApiLinks(matchId, authScopes) ++ Seq(selfLink))
+
+          auditHelper.auditApiResponse(
+            correlationId.toString,
+            matchId,
+            Some(scopeService.getAllScopes.mkString(",")),
+            request,
+            selfLink.toString,
+            Json.toJson(response))
+
+          Ok(response)
         }
-      } recover recovery
-    }
+      }
+    } recover recoveryWithAudit(maybeCorrelationId(request), request.body.toString, s"/individuals/matching/$matchId")
   }
 
   private def getApiLinks(matchId: String, scopes: Iterable[String]): Seq[HalLink] =
@@ -69,8 +82,9 @@ class LivePrivilegedIndividualsController @Inject()(
   liveCitizenMatchingService: LiveCitizenMatchingService,
   scopeService: ScopesService,
   val authConnector: AuthConnector,
+  auditHelper: AuditHelper,
   cc: ControllerComponents)(override implicit val ec: ExecutionContext)
-    extends PrivilegedIndividualsController(liveCitizenMatchingService, scopeService, cc) {
+    extends PrivilegedIndividualsController(liveCitizenMatchingService, scopeService, auditHelper, cc) {
   override val environment = PRODUCTION
 }
 
@@ -79,7 +93,8 @@ class SandboxPrivilegedIndividualsController @Inject()(
   sandboxCitizenMatchingService: SandboxCitizenMatchingService,
   scopeService: ScopesService,
   val authConnector: AuthConnector,
+  auditHelper: AuditHelper,
   cc: ControllerComponents)(override implicit val ec: ExecutionContext)
-    extends PrivilegedIndividualsController(sandboxCitizenMatchingService, scopeService, cc) {
+    extends PrivilegedIndividualsController(sandboxCitizenMatchingService, scopeService, auditHelper, cc) {
   override val environment = SANDBOX
 }

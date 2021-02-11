@@ -26,14 +26,14 @@ sealed abstract class ErrorResponse(val httpStatusCode: Int, val errorCode: Stri
   def toHttpResponse = Results.Status(httpStatusCode)(Json.toJson(this))
 }
 
-case class ErrorInvalidRequest(errorMessage: String) extends ErrorResponse(BAD_REQUEST, "INVALID_REQUEST", errorMessage)
-case object ErrorUnauthorized
-    extends ErrorResponse(UNAUTHORIZED, "UNAUTHORIZED", "Bearer token is missing or not authorized")
 case object ErrorMatchingFailed
     extends ErrorResponse(FORBIDDEN, "MATCHING_FAILED", "There is no match for the information provided")
-case object ErrorInternalServer
-    extends ErrorResponse(INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "Failed to process request")
+case class ErrorInvalidRequest(errorMessage: String) extends ErrorResponse(BAD_REQUEST, "INVALID_REQUEST", errorMessage)
+case class ErrorUnauthorized(errorMessage: String) extends ErrorResponse(UNAUTHORIZED, "UNAUTHORIZED", errorMessage)
+case class ErrorInternalServer(errorMessage: String = "Failed to process request")
+    extends ErrorResponse(INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", errorMessage)
 case object ErrorNotFound extends ErrorResponse(NOT_FOUND, "NOT_FOUND", "The resource can not be found")
+case object ErrorTooManyRequests extends ErrorResponse(TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS", "Rate limit exceeded")
 
 class ValidationException(message: String) extends RuntimeException(message)
 class MatchingException extends RuntimeException
@@ -41,3 +41,4 @@ class CitizenNotFoundException extends RuntimeException
 class InvalidNinoException extends RuntimeException
 class MatchNotFoundException extends RuntimeException
 class NotImplementedException extends RuntimeException
+class InvalidBodyException(message: String) extends RuntimeException(message)
