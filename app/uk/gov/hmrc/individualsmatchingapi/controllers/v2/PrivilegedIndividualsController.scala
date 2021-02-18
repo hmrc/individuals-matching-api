@@ -47,8 +47,8 @@ abstract class PrivilegedIndividualsController(
           val data = obj("individual" -> toJson(citizenDetails))
           Ok(state(data) ++ linksSeq(getApiLinks(matchId, authScopes) ++ Seq(selfLink)))
         }
-      } recover recovery
-    }
+      }
+    } recover recoveryV2
   }
 
   private def getApiLinks(matchId: String, scopes: Iterable[String]): Seq[HalLink] =

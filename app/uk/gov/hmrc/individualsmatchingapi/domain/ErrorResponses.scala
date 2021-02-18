@@ -27,8 +27,8 @@ sealed abstract class ErrorResponse(val httpStatusCode: Int, val errorCode: Stri
 }
 
 case class ErrorInvalidRequest(errorMessage: String) extends ErrorResponse(BAD_REQUEST, "INVALID_REQUEST", errorMessage)
-case object ErrorUnauthorized
-    extends ErrorResponse(UNAUTHORIZED, "UNAUTHORIZED", "Bearer token is missing or not authorized")
+case class ErrorUnauthorized(errorMessage: String = "Bearer token is missing or not authorized")
+    extends ErrorResponse(UNAUTHORIZED, "UNAUTHORIZED", errorMessage)
 case object ErrorMatchingFailed
     extends ErrorResponse(FORBIDDEN, "MATCHING_FAILED", "There is no match for the information provided")
 case object ErrorInternalServer

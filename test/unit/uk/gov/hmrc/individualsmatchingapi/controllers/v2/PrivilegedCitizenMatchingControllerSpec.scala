@@ -310,11 +310,15 @@ class PrivilegedCitizenMatchingControllerSpec
       given(mockAuthConnector.authorise(any(), refEq(Retrievals.allEnrolments))(any(), any()))
         .willReturn(failed(new InsufficientEnrolments()))
 
-      intercept[InsufficientEnrolments] {
-        await(
-          liveController.matchCitizen()(
-            fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId))))
-      }
+      val eventualResult =
+        liveController.matchCitizen()(
+          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
+
+      status(eventualResult) mustBe UNAUTHORIZED
+      contentAsJson(eventualResult) mustBe Json.obj(
+        "code"    -> "UNAUTHORIZED",
+        "message" -> "Insufficient Enrolments"
+      )
 
       verifyZeroInteractions(mockLiveCitizenMatchingService)
     }

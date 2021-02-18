@@ -17,12 +17,13 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
 import java.util.UUID
+
 import javax.inject.Inject
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, ControllerComponents, Request, Result}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolment}
+import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrolment, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
 import uk.gov.hmrc.individualsmatchingapi.domain._
@@ -59,6 +60,20 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
   private[controllers] def recovery: PartialFunction[Throwable, Result] = {
     case _: CitizenNotFoundException | _: InvalidNinoException | _: MatchingException =>
       ErrorMatchingFailed.toHttpResponse
+    case _: MatchNotFoundException => ErrorNotFound.toHttpResponse
+    case e: IllegalArgumentException =>
+      ErrorInvalidRequest(e.getMessage).toHttpResponse
+  }
+
+  private[controllers] def recoveryV2: PartialFunction[Throwable, Result] = {
+    case _: CitizenNotFoundException | _: InvalidNinoException | _: MatchingException =>
+      ErrorMatchingFailed.toHttpResponse
+    case e: InsufficientEnrolments => {
+      ErrorUnauthorized("Insufficient Enrolments").toHttpResponse
+    }
+    case e: AuthorisationException => {
+      ErrorUnauthorized(e.getMessage).toHttpResponse
+    }
     case _: MatchNotFoundException => ErrorNotFound.toHttpResponse
     case e: IllegalArgumentException =>
       ErrorInvalidRequest(e.getMessage).toHttpResponse
