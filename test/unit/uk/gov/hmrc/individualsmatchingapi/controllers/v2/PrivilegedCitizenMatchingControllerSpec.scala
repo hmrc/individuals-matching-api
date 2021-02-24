@@ -19,7 +19,7 @@ package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 import java.util.UUID
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, refEq}
-import org.mockito.Mockito.{verifyZeroInteractions, when}
+import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, MustMatchers}
 import play.api.libs.json.Json
@@ -31,6 +31,7 @@ import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.{LivePrivilegedCitizenMatchingController, SandboxPrivilegedCitizenMatchingController}
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain._
@@ -47,6 +48,7 @@ class PrivilegedCitizenMatchingControllerSpec
   trait Setup extends ScopesConfigHelper {
 
     val sampleCorrelationId = "188e9400-b636-4a3b-80ba-230a8c72b92a"
+    val sampleCorrelationIdHeader = ("CorrelationId" -> sampleCorrelationId)
 
     val fakeRequest = FakeRequest()
 
@@ -56,6 +58,7 @@ class PrivilegedCitizenMatchingControllerSpec
     val mockLiveCitizenMatchingService = mock[LiveCitizenMatchingService]
 
     val mockAuthConnector = mock[AuthConnector]
+    val mockAuditHelper = mock[AuditHelper]
 
     val mockScopesService = new ScopesService(mockScopesConfig)
 
@@ -65,12 +68,14 @@ class PrivilegedCitizenMatchingControllerSpec
       mockLiveCitizenMatchingService,
       mockScopesService,
       mockAuthConnector,
+      mockAuditHelper,
       controllerComponents)
 
     val sandboxController = new SandboxPrivilegedCitizenMatchingController(
       sandboxCitizenMatchingService,
       mockScopesService,
       mockAuthConnector,
+      mockAuditHelper,
       controllerComponents)
 
     given(mockAuthConnector.authorise(any(), refEq(Retrievals.allEnrolments))(any(), any()))
@@ -104,9 +109,13 @@ class PrivilegedCitizenMatchingControllerSpec
                }
              }"""
       )
+
+      verify(liveController.auditHelper, times(1)).auditApiResponse(any(), any(), any(), any(), any(), any())(any())
+
     }
 
     "return 200 Ok when matching a user with a '.' in their name" in new Setup {
+
       when(mockLiveCitizenMatchingService.matchCitizen(any())(any()))
         .thenReturn(Future.successful(matchId))
 
@@ -120,6 +129,7 @@ class PrivilegedCitizenMatchingControllerSpec
       val res =
         liveController.matchCitizen()(fakeRequest.withBody(payload).withHeaders(("CorrelationId", sampleCorrelationId)))
       status(res) mustBe OK
+      verify(liveController.auditHelper, times(1)).auditApiResponse(any(), any(), any(), any(), any(), any())(any())
     }
 
     "return 403 (Forbidden) for a citizen not found" in new Setup {
@@ -135,6 +145,8 @@ class PrivilegedCitizenMatchingControllerSpec
         "code"    -> "MATCHING_FAILED",
         "message" -> "There is no match for the information provided"
       )
+
+      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "return 403 (Forbidden) when a matching exception is thrown" in new Setup {
@@ -149,6 +161,8 @@ class PrivilegedCitizenMatchingControllerSpec
         "code"    -> "MATCHING_FAILED",
         "message" -> "There is no match for the information provided"
       )
+
+      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "return 403 (Forbidden) when an invalid nino exception is thrown" in new Setup {
@@ -163,6 +177,8 @@ class PrivilegedCitizenMatchingControllerSpec
         "code"    -> "MATCHING_FAILED",
         "message" -> "There is no match for the information provided"
       )
+
+      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "return 400 (BadRequest) for an invalid dateOfBirth" in new Setup {
@@ -177,6 +193,8 @@ class PrivilegedCitizenMatchingControllerSpec
         "code"    -> "INVALID_REQUEST",
         "message" -> "dateOfBirth: invalid date format"
       )
+
+      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
 
       requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
       eventualResult = liveController.matchCitizen()(
@@ -201,6 +219,8 @@ class PrivilegedCitizenMatchingControllerSpec
         "code"    -> "INVALID_REQUEST",
         "message" -> "Malformed nino submitted"
       )
+
+      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "return 400 Bad Request when the first name is empty" in new Setup {
@@ -217,6 +237,8 @@ class PrivilegedCitizenMatchingControllerSpec
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "firstName is required")
+
+      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "return 400 Bad Request when the last name is empty" in new Setup {
@@ -227,12 +249,13 @@ class PrivilegedCitizenMatchingControllerSpec
         "dateOfBirth" -> "1900-01-01"
       )
 
-      val res =
-        liveController.matchCitizen()(
-          fakeRequest.withBody(emptyLastName).withHeaders(("CorrelationId", sampleCorrelationId)))
+      val res = liveController.matchCitizen()(
+        fakeRequest.withBody(emptyLastName).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "lastName is required")
+
+      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "return 400 Bad Request when the first name is greater than 35 characters" in new Setup {
@@ -250,6 +273,8 @@ class PrivilegedCitizenMatchingControllerSpec
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json
         .obj("code" -> "INVALID_REQUEST", "message" -> "firstName must be no more than 35 characters")
+
+      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "return 400 Bad Request when the last name is greater than 35 characters" in new Setup {
@@ -267,6 +292,8 @@ class PrivilegedCitizenMatchingControllerSpec
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json
         .obj("code" -> "INVALID_REQUEST", "message" -> "lastName must be no more than 35 characters")
+
+      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "return 400 Bad Request when the first name contains invalid characters" in new Setup {
@@ -277,13 +304,14 @@ class PrivilegedCitizenMatchingControllerSpec
         "dateOfBirth" -> "1900-01-01"
       )
 
-      val res =
-        liveController.matchCitizen()(
-          fakeRequest.withBody(invalidFirstName).withHeaders(("CorrelationId", sampleCorrelationId)))
+      val res = liveController.matchCitizen()(
+        fakeRequest.withBody(invalidFirstName).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json
         .obj("code" -> "INVALID_REQUEST", "message" -> "firstName contains invalid characters")
+
+      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "return 400 Bad Request when the last name contains invalid characters" in new Setup {
@@ -294,13 +322,14 @@ class PrivilegedCitizenMatchingControllerSpec
         "dateOfBirth" -> "1900-01-01"
       )
 
-      val res =
-        liveController.matchCitizen()(
-          fakeRequest.withBody(invalidFirstName).withHeaders(("CorrelationId", sampleCorrelationId)))
+      val res = liveController.matchCitizen()(
+        fakeRequest.withBody(invalidFirstName).withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json
         .obj("code" -> "INVALID_REQUEST", "message" -> "lastName contains invalid characters")
+
+      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "fail with UnauthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
@@ -310,23 +339,18 @@ class PrivilegedCitizenMatchingControllerSpec
       given(mockAuthConnector.authorise(any(), refEq(Retrievals.allEnrolments))(any(), any()))
         .willReturn(failed(new InsufficientEnrolments()))
 
-      val eventualResult =
-        liveController.matchCitizen()(
-          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
+      val res = liveController.matchCitizen()(
+        fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
 
-      status(eventualResult) mustBe UNAUTHORIZED
-      contentAsJson(eventualResult) mustBe Json.obj(
-        "code"    -> "UNAUTHORIZED",
-        "message" -> "Insufficient Enrolments"
-      )
-
+      contentAsJson(res) mustBe Json
+        .obj("code" -> "UNAUTHORIZED", "message" -> "Insufficient Enrolments")
       verifyZeroInteractions(mockLiveCitizenMatchingService)
+
+      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
   }
 
   "Sandbox match citizen function" should {
-
-    val matchId = UUID.randomUUID()
 
     "return 200 (Ok) for the sandbox matchId" in new Setup {
       val eventualResult = sandboxController.matchCitizen()(
@@ -393,41 +417,32 @@ class PrivilegedCitizenMatchingControllerSpec
     }
 
     "return 400 (BadRequest) for an invalid dateOfBirth" in new Setup {
-      var requestBody =
+      val requestBody =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
-      var eventualResult =
+
+      val exception = intercept[InvalidBodyException](
         sandboxController.matchCitizen()(
-          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
+          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId))))
 
-      status(eventualResult) mustBe BAD_REQUEST
-      contentAsJson(eventualResult) mustBe Json.obj(
-        "code"    -> "INVALID_REQUEST",
-        "message" -> "dateOfBirth: invalid date format"
-      )
+      exception.getMessage mustBe "dateOfBirth: invalid date format"
 
-      requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
-      eventualResult = sandboxController.matchCitizen()(
-        fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
+      val requestBody2 =
+        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
+      val exception2 = intercept[InvalidBodyException](
+        sandboxController.matchCitizen()(
+          fakeRequest.withBody(requestBody2).withHeaders(("CorrelationId", sampleCorrelationId))))
 
-      status(eventualResult) mustBe BAD_REQUEST
-      contentAsJson(eventualResult) mustBe Json.obj(
-        "code"    -> "INVALID_REQUEST",
-        "message" -> "dateOfBirth: invalid date format"
-      )
+      exception2.getMessage mustBe "dateOfBirth: invalid date format"
     }
 
     "return 400 (BadRequest) for an invalid nino" in new Setup {
       val requestBody =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"AB1234567","dateOfBirth":"2020-01-31"}""")
-      val eventualResult =
+      val exception = intercept[InvalidBodyException](
         sandboxController.matchCitizen()(
-          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
+          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId))))
 
-      status(eventualResult) mustBe BAD_REQUEST
-      contentAsJson(eventualResult) mustBe Json.obj(
-        "code"    -> "INVALID_REQUEST",
-        "message" -> "Malformed nino submitted"
-      )
+      exception.getMessage mustBe "Malformed nino submitted"
     }
 
     "not require bearer token authentication" in new Setup {

@@ -36,7 +36,7 @@ object RequestHeaderUtils {
   def extractUriContext(requestHeader: RequestHeader) =
     (uriRegex.findFirstMatchIn(requestHeader.uri) map (_.group(1))).get
 
-  def extractCorrelationId(requestHeader: RequestHeader) =
+  def validateCorrelationId(requestHeader: RequestHeader) =
     requestHeader.headers.get("CorrelationId") match {
       case Some(uuidString) =>
         Try(UUID.fromString(uuidString)) match {
@@ -44,6 +44,12 @@ object RequestHeaderUtils {
           case _          => throw new BadRequestException("Malformed CorrelationId")
         }
       case None => throw new BadRequestException("CorrelationId is required")
+    }
+
+  def maybeCorrelationId(requestHeader: RequestHeader) =
+    Try(validateCorrelationId(requestHeader)) match {
+      case Success(value) => Some(value.toString)
+      case _              => None
     }
 
   def getVersionedRequest(originalRequest: RequestHeader) = {
