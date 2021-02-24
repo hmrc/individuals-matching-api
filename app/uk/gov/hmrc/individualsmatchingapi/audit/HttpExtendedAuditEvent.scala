@@ -58,7 +58,6 @@ trait HttpExtendedAuditEvent {
     val requiredFields = Map(
       "ipAddress"            -> hc.forwarded.map(_.value).getOrElse("-"),
       hc.names.authorisation -> hc.authorization.map(_.value).getOrElse("-"),
-      hc.names.token         -> hc.token.map(_.value).getOrElse("-"),
       hc.names.deviceID      -> hc.deviceID.getOrElse("-"),
       Input                  -> s"Request to ${request.path}",
       Method                 -> request.method.toUpperCase,
