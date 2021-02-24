@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
+import java.util.UUID
+
+import javax.inject.Inject
 import play.api.libs.json._
 import play.api.mvc.{ControllerComponents, Request, RequestHeader, Result}
 import uk.gov.hmrc.auth.core.authorise.Predicate
@@ -23,6 +26,7 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrolment, InsufficientEnrolments}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, InternalServerException, TooManyRequestException}
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
 import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController

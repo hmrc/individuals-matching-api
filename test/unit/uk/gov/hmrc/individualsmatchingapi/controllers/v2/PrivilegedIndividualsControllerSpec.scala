@@ -85,11 +85,13 @@ class PrivilegedIndividualsControllerSpec
       when(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
         .thenReturn(failed(new MatchNotFoundException))
 
-      val eventualResult = liveController.matchedIndividual(uuid.toString)
-          .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId)))
+      val eventualResult = liveController
+        .matchedIndividual(uuid.toString)
+        .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId)))
 
       status(eventualResult) mustBe NOT_FOUND
-      contentAsJson(eventualResult) mustBe Json.parse("""{"code":"NOT_FOUND","message":"The resource can not be found"}""")
+      contentAsJson(eventualResult) mustBe Json.parse(
+        """{"code":"NOT_FOUND","message":"The resource can not be found"}""")
 
       verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
