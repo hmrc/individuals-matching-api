@@ -43,7 +43,6 @@ abstract class PrivilegedIndividualsController(
   def matchedIndividual(matchId: String) = Action.async { implicit request =>
     authenticate(scopeService.getAllScopes, matchId) { authScopes =>
       val correlationId = validateCorrelationId(request)
-
       withUuid(matchId) { matchUuid =>
         citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
           val selfLink = HalLink("self", s"/individuals/matching/$matchId")
@@ -53,10 +52,10 @@ abstract class PrivilegedIndividualsController(
           auditHelper.auditApiResponse(
             correlationId.toString,
             matchId,
-            Some(scopeService.getAllScopes.mkString(",")),
+            authScopes.mkString(","),
             request,
             selfLink.toString,
-            Json.toJson(response))
+            Some(Json.toJson(response)))
 
           Ok(response)
         }

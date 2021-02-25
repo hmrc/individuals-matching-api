@@ -18,7 +18,16 @@ package uk.gov.hmrc.individualsmatchingapi.audit.models
 
 import play.api.libs.json.Json
 
-case class ScopesAuditEventModel(apiVersion: String, matchId: String, scopes: String)
+case class ScopesAuditEventModel(
+  ipAddress: String,
+  authorisation: String,
+  deviceId: String,
+  input: String,
+  method: String,
+  userAgent: String,
+  apiVersion: String,
+  matchId: String,
+  scopes: String)
 
 object ScopesAuditEventModel {
   implicit val formatScopesAuditEventModel = Json.format[ScopesAuditEventModel]

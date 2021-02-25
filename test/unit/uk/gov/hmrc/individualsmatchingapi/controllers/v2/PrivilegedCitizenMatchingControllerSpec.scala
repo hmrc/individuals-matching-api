@@ -17,6 +17,7 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import java.util.UUID
+
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
@@ -24,7 +25,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, MustMatchers}
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
-import play.api.mvc.{ControllerComponents, Results}
+import play.api.mvc.{ControllerComponents, PlayBodyParsers, Results}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
@@ -53,6 +54,7 @@ class PrivilegedCitizenMatchingControllerSpec
     val fakeRequest = FakeRequest()
 
     val controllerComponents = fakeApplication.injector.instanceOf[ControllerComponents]
+    val bodyParsers = fakeApplication.injector.instanceOf[PlayBodyParsers]
 
     val sandboxCitizenMatchingService = new SandboxCitizenMatchingService
     val mockLiveCitizenMatchingService = mock[LiveCitizenMatchingService]
@@ -69,14 +71,16 @@ class PrivilegedCitizenMatchingControllerSpec
       mockScopesService,
       mockAuthConnector,
       mockAuditHelper,
-      controllerComponents)
+      controllerComponents,
+      bodyParsers)
 
     val sandboxController = new SandboxPrivilegedCitizenMatchingController(
       sandboxCitizenMatchingService,
       mockScopesService,
       mockAuthConnector,
       mockAuditHelper,
-      controllerComponents)
+      controllerComponents,
+      bodyParsers)
 
     given(mockAuthConnector.authorise(any(), refEq(Retrievals.allEnrolments))(any(), any()))
       .willReturn(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
