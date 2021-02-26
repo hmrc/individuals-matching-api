@@ -23,7 +23,7 @@
             },
             "title": {
               "type": "string",
-              "description": "Get the individual's income data"
+              "description": "Get the individual's income data."
             }
           }
         },
@@ -43,7 +43,7 @@
             },
             "title": {
               "type": "string",
-              "description": "Get the individual's employment data"
+              "description": "Get the individual's employment data."
             }
           }
         },
@@ -63,7 +63,7 @@
             },
             "title": {
               "type": "string",
-              "description": "Get the individual's benefits and credits data"
+              "description": "Get the individual's benefits and credits data."
             }
           }
         },
@@ -83,7 +83,7 @@
             },
             "title": {
               "type": "string",
-              "example": "Get the individual's details"
+              "description": "Get the individual's details."
             }
           }
         },
@@ -108,20 +108,27 @@
       "properties": {
         "firstName": {
           "type": "string",
-          "description": "The individual's first name."
+          "description": "The individual's first name.",
+          "pattern": "^[a-zA-Z `\\-\\'^]{1,35}$",
+          "example": "Amanda"
         },
         "lastName": {
           "type": "string",
-          "description": "The individual's last name."
+          "description": "The individual's last name.",
+          "pattern": "^[a-zA-Z `\\-\\'^]{1,35}$",
+          "example": "Joseph"
         },
         "nino": {
           "type": "string",
           "format": "NINO",
-          "description": "The individual's National Insurance number."
+          "description": "The individual's National Insurance number.",
+          "example": "NA000799C"
         },
         "dateOfBirth": {
           "type": "string",
           "format": "date",
+          "id": "full-date",
+          "example": "1960-01-15",
           "description": "The individual's date of birth. In the format: YYYY-MM-DD"
         }
       },
