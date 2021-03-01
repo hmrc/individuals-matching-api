@@ -13,7 +13,7 @@
           "properties": {
             "href": {
               "type": "string",
-              "description": "The URL of the endpoint",
+              "description": "The URL of the endpoint.",
               "example": "/individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430"
             },
             "name": {
@@ -22,7 +22,7 @@
             },
             "title": {
               "type": "string",
-              "description": "Get a matched individual’s information"
+              "description": "Get matched individual's details."
             }
           }
         },
