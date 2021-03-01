@@ -59,9 +59,9 @@ class AuditHelperSpec extends AsyncWordSpec with Matchers with MockitoSugar {
         .sendExplicitAudit(eqTo("AuthScopesAuditEvent"), captor.capture())(any(), any(), any())
 
       val capturedEvent = captor.getValue
-      capturedEvent.asInstanceOf[ScopesAuditEventModel].apiVersion shouldEqual "2.0"
-      capturedEvent.asInstanceOf[ScopesAuditEventModel].matchId shouldEqual matchId
-      capturedEvent.asInstanceOf[ScopesAuditEventModel].scopes shouldBe scopes
+      capturedEvent.apiVersion shouldEqual "2.0"
+      capturedEvent.matchId shouldEqual matchId
+      capturedEvent.scopes shouldBe scopes
 
     }
 
@@ -76,30 +76,12 @@ class AuditHelperSpec extends AsyncWordSpec with Matchers with MockitoSugar {
       verify(auditConnector, times(1))
         .sendExplicitAudit(eqTo("ApiResponseEvent"), captor.capture())(any(), any(), any())
 
-      val result = Json.parse("""
-                                |{
-                                |  "apiVersion": "2.0",
-                                |  "matchId": "80a6bb14-d888-436e-a541-4000674c60aa",
-                                |  "correlationId": "test",
-                                |  "scopes": "test",
-                                |  "requestUrl":"/test",
-                                |  "response": "[\"some\",\"json\"]",
-                                |  "method": "GET",
-                                |  "deviceID": "-",
-                                |  "ipAddress": "-",
-                                |  "referrer": "-",
-                                |  "Authorization": "-",
-                                |  "input": "Request to /",
-                                |  "userAgentString": "-"
-                                |}
-                                |""".stripMargin)
-
       val capturedEvent = captor.getValue
-      capturedEvent.asInstanceOf[ApiResponseEventModel].matchId shouldEqual matchId
-      capturedEvent.asInstanceOf[ApiResponseEventModel].correlationId shouldEqual Some(correlationId)
-      capturedEvent.asInstanceOf[ApiResponseEventModel].scopes shouldBe scopes
-      capturedEvent.asInstanceOf[ApiResponseEventModel].returnLinks shouldBe endpoint
-      capturedEvent.asInstanceOf[ApiResponseEventModel].response shouldBe response
+      capturedEvent.matchId shouldEqual matchId
+      capturedEvent.correlationId shouldEqual Some(correlationId)
+      capturedEvent.scopes shouldBe scopes
+      capturedEvent.returnLinks shouldBe endpoint
+      capturedEvent.response shouldBe response
 
     }
 
@@ -116,10 +98,10 @@ class AuditHelperSpec extends AsyncWordSpec with Matchers with MockitoSugar {
       verify(auditConnector, times(1)).sendExplicitAudit(eqTo("ApiFailureEvent"), captor.capture())(any(), any(), any())
 
       val capturedEvent = captor.getValue
-      capturedEvent.asInstanceOf[ApiFailureResponseEventModel].matchId shouldEqual matchId
-      capturedEvent.asInstanceOf[ApiFailureResponseEventModel].correlationId shouldEqual Some(correlationId)
-      capturedEvent.asInstanceOf[ApiFailureResponseEventModel].requestUrl shouldEqual endpoint
-      capturedEvent.asInstanceOf[ApiFailureResponseEventModel].response shouldEqual msg
+      capturedEvent.matchId shouldEqual matchId
+      capturedEvent.correlationId shouldEqual Some(correlationId)
+      capturedEvent.requestUrl shouldEqual endpoint
+      capturedEvent.response shouldEqual msg
 
     }
 
