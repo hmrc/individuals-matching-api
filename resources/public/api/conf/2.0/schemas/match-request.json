@@ -5,16 +5,14 @@
   "properties": {
     "firstName": {
       "type": "string",
-      "description": "The individual's first name.",
-      "pattern": "^[A-Za-z `\\-\\'^.]{1,35}$",
+      "description": "The individual's first name. Must conform to the regular expression: ^[\\p{L} `\\-\\'^.]{1,35}$",
       "example": "Amanda",
       "minLength": 1,
       "maxLength": 35
     },
     "lastName": {
       "type": "string",
-      "description": "The individual's last name.",
-      "pattern": "^[A-Za-z `\\-\\'^.]{1,35}$",
+      "description": "The individual's last name. Must conform to the regular expression: ^[\\p{L} `\\-\\'^.]{1,35}$",
       "example": "Joseph",
       "minLength": 1,
       "maxLength": 35
