@@ -30,9 +30,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
 import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-
 import java.util.UUID
+
 import javax.inject.Inject
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -139,7 +140,7 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
   def authPredicate(scopes: Iterable[String]): Predicate =
     scopes.map(Enrolment(_): Predicate).reduce(_ or _)
 
-  def authenticate(endpointScopes: Iterable[String], auditableData: String)(f: Iterable[String] => Future[Result])(
+  def authenticate(endpointScopes: Iterable[String], matchId: String)(f: Iterable[String] => Future[Result])(
     implicit hc: HeaderCarrier,
     request: RequestHeader,
     auditHelper: AuditHelper): Future[Result] = {
@@ -152,7 +153,7 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
       authorised(authPredicate(endpointScopes)).retrieve(Retrievals.allEnrolments) {
         case scopes => {
 
-          auditHelper.auditAuthScopes(auditableData, scopes.enrolments.map(e => e.key).mkString(","), request)
+          auditHelper.auditAuthScopes(matchId, scopes.enrolments.map(e => e.key).mkString(","), request)
 
           f(scopes.enrolments.map(e => e.key))
         }

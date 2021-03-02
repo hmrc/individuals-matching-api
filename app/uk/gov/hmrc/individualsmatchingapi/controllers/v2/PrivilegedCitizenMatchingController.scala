@@ -19,9 +19,9 @@ package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 import org.slf4j.LoggerFactory
 import play.api.hal.Hal.links
 import play.api.hal.HalLink
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.hal._
-import play.api.mvc.{BodyParsers, ControllerComponents}
+import play.api.mvc.{Action, ControllerComponents, PlayBodyParsers}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
@@ -30,21 +30,22 @@ import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.{maybeCorrelationId, validateCorrelationId}
 import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
-
 import javax.inject.{Inject, Singleton}
+
 import scala.concurrent.ExecutionContext
 
 abstract class PrivilegedCitizenMatchingController(
   citizenMatchingService: CitizenMatchingService,
   scopeService: ScopesService,
   cc: ControllerComponents,
+  bodyParsers: PlayBodyParsers,
   implicit val auditHelper: AuditHelper)(implicit val ec: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
   val logger = LoggerFactory.getLogger(this.getClass)
 
-  def matchCitizen = Action.async(BodyParsers.parse.json) { implicit request =>
-    authenticate(scopeService.getAllScopes, request.body.toString()) { _ =>
+  def matchCitizen: Action[JsValue] = Action.async(bodyParsers.json) { implicit request =>
+    authenticate(scopeService.getAllScopes, request.body.toString()) { authScopes =>
       withJsonBodyV2[CitizenMatchingRequest] { matchCitizen =>
         val correlationId = validateCorrelationId(request)
         citizenMatchingService.matchCitizen(matchCitizen) map { matchId =>
@@ -60,12 +61,12 @@ abstract class PrivilegedCitizenMatchingController(
           auditHelper.auditApiResponse(
             correlationId.toString,
             matchId.toString,
-            Some(scopeService.getAllScopes.mkString(",")),
+            authScopes.mkString(","),
             request,
             selfLink.toString,
-            Json.toJson(response))
+            Some(Json.toJson(response)))
 
-          Ok(links(selfLink, individualLink))
+          Ok(response)
         }
       }
     } recover recoveryWithAudit(maybeCorrelationId(request), request.body.toString, "/individuals/matching/")
@@ -78,8 +79,9 @@ class LivePrivilegedCitizenMatchingController @Inject()(
   scopeService: ScopesService,
   val authConnector: AuthConnector,
   auditHelper: AuditHelper,
-  cc: ControllerComponents)(override implicit val ec: ExecutionContext)
-    extends PrivilegedCitizenMatchingController(liveCitizenMatchingService, scopeService, cc, auditHelper) {
+  cc: ControllerComponents,
+  bodyParser: PlayBodyParsers)(override implicit val ec: ExecutionContext)
+    extends PrivilegedCitizenMatchingController(liveCitizenMatchingService, scopeService, cc, bodyParser, auditHelper) {
   override val environment = PRODUCTION
 }
 
@@ -89,7 +91,13 @@ class SandboxPrivilegedCitizenMatchingController @Inject()(
   scopeService: ScopesService,
   val authConnector: AuthConnector,
   auditHelper: AuditHelper,
-  cc: ControllerComponents)(override implicit val ec: ExecutionContext)
-    extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService, scopeService, cc, auditHelper) {
+  cc: ControllerComponents,
+  bodyParser: PlayBodyParsers)(override implicit val ec: ExecutionContext)
+    extends PrivilegedCitizenMatchingController(
+      sandboxCitizenMatchingService,
+      scopeService,
+      cc,
+      bodyParser,
+      auditHelper) {
   override val environment = SANDBOX
 }
