@@ -102,9 +102,6 @@ class AuditHelperSpec extends AsyncWordSpec with Matchers with MockitoSugar {
       capturedEvent.correlationId shouldEqual Some(correlationId)
       capturedEvent.requestUrl shouldEqual endpoint
       capturedEvent.response shouldEqual msg
-
     }
-
   }
-
 }

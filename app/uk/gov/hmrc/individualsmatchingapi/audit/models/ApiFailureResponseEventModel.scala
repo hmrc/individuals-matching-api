@@ -19,8 +19,6 @@ package uk.gov.hmrc.individualsmatchingapi.audit.models
 import play.api.libs.json.Json
 
 case class ApiFailureResponseEventModel(
-  ipAddress: String,
-  authorisation: String,
   deviceId: String,
   input: String,
   method: String,
