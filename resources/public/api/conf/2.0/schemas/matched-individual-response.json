@@ -129,7 +129,7 @@
           "format": "date",
           "id": "full-date",
           "example": "1960-01-15",
-          "description": "The individual's date of birth. In the format: YYYY-MM-DD"
+          "description": "The individual's date of birth"
         }
       },
       "required": ["firstName", "lastName", "nino", "dateOfBirth"]
