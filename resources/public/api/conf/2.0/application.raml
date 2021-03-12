@@ -34,7 +34,7 @@ uses:
       description: !include docs/match-endpoint-description.md
       is: [headers.acceptHeader]
       headers:
-        correlationId:
+        CorrelationId:
           description: A universally unique identifier (UUID), used for traceability purposes.
           type: string
           example: 58072660-1df9-4deb-b4ca-cd2d7f96e480
@@ -81,7 +81,7 @@ uses:
       securedBy: [ sec.oauth_2_0: { scopes: [ "assigned" ] } ]
       (annotations.sandboxData): !include sandbox/matched-individual-request.md
       headers:
-        correlationId:
+        CorrelationId:
           description: A UUID, used for traceability purposes.
           type: string
           example: 58072660-1df9-4deb-b4ca-cd2d7f96e480
