@@ -35,7 +35,7 @@ uses:
       is: [headers.acceptHeader]
       headers:
         CorrelationId:
-          description: A universally unique identifier (UUID), used for traceability purposes.
+          description: !include ./includes/correlationId.md
           type: string
           example: 58072660-1df9-4deb-b4ca-cd2d7f96e480
       body:
@@ -82,7 +82,7 @@ uses:
       (annotations.sandboxData): !include sandbox/matched-individual-request.md
       headers:
         CorrelationId:
-          description: A UUID, used for traceability purposes.
+          description: !include ./includes/correlationId.md
           type: string
           example: 58072660-1df9-4deb-b4ca-cd2d7f96e480
       responses:
