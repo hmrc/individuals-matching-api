@@ -66,22 +66,22 @@
     },
     {
       "key": "read:individuals-matching-ho-rp2-application",
-      "name": "match individual from their details for ho RP2 application",
+      "name": "match individual from their details for HO RP2 application",
       "description": "Scope for HO RP2 application to match an individual from their details"
     },
     {
       "key": "read:individuals-matching-ho-rp2-compliance",
-      "name": "match individual from their details for ho RP2 compliance",
+      "name": "match individual from their details for HO RP2 compliance",
       "description": "Scope for HO RP2 compliance to match an individual from their details"
     },
     {
       "key": "read:individuals-matching-ho-ecp-application",
-      "name": "match individual from their details for ho ECP application",
+      "name": "match individual from their details for HO ECP application",
       "description": "Scope for HO ECP application to match an individual from their details"
     },
     {
       "key": "read:individuals-matching-ho-ecp-compliance",
-      "name": "match individual from their details for ho ECP compliance",
+      "name": "match individual from their details for HO ECP compliance",
       "description": "Scope for HO ECP compliance to match an individual from their details"
     },
     {
