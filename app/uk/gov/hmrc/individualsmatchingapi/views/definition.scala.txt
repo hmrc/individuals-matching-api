@@ -76,7 +76,7 @@
     },
     {
       "key": "read:individuals-matching-ho-ecp-application",
-      "name": "match individual from their details for ho RCP application",
+      "name": "match individual from their details for ho ECP application",
       "description": "Scope for HO ECP application to match an individual from their details"
     },
     {
