@@ -44,7 +44,7 @@ class AuditHelper @Inject()(auditConnector: AuditConnector)(implicit ec: Executi
         apiVersion = "2.0",
         matchId = matchId,
         correlationId = Some(correlationId),
-        request.headers.get("X-Client-ID").getOrElse("-"),
+        request.headers.get("X-Application-ID").getOrElse("-"),
         scopes,
         returnLinks = selfLink,
         response = response
@@ -67,7 +67,7 @@ class AuditHelper @Inject()(auditConnector: AuditConnector)(implicit ec: Executi
         apiVersion = "2.0",
         matchId = matchId,
         correlationId = correlationId,
-        request.headers.get("X-Client-ID").getOrElse("-"),
+        request.headers.get("X-Application-ID").getOrElse("-"),
         requestUrl,
         msg
       )
@@ -83,7 +83,7 @@ class AuditHelper @Inject()(auditConnector: AuditConnector)(implicit ec: Executi
         userAgent = request.headers.get("User-Agent").getOrElse("-"),
         apiVersion = "2.0",
         matchId = matchId,
-        request.headers.get("X-Client-ID").getOrElse("-"),
+        request.headers.get("X-Application-ID").getOrElse("-"),
         scopes
       )
     )
