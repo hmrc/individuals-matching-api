@@ -44,7 +44,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
 
   trait Setup {
 
-    implicit val headers = HeaderCarrier() //.copy(authorization = Some(Authorization(s"Bearer $authBearerToken")))
+    implicit val headers = HeaderCarrier()
 
     val mockNinoMatchRepository = mock[NinoMatchRepository]
     val mockCitizenDetailsConnector = mock[CitizenDetailsConnector]
