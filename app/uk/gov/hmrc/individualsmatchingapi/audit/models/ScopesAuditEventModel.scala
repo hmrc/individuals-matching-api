@@ -25,6 +25,7 @@ case class ScopesAuditEventModel(
   userAgent: String,
   apiVersion: String,
   matchId: String,
+  applicationId: String,
   scopes: String)
 
 object ScopesAuditEventModel {

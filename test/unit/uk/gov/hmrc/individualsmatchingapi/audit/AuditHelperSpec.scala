@@ -36,7 +36,8 @@ class AuditHelperSpec extends AsyncWordSpec with Matchers with MockitoSugar {
   val correlationId = "test"
   val scopes = "test"
   val matchId = "80a6bb14-d888-436e-a541-4000674c60aa"
-  val request = FakeRequest()
+  val applicationId = "80a6bb14-d888-436e-a541-4000674c60bb"
+  val request = FakeRequest().withHeaders("X-Application-Id" -> applicationId)
   val response = Some(Json.toJson("some" -> "json"))
   val ifUrl =
     s"host/individuals/employments/paye/nino/$nino?startDate=2019-01-01&endDate=2020-01-01&fields=some(vals(val1),val2)"
@@ -62,6 +63,7 @@ class AuditHelperSpec extends AsyncWordSpec with Matchers with MockitoSugar {
       capturedEvent.apiVersion shouldEqual "2.0"
       capturedEvent.matchId shouldEqual matchId
       capturedEvent.scopes shouldBe scopes
+      capturedEvent.asInstanceOf[ScopesAuditEventModel].applicationId shouldBe applicationId
 
     }
 
@@ -80,6 +82,7 @@ class AuditHelperSpec extends AsyncWordSpec with Matchers with MockitoSugar {
       capturedEvent.matchId shouldEqual matchId
       capturedEvent.correlationId shouldEqual Some(correlationId)
       capturedEvent.scopes shouldBe scopes
+      capturedEvent.applicationId shouldBe applicationId
       capturedEvent.returnLinks shouldBe endpoint
       capturedEvent.response shouldBe response
 
@@ -100,6 +103,7 @@ class AuditHelperSpec extends AsyncWordSpec with Matchers with MockitoSugar {
       val capturedEvent = captor.getValue
       capturedEvent.matchId shouldEqual matchId
       capturedEvent.correlationId shouldEqual Some(correlationId)
+      capturedEvent.applicationId shouldBe applicationId
       capturedEvent.requestUrl shouldEqual endpoint
       capturedEvent.response shouldEqual msg
     }
