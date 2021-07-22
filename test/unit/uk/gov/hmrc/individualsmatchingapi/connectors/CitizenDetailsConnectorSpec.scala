@@ -42,7 +42,7 @@ class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndA
     implicit val hc = HeaderCarrier()
 
     val underTest = new CitizenDetailsConnector(config, http, servicesConfig) {
-      override val serviceUrl = "http://localhost:11121"
+      override val serviceUrl = "http://127.0.0.1:11121"
     }
   }
 
