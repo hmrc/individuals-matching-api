@@ -42,7 +42,7 @@ class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEa
     implicit val hc = HeaderCarrier()
 
     val underTest = new MatchingConnector(config, http, servicesConfig) {
-      override val serviceUrl = "http://localhost:11122"
+      override val serviceUrl = "http://127.0.0.1:11122"
     }
   }
 

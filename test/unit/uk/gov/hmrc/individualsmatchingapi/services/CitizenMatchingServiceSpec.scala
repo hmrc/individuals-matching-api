@@ -17,7 +17,6 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
 import java.util.UUID
-
 import org.joda.time.LocalDate
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{verifyZeroInteractions, when}
@@ -26,7 +25,6 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.individualsmatchingapi.connectors.{CitizenDetailsConnector, MatchingConnector}
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain._
@@ -45,7 +43,8 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
   val ninoMatch = NinoMatch(nino, matchId)
 
   trait Setup {
-    implicit val headers = HeaderCarrier().copy(authorization = Some(Authorization(s"Bearer $authBearerToken")))
+
+    implicit val headers = HeaderCarrier()
 
     val mockNinoMatchRepository = mock[NinoMatchRepository]
     val mockCitizenDetailsConnector = mock[CitizenDetailsConnector]
