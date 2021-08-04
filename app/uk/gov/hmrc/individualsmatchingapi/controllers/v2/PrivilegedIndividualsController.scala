@@ -66,13 +66,8 @@ abstract class PrivilegedIndividualsController(
   private def getApiLinks(matchId: String, scopes: Iterable[String]): Seq[HalLink] =
     scopeService
       .getEndpoints(scopes)
-      .map(
-        endpoint =>
-          HalLink(
-            endpoint.name,
-            endpoint.link.replaceAllLiterally("<matchId>", matchId),
-            name = Some("GET"),
-            title = Some(endpoint.title)))
+      .map(endpoint =>
+        HalLink(endpoint.name, endpoint.link.replaceAllLiterally("<matchId>", matchId), title = Some(endpoint.title)))
       .toSeq
 }
 

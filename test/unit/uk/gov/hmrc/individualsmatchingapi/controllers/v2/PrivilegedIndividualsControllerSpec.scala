@@ -219,22 +219,18 @@ class PrivilegedIndividualsControllerSpec
            },
            "benefits-and-credits": {
              "href": "/individuals/benefits-and-credits/?matchId=$matchId",
-             "name": "GET",
              "title": "View individual's benefits and credits"
            },
            "details": {
              "href": "/individuals/details/?matchId=$matchId",
-             "name": "GET",
              "title": "View individual's details"
            },
            "employments": {
              "href": "/individuals/employments/?matchId=$matchId",
-             "name": "GET",
              "title": "View individual's employments"
            },
            "income": {
              "href": "/individuals/income/?matchId=$matchId",
-             "name": "GET",
              "title": "View individual's income"
            }
          }

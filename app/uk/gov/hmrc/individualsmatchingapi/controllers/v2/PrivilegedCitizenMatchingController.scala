@@ -53,7 +53,6 @@ abstract class PrivilegedCitizenMatchingController(
           val individualLink = HalLink(
             "individual",
             s"/individuals/matching/$matchId",
-            name = Option("GET"),
             title = Option("Get a matched individual’s information"))
 
           val response = links(selfLink, individualLink);
