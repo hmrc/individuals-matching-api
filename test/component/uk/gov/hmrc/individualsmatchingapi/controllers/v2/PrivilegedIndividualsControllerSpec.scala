@@ -74,22 +74,18 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
            "_links":{
                "benefits-and-credits": {
                "href": "/individuals/benefits-and-credits/?matchId=$matchId",
-               "name": "GET",
                "title": "Get the individual's benefits and credits data"
              },
              "details": {
                "href": "/individuals/details/?matchId=$matchId",
-               "name": "GET",
                "title": "Get the individual's details"
              },
              "employments": {
                "href": "/individuals/employments/?matchId=$matchId",
-               "name": "GET",
                "title": "Get the individual's employment data"
              },
              "income": {
                "href": "/individuals/income/?matchId=$matchId",
-               "name": "GET",
                "title": "Get the individual's income data"
              },
              "self":{
@@ -120,22 +116,18 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
            "_links":{
                "benefits-and-credits": {
                "href": "/individuals/benefits-and-credits/?matchId=$sandboxMatchId",
-               "name": "GET",
                "title": "Get the individual's benefits and credits data"
              },
              "details": {
                "href": "/individuals/details/?matchId=$sandboxMatchId",
-               "name": "GET",
                "title": "Get the individual's details"
              },
              "employments": {
                "href": "/individuals/employments/?matchId=$sandboxMatchId",
-               "name": "GET",
                "title": "Get the individual's employment data"
              },
              "income": {
                "href": "/individuals/income/?matchId=$sandboxMatchId",
-               "name": "GET",
                "title": "Get the individual's income data"
              },
              "self":{
