@@ -45,7 +45,7 @@
     </tr>
     <tr>
         <td><p>Malformed nino</p></td>
-        <td><p>Any National Insurance Number that does not meet the validation rule.</p></td>
+        <td><p>Any National Insurance number that does not meet the validation rule.</p></td>
         <td>
             <p>400 (Bad Request)</p>
             <p>{ &quot;code&quot; : &quot;INVALID_REQUEST&quot;,<br/>&quot;message&quot; : &quot;Malformed nino submitted&quot; }</p>
