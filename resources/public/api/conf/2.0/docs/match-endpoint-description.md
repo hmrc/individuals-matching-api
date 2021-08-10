@@ -1,4 +1,5 @@
 <p>Use this endpoint to match an individual's first name, last name, date of birth and National Insurance number (nino) against HMRC’s records. On a successful match, a matchId is returned.</p>
+<h3>Match Criteria</h3>
 <p>For a successful match, the following set of criteria must be met. </p>
 <table>
   <thead>

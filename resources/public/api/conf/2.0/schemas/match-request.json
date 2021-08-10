@@ -25,7 +25,7 @@
     },
     "nino": {
       "type": "string",
-      "description": "Individual's national insurance number.",
+      "description": "Individual's National Insurance number.",
       "example": "NA000799C"
     }
   },
