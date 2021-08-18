@@ -28,6 +28,8 @@ sealed abstract class ErrorResponse(val httpStatusCode: Int, val errorCode: Stri
 
 case object ErrorMatchingFailed
     extends ErrorResponse(FORBIDDEN, "MATCHING_FAILED", "There is no match for the information provided")
+case object ErrorMatchingFailedNotFound
+    extends ErrorResponse(NOT_FOUND, "MATCHING_FAILED", "There is no match for the information provided")
 case class ErrorInvalidRequest(errorMessage: String) extends ErrorResponse(BAD_REQUEST, "INVALID_REQUEST", errorMessage)
 case class ErrorUnauthorized(errorMessage: String) extends ErrorResponse(UNAUTHORIZED, "UNAUTHORIZED", errorMessage)
 case class ErrorInternalServer(errorMessage: String = "Failed to process request")

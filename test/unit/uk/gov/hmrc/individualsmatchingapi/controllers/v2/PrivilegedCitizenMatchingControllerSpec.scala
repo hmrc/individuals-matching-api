@@ -17,12 +17,11 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import java.util.UUID
-
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfter, MustMatchers}
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach, MustMatchers}
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
 import play.api.mvc.{ControllerComponents, PlayBodyParsers, Results}
@@ -44,7 +43,7 @@ import scala.concurrent.Future.{failed, successful}
 import scala.util.Random
 
 class PrivilegedCitizenMatchingControllerSpec
-    extends SpecBase with MustMatchers with MockitoSugar with Results with BeforeAndAfter {
+    extends SpecBase with MustMatchers with MockitoSugar with Results with BeforeAndAfterEach {
 
   trait Setup extends ScopesConfigHelper {
 
@@ -135,7 +134,7 @@ class PrivilegedCitizenMatchingControllerSpec
       verify(liveController.auditHelper, times(1)).auditApiResponse(any(), any(), any(), any(), any(), any())(any())
     }
 
-    "return 403 (Forbidden) for a citizen not found" in new Setup {
+    "return 404 (Not Found) for a citizen not found" in new Setup {
       when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new CitizenNotFoundException))
 
@@ -143,7 +142,7 @@ class PrivilegedCitizenMatchingControllerSpec
         fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId))
       )
 
-      status(eventualResult) mustBe FORBIDDEN
+      status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.obj(
         "code"    -> "MATCHING_FAILED",
         "message" -> "There is no match for the information provided"
@@ -159,7 +158,7 @@ class PrivilegedCitizenMatchingControllerSpec
       val eventualResult = liveController.matchCitizen()(
         fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId)))
 
-      status(eventualResult) mustBe FORBIDDEN
+      status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.obj(
         "code"    -> "MATCHING_FAILED",
         "message" -> "There is no match for the information provided"
@@ -168,14 +167,14 @@ class PrivilegedCitizenMatchingControllerSpec
       verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
-    "return 403 (Forbidden) when an invalid nino exception is thrown" in new Setup {
+    "return 404 (Not Found) when an invalid nino exception is thrown" in new Setup {
       when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new InvalidNinoException()))
 
       val eventualResult = liveController.matchCitizen()(
         fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId)))
 
-      status(eventualResult) mustBe FORBIDDEN
+      status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.obj(
         "code"    -> "MATCHING_FAILED",
         "message" -> "There is no match for the information provided"
@@ -376,42 +375,42 @@ class PrivilegedCitizenMatchingControllerSpec
       )
     }
 
-    "return 403 (Forbidden) for a citizen not found" in new Setup {
+    "return 404 (Not Found) for a citizen not found" in new Setup {
       val eventualResult =
         sandboxController.matchCitizen()(
           fakeRequest
             .withBody(parse(matchingRequest(firstName = "José")))
             .withHeaders(("CorrelationId", sampleCorrelationId)))
 
-      status(eventualResult) mustBe FORBIDDEN
+      status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.obj(
         "code"    -> "MATCHING_FAILED",
         "message" -> "There is no match for the information provided"
       )
     }
 
-    "return 403 (Forbidden) when nino does not match a sandbox individual" in new Setup {
+    "return 404 (Not Found) when nino does not match a sandbox individual" in new Setup {
       val eventualResult =
         sandboxController.matchCitizen()(
           fakeRequest
             .withBody(parse(matchingRequest(nino = "AA000799C")))
             .withHeaders(("CorrelationId", sampleCorrelationId)))
 
-      status(eventualResult) mustBe FORBIDDEN
+      status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.obj(
         "code"    -> "MATCHING_FAILED",
         "message" -> "There is no match for the information provided"
       )
     }
 
-    "return 403 (Forbidden) when an invalid nino exception is thrown" in new Setup {
+    "return 404 (Not Found) when an invalid nino exception is thrown" in new Setup {
       val eventualResult =
         sandboxController.matchCitizen()(
           fakeRequest
             .withBody(parse(matchingRequest(nino = "NA000799D")))
             .withHeaders(("CorrelationId", sampleCorrelationId)))
 
-      status(eventualResult) mustBe FORBIDDEN
+      status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.obj(
         "code"    -> "MATCHING_FAILED",
         "message" -> "There is no match for the information provided"
