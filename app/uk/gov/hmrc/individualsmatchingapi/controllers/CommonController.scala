@@ -92,15 +92,15 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
     }
     case _: CitizenNotFoundException => {
       auditHelper.auditApiFailure(correlationId, matchId, request, url, "Not Found")
-      ErrorMatchingFailed.toHttpResponse
-    }
-    case _: MatchingException => {
-      auditHelper.auditApiFailure(correlationId, matchId, request, url, "Not Found")
-      ErrorMatchingFailed.toHttpResponse
+      ErrorMatchingFailedNotFound.toHttpResponse
     }
     case _: InvalidNinoException => {
       auditHelper.auditApiFailure(correlationId, matchId, request, url, "Not Found")
-      ErrorMatchingFailed.toHttpResponse
+      ErrorMatchingFailedNotFound.toHttpResponse
+    }
+    case _: MatchingException => {
+      auditHelper.auditApiFailure(correlationId, matchId, request, url, "Not Found")
+      ErrorMatchingFailedNotFound.toHttpResponse
     }
     case e: InsufficientEnrolments => {
       auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)

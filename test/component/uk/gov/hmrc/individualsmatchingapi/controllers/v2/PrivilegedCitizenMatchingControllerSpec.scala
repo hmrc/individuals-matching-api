@@ -148,8 +148,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       When("I request a citizen's details match")
       val response = requestMatch(matchingRequest)
 
-      Then("The response status should be 403 (Forbidden)")
-      response.code shouldBe FORBIDDEN
+      Then("The response status should be 404 (Not Found)")
+      response.code shouldBe NOT_FOUND
 
       And("The correct error message is returned")
       parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
@@ -166,11 +166,11 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       When("I request a citizen's details match")
       val response = requestMatch(matchingRequest)
 
-      Then("The response status should be 403 (Forbidden)")
-      response.code shouldBe FORBIDDEN
+      Then("The response status should be 404 (Not Found)")
+      response.code shouldBe NOT_FOUND
 
       And("The correct error message is returned")
-      parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
+      parse(response.body) shouldBe Json.toJson(ErrorMatchingFailedNotFound)
     }
 
     scenario("Invalid NINO provided") {
@@ -184,8 +184,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       When("I request a citizen's details match")
       val response = requestMatch(matchingRequest)
 
-      Then("The response status should be 403 (Forbidden)")
-      response.code shouldBe FORBIDDEN
+      Then("The response status should be 404 (Not Found)")
+      response.code shouldBe NOT_FOUND
 
       And("The correct error message is returned")
       parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
