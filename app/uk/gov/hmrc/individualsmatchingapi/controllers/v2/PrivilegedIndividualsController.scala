@@ -43,7 +43,7 @@ abstract class PrivilegedIndividualsController(
   def matchedIndividual(matchId: String) = Action.async { implicit request =>
     authenticate(scopeService.getAllScopes, matchId) { authScopes =>
       val correlationId = validateCorrelationId(request)
-      withUuid(matchId) { matchUuid =>
+      withValidUuid(matchId) { matchUuid =>
         citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
           val selfLink = HalLink("self", s"/individuals/matching/$matchId")
           val data = obj("individual" -> toJson(citizenDetails))
