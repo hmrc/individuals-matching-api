@@ -28,14 +28,15 @@ import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.{maybeCorrelationId, validateCorrelationId}
-import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
-
+import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesHelper, ScopesService}
 import javax.inject.{Inject, Singleton}
+
 import scala.concurrent.ExecutionContext
 
 abstract class PrivilegedIndividualsController(
   citizenMatchingService: CitizenMatchingService,
   scopeService: ScopesService,
+  scopesHelper: ScopesHelper,
   implicit val auditHelper: AuditHelper,
   cc: ControllerComponents)(implicit val ec: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
@@ -47,7 +48,8 @@ abstract class PrivilegedIndividualsController(
         citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
           val selfLink = HalLink("self", s"/individuals/matching/$matchId")
           val data = obj("individual" -> toJson(citizenDetails))
-          val response = state(data) ++ linksSeq(getApiLinks(matchId, authScopes) ++ Seq(selfLink))
+          val links = scopesHelper.getHalLinks(matchUuid, None, authScopes, None, excludeInternal = true) ++ selfLink
+          val response = state(data) ++ links
 
           auditHelper.auditApiResponse(
             correlationId.toString,
@@ -63,22 +65,22 @@ abstract class PrivilegedIndividualsController(
     } recover recoveryWithAudit(maybeCorrelationId(request), request.body.toString, s"/individuals/matching/$matchId")
   }
 
-  private def getApiLinks(matchId: String, scopes: Iterable[String]): Seq[HalLink] =
-    scopeService
-      .getEndpoints(scopes)
-      .map(endpoint =>
-        HalLink(endpoint.name, endpoint.link.replaceAllLiterally("<matchId>", matchId), title = Some(endpoint.title)))
-      .toSeq
+//  private def getApiLinks(matchId: String, scopes: Iterable[String]): Seq[HalLink] =
+//    scopeService.getExternalEndpoints(scopes)
+//      .map(endpoint =>
+//        HalLink(endpoint.name, endpoint.link.replaceAllLiterally("<matchId>", matchId), title = Some(endpoint.title)))
+//      .toSeq
 }
 
 @Singleton
 class LivePrivilegedIndividualsController @Inject()(
   liveCitizenMatchingService: LiveCitizenMatchingService,
   scopeService: ScopesService,
+  scopesHelper: ScopesHelper,
   val authConnector: AuthConnector,
   auditHelper: AuditHelper,
   cc: ControllerComponents)(override implicit val ec: ExecutionContext)
-    extends PrivilegedIndividualsController(liveCitizenMatchingService, scopeService, auditHelper, cc) {
+    extends PrivilegedIndividualsController(liveCitizenMatchingService, scopeService, scopesHelper, auditHelper, cc) {
   override val environment = PRODUCTION
 }
 
@@ -86,9 +88,10 @@ class LivePrivilegedIndividualsController @Inject()(
 class SandboxPrivilegedIndividualsController @Inject()(
   sandboxCitizenMatchingService: SandboxCitizenMatchingService,
   scopeService: ScopesService,
+  scopesHelper: ScopesHelper,
   val authConnector: AuthConnector,
   auditHelper: AuditHelper,
   cc: ControllerComponents)(override implicit val ec: ExecutionContext)
-    extends PrivilegedIndividualsController(sandboxCitizenMatchingService, scopeService, auditHelper, cc) {
+    extends PrivilegedIndividualsController(sandboxCitizenMatchingService, scopeService, scopesHelper, auditHelper, cc) {
   override val environment = SANDBOX
 }
