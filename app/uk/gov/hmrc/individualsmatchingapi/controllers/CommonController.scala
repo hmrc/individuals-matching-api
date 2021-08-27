@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// $COVERAGE-OFF$
+
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
 import java.util.UUID
@@ -170,3 +172,4 @@ object Environment {
   val SANDBOX = "SANDBOX"
   val PRODUCTION = "PRODUCTION"
 }
+// $COVERAGE-ON$
