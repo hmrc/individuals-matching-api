@@ -64,12 +64,6 @@ abstract class PrivilegedIndividualsController(
       }
     } recover recoveryWithAudit(maybeCorrelationId(request), request.body.toString, s"/individuals/matching/$matchId")
   }
-
-//  private def getApiLinks(matchId: String, scopes: Iterable[String]): Seq[HalLink] =
-//    scopeService.getExternalEndpoints(scopes)
-//      .map(endpoint =>
-//        HalLink(endpoint.name, endpoint.link.replaceAllLiterally("<matchId>", matchId), title = Some(endpoint.title)))
-//      .toSeq
 }
 
 @Singleton
