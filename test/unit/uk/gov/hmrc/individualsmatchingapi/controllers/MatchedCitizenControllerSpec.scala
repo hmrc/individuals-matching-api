@@ -30,7 +30,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.MatchedCitizenController
 import uk.gov.hmrc.individualsmatchingapi.domain.{MatchNotFoundException, MatchedCitizenRecord}
-import uk.gov.hmrc.individualsmatchingapi.services.CitizenMatchingService
+import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import scala.concurrent.Future
@@ -45,8 +45,8 @@ class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSu
     val matchedCitizenRecord: MatchedCitizenRecord =
       MatchedCitizenRecord(Nino(ninoString), matchId)
     val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    val mockCitizenMatchingService: CitizenMatchingService =
-      mock[CitizenMatchingService]
+    val mockCitizenMatchingService: LiveCitizenMatchingService =
+      mock[LiveCitizenMatchingService]
     val controllerComponents =
       fakeApplication.injector.instanceOf[ControllerComponents]
 

@@ -34,7 +34,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.v1.{LivePrivilegedIndividualsController, SandboxPrivilegedIndividualsController}
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
-import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, SandboxCitizenMatchingService}
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
@@ -48,7 +48,7 @@ class PrivilegedIndividualsControllerSpec
 
   trait Setup {
 
-    val mockCitizenMatchingService = mock[CitizenMatchingService]
+    val mockCitizenMatchingService = mock[LiveCitizenMatchingService]
     val mockAuthConnector = mock[AuthConnector]
     val controllerComponents =
       fakeApplication.injector.instanceOf[ControllerComponents]

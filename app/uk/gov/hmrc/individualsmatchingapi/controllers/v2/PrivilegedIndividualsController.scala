@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
+import javax.inject.Inject
 import play.api.hal.Hal.{linksSeq, state}
 import play.api.hal.HalLink
 import play.api.libs.json.Json
@@ -28,12 +29,12 @@ import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.{maybeCorrelationId, validateCorrelationId}
-import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, ScopesService}
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
 
 import scala.concurrent.ExecutionContext
 
-class PrivilegedIndividualsController(
-  citizenMatchingService: CitizenMatchingService,
+class PrivilegedIndividualsController @Inject()(
+  citizenMatchingService: LiveCitizenMatchingService,
   scopeService: ScopesService,
   implicit val auditHelper: AuditHelper,
   val authConnector: AuthConnector,

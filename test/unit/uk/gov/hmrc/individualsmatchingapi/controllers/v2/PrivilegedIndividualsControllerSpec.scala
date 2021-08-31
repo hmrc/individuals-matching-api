@@ -17,6 +17,7 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import java.util.UUID
+
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
@@ -32,10 +33,9 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
-import uk.gov.hmrc.individualsmatchingapi.controllers.v2.{PrivilegedIndividualsController}
+import uk.gov.hmrc.individualsmatchingapi.controllers.v2.PrivilegedIndividualsController
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
-import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
-import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
@@ -51,7 +51,7 @@ class PrivilegedIndividualsControllerSpec
 
   trait Setup extends ScopesConfigHelper {
 
-    val mockCitizenMatchingService = mock[CitizenMatchingService]
+    val mockCitizenMatchingService = mock[LiveCitizenMatchingService]
 
     val mockAuthConnector = mock[AuthConnector]
     val mockAuditHelper = mock[AuditHelper]
