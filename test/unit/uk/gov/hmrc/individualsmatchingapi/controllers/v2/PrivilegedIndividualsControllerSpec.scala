@@ -17,6 +17,7 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import java.util.UUID
+
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
@@ -35,7 +36,7 @@ import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.{LivePrivilegedIndividualsController, SandboxPrivilegedIndividualsController}
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
-import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesHelper, ScopesService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
@@ -57,6 +58,7 @@ class PrivilegedIndividualsControllerSpec
     val mockAuditHelper = mock[AuditHelper]
 
     val mockScopesService = new ScopesService(mockScopesConfig)
+    val scopesHelper = new ScopesHelper(mockScopesService)
 
     val controllerComponents = fakeApplication.injector.instanceOf[ControllerComponents]
 
@@ -65,6 +67,7 @@ class PrivilegedIndividualsControllerSpec
     val liveController = new LivePrivilegedIndividualsController(
       mockCitizenMatchingService,
       mockScopesService,
+      scopesHelper,
       mockAuthConnector,
       mockAuditHelper,
       controllerComponents)
@@ -72,6 +75,7 @@ class PrivilegedIndividualsControllerSpec
     val sandboxController = new SandboxPrivilegedIndividualsController(
       new SandboxCitizenMatchingService(),
       mockScopesService,
+      scopesHelper,
       mockAuthConnector,
       mockAuditHelper,
       controllerComponents)
