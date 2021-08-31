@@ -35,7 +35,7 @@ import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.PrivilegedCitizenMatchingController
 import uk.gov.hmrc.individualsmatchingapi.domain._
-import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -55,7 +55,6 @@ class PrivilegedCitizenMatchingControllerSpec
     val controllerComponents = fakeApplication.injector.instanceOf[ControllerComponents]
     val bodyParsers = fakeApplication.injector.instanceOf[PlayBodyParsers]
 
-    val sandboxCitizenMatchingService = new SandboxCitizenMatchingService
     val mockLiveCitizenMatchingService = mock[LiveCitizenMatchingService]
 
     val mockAuthConnector = mock[AuthConnector]

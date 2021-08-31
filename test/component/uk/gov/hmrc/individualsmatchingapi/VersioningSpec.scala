@@ -75,52 +75,6 @@ class VersioningSpec extends BaseSpec {
             }""")
     }
 
-    scenario("Requests with an accept header version P2") {
-
-      When("A request to the match citizen endpoint is made with version P2 accept header")
-      val response = invokeWithHeaders(
-        s"/sandbox/$sandboxMatchId",
-        AUTHORIZATION -> authToken,
-        acceptHeaderP2,
-        testCorrelationHeader)
-
-      Then("The response status should be 200 (Ok)")
-      response.code shouldBe OK
-
-      And("The response body should be for api version P1")
-      Json.parse(response.body) shouldBe
-        Json.parse(s"""
-            {
-              "_links": {
-                "benefits-and-credits": {
-                  "href": "/individuals/benefits-and-credits/?matchId=$sandboxMatchId",
-                  "title": "Get the individual's benefits and credits data"
-                },
-                "details": {
-                  "href": "/individuals/details/?matchId=$sandboxMatchId",
-                  "title": "Get the individual's details"
-                },
-                "employments": {
-                  "href": "/individuals/employments/?matchId=$sandboxMatchId",
-                  "title": "Get the individual's employment data"
-                },
-                "income": {
-                  "href": "/individuals/income/?matchId=$sandboxMatchId",
-                  "title": "Get the individual's income data"
-                },
-                "self": {
-                  "href"  : "/individuals/matching/$sandboxMatchId"
-                }
-              },
-              "individual": {
-                "firstName": "Amanda",
-                "lastName": "Joseph",
-                "nino": "NA000799C",
-                "dateOfBirth": "1960-01-15"
-              }
-            }""")
-    }
-
     scenario("Requests without an accept header default to version 1") {
 
       When("A request to the match citizen endpoint is made without an accept header")

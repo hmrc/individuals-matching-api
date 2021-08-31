@@ -101,47 +101,5 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
          }
        """)
     }
-
-    scenario("valid request to the sandbox implementation") {
-
-      When("I request available resources for a matched individual")
-      val response = Http(s"$serviceUrl/sandbox/$sandboxMatchId").headers(requestHeaders(acceptHeaderP2)).asString
-
-      Then("The response status should be 200 (Ok)")
-      response.code shouldBe Status.OK
-
-      And("The response contains a valid payload")
-      Json.parse(response.body) shouldBe Json.parse(s"""
-         {
-           "_links":{
-               "benefits-and-credits": {
-               "href": "/individuals/benefits-and-credits/?matchId=$sandboxMatchId",
-               "title": "Get the individual's benefits and credits data"
-             },
-             "details": {
-               "href": "/individuals/details/?matchId=$sandboxMatchId",
-               "title": "Get the individual's details"
-             },
-             "employments": {
-               "href": "/individuals/employments/?matchId=$sandboxMatchId",
-               "title": "Get the individual's employment data"
-             },
-             "income": {
-               "href": "/individuals/income/?matchId=$sandboxMatchId",
-               "title": "Get the individual's income data"
-             },
-             "self":{
-               "href":"/individuals/matching/$sandboxMatchId"
-             }
-           },
-           "individual": {
-             "firstName":"Amanda",
-             "lastName":"Joseph",
-             "nino":"NA000799C",
-             "dateOfBirth":"1960-01-15"
-           }
-         }
-       """)
-    }
   }
 }
