@@ -24,7 +24,6 @@ import play.api.libs.json.Json.parse
 import play.api.test.Helpers.{BAD_REQUEST, NOT_FOUND}
 import scalaj.http.{Http, HttpResponse}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
-import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain._
 
 import scala.concurrent.Await
@@ -60,34 +59,6 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
   val validScopes = List("read:individuals-matching-laa-c3")
 
   feature("citizen matching is open and accessible") {
-
-    scenario("valid request to the sandbox implementation. Individual's details match sandbox citizen") {
-
-      When("I request individual income for the sandbox matchId")
-      val response = Http(s"$serviceUrl/sandbox/")
-        .postData("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"1960-01-15"}""")
-        .headers(requestHeaders(acceptHeaderP2))
-        .asString
-
-      Then("The response status should be 200 (Ok)")
-      response.code shouldBe OK
-
-      And("The response contains a valid payload")
-      parse(response.body) shouldBe parse(
-        s"""
-           {
-             "_links": {
-               "individual": {
-                 "href": "/individuals/matching/$sandboxMatchId",
-                 "title": "Get a matched individual’s information"
-               },
-               "self": {
-                 "href": "/individuals/matching/"
-               }
-             }
-           }"""
-      )
-    }
 
     scenario("Valid request to the live implementation. Individual's details match existing citizen records") {
 

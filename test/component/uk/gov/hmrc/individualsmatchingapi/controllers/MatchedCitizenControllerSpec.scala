@@ -62,17 +62,4 @@ class MatchedCitizenControllerSpec extends BaseSpec {
       response.body shouldBe Json.toJson(ErrorNotFound).toString()
     }
   }
-
-  feature("Sandbox implementation of matched citizen record is not accessible") {
-
-    scenario("Request for a sandbox matched citizen record") {
-
-      When("I attempt to request a sandbox matched citizen record")
-      val response =
-        Http(s"$serviceUrl/sandbox/match-record/$sandboxMatchId").asString
-
-      Then("The response status should be 404 (Not Found)")
-      response.code shouldBe NOT_FOUND
-    }
-  }
 }

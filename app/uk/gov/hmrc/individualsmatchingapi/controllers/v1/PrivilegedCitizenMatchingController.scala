@@ -33,7 +33,7 @@ import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, Live
 import scala.concurrent.ExecutionContext.Implicits.global
 
 abstract class PrivilegedCitizenMatchingController(
-  citizenMatchingService: CitizenMatchingService,
+  liveCitizenMatchingService: CitizenMatchingService,
   cc: ControllerComponents)
     extends CommonController(cc) with PrivilegedAuthentication {
 
@@ -45,7 +45,7 @@ abstract class PrivilegedCitizenMatchingController(
   def matchCitizen = Action.async(BodyParsers.parse.json) { implicit request =>
     requiresPrivilegedAuthentication {
       withJsonBody[CitizenMatchingRequest] { matchCitizen =>
-        citizenMatchingService.matchCitizen(matchCitizen) map { matchId =>
+        liveCitizenMatchingService.matchCitizen(matchCitizen) map { matchId =>
           val selfLink = HalLink("self", s"/individuals/matching/")
           val individualLink = HalLink(
             "individual",

@@ -17,6 +17,7 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import java.util.UUID
+
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
@@ -32,10 +33,9 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
-import uk.gov.hmrc.individualsmatchingapi.controllers.v2.{LivePrivilegedCitizenMatchingController, SandboxPrivilegedCitizenMatchingController}
-import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
+import uk.gov.hmrc.individualsmatchingapi.controllers.v2.PrivilegedCitizenMatchingController
 import uk.gov.hmrc.individualsmatchingapi.domain._
-import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -55,7 +55,6 @@ class PrivilegedCitizenMatchingControllerSpec
     val controllerComponents = fakeApplication.injector.instanceOf[ControllerComponents]
     val bodyParsers = fakeApplication.injector.instanceOf[PlayBodyParsers]
 
-    val sandboxCitizenMatchingService = new SandboxCitizenMatchingService
     val mockLiveCitizenMatchingService = mock[LiveCitizenMatchingService]
 
     val mockAuthConnector = mock[AuthConnector]
@@ -65,21 +64,13 @@ class PrivilegedCitizenMatchingControllerSpec
 
     implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
-    val liveController = new LivePrivilegedCitizenMatchingController(
+    val liveController = new PrivilegedCitizenMatchingController(
       mockLiveCitizenMatchingService,
       mockScopesService,
       mockAuthConnector,
-      mockAuditHelper,
       controllerComponents,
-      bodyParsers)
-
-    val sandboxController = new SandboxPrivilegedCitizenMatchingController(
-      sandboxCitizenMatchingService,
-      mockScopesService,
-      mockAuthConnector,
-      mockAuditHelper,
-      controllerComponents,
-      bodyParsers)
+      bodyParsers,
+      mockAuditHelper)
 
     given(mockAuthConnector.authorise(any(), refEq(Retrievals.allEnrolments))(any(), any()))
       .willReturn(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
@@ -349,131 +340,6 @@ class PrivilegedCitizenMatchingControllerSpec
       verifyZeroInteractions(mockLiveCitizenMatchingService)
 
       verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
-    }
-  }
-
-  "Sandbox match citizen function" should {
-
-    "return 200 (Ok) for the sandbox matchId" in new Setup {
-      val eventualResult = sandboxController.matchCitizen()(
-        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId)))
-
-      status(eventualResult) mustBe OK
-      contentAsJson(eventualResult) mustBe parse(
-        s"""
-             {
-               "_links": {
-                 "individual": {
-                   "href": "/individuals/matching/$sandboxMatchId",
-                   "title": "Get a matched individual’s information"
-                 },
-                 "self": {
-                   "href": "/individuals/matching/"
-                 }
-               }
-             }"""
-      )
-    }
-
-    "return 404 (Not Found) for a citizen not found" in new Setup {
-      val eventualResult =
-        sandboxController.matchCitizen()(
-          fakeRequest
-            .withBody(parse(matchingRequest(firstName = "José")))
-            .withHeaders(("CorrelationId", sampleCorrelationId)))
-
-      status(eventualResult) mustBe NOT_FOUND
-      contentAsJson(eventualResult) mustBe Json.obj(
-        "code"    -> "MATCHING_FAILED",
-        "message" -> "There is no match for the information provided"
-      )
-    }
-
-    "return 404 (Not Found) when nino does not match a sandbox individual" in new Setup {
-      val eventualResult =
-        sandboxController.matchCitizen()(
-          fakeRequest
-            .withBody(parse(matchingRequest(nino = "AA000799C")))
-            .withHeaders(("CorrelationId", sampleCorrelationId)))
-
-      status(eventualResult) mustBe NOT_FOUND
-      contentAsJson(eventualResult) mustBe Json.obj(
-        "code"    -> "MATCHING_FAILED",
-        "message" -> "There is no match for the information provided"
-      )
-    }
-
-    "return 404 (Not Found) when an invalid nino exception is thrown" in new Setup {
-      val eventualResult =
-        sandboxController.matchCitizen()(
-          fakeRequest
-            .withBody(parse(matchingRequest(nino = "NA000799D")))
-            .withHeaders(("CorrelationId", sampleCorrelationId)))
-
-      status(eventualResult) mustBe NOT_FOUND
-      contentAsJson(eventualResult) mustBe Json.obj(
-        "code"    -> "MATCHING_FAILED",
-        "message" -> "There is no match for the information provided"
-      )
-    }
-
-    "return 400 (BadRequest) for an invalid dateOfBirth" in new Setup {
-      val requestBody =
-        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
-
-      val exception = intercept[InvalidBodyException](
-        sandboxController.matchCitizen()(
-          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId))))
-
-      exception.getMessage mustBe "dateOfBirth: invalid date format"
-
-      val requestBody2 =
-        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
-      val exception2 = intercept[InvalidBodyException](
-        sandboxController.matchCitizen()(
-          fakeRequest.withBody(requestBody2).withHeaders(("CorrelationId", sampleCorrelationId))))
-
-      exception2.getMessage mustBe "dateOfBirth: invalid date format"
-    }
-
-    "return 400 (BadRequest) for an invalid nino" in new Setup {
-      val requestBody =
-        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"AB1234567","dateOfBirth":"2020-01-31"}""")
-      val exception = intercept[InvalidBodyException](
-        sandboxController.matchCitizen()(
-          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId))))
-
-      exception.getMessage mustBe "Malformed nino submitted"
-    }
-
-    "not require bearer token authentication" in new Setup {
-      val eventualResult = sandboxController.matchCitizen()(
-        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId)))
-
-      status(eventualResult) mustBe OK
-      verifyZeroInteractions(mockAuthConnector)
-    }
-
-    "return 400 (Bad Request) when CorrelationId is missing" in new Setup {
-      val requestBody =
-        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-31"}""")
-      val exception =
-        intercept[BadRequestException](sandboxController.matchCitizen()(fakeRequest.withBody(requestBody)))
-
-      exception.message mustBe "CorrelationId is required"
-      exception.responseCode mustBe BAD_REQUEST
-    }
-
-    "return 400 (Bad Request) when CorrelationId is malformed" in new Setup {
-      val requestBody =
-        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-31"}""")
-
-      val exception = intercept[BadRequestException](
-        sandboxController.matchCitizen()(
-          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", "fakeCorrelationId"))))
-
-      exception.message mustBe "Malformed CorrelationId"
-      exception.responseCode mustBe BAD_REQUEST
     }
   }
 
