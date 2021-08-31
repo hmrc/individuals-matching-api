@@ -26,7 +26,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
-import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService}
+import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, SandboxCitizenMatchingService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -58,7 +58,7 @@ abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMa
 
 @Singleton
 class LivePrivilegedIndividualsController @Inject()(
-  liveCitizenMatchingService: LiveCitizenMatchingService,
+  liveCitizenMatchingService: CitizenMatchingService,
   val authConnector: AuthConnector,
   cc: ControllerComponents)
     extends PrivilegedIndividualsController(liveCitizenMatchingService, cc) {

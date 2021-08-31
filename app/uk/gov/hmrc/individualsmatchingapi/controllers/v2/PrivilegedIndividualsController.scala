@@ -28,15 +28,15 @@ import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.{maybeCorrelationId, validateCorrelationId}
-import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
+import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, ScopesService}
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
-abstract class PrivilegedIndividualsController(
+class PrivilegedIndividualsController(
   citizenMatchingService: CitizenMatchingService,
   scopeService: ScopesService,
   implicit val auditHelper: AuditHelper,
+  val authConnector: AuthConnector,
   cc: ControllerComponents)(implicit val ec: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
@@ -63,32 +63,12 @@ abstract class PrivilegedIndividualsController(
     } recover recoveryWithAudit(maybeCorrelationId(request), request.body.toString, s"/individuals/matching/$matchId")
   }
 
+  val environment = PRODUCTION
+
   private def getApiLinks(matchId: String, scopes: Iterable[String]): Seq[HalLink] =
     scopeService
       .getEndpoints(scopes)
       .map(endpoint =>
         HalLink(endpoint.name, endpoint.link.replaceAllLiterally("<matchId>", matchId), title = Some(endpoint.title)))
       .toSeq
-}
-
-@Singleton
-class LivePrivilegedIndividualsController @Inject()(
-  liveCitizenMatchingService: LiveCitizenMatchingService,
-  scopeService: ScopesService,
-  val authConnector: AuthConnector,
-  auditHelper: AuditHelper,
-  cc: ControllerComponents)(override implicit val ec: ExecutionContext)
-    extends PrivilegedIndividualsController(liveCitizenMatchingService, scopeService, auditHelper, cc) {
-  override val environment = PRODUCTION
-}
-
-@Singleton
-class SandboxPrivilegedIndividualsController @Inject()(
-  sandboxCitizenMatchingService: SandboxCitizenMatchingService,
-  scopeService: ScopesService,
-  val authConnector: AuthConnector,
-  auditHelper: AuditHelper,
-  cc: ControllerComponents)(override implicit val ec: ExecutionContext)
-    extends PrivilegedIndividualsController(sandboxCitizenMatchingService, scopeService, auditHelper, cc) {
-  override val environment = SANDBOX
 }

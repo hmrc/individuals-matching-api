@@ -32,10 +32,10 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
-import uk.gov.hmrc.individualsmatchingapi.controllers.v2.{LivePrivilegedIndividualsController, SandboxPrivilegedIndividualsController}
+import uk.gov.hmrc.individualsmatchingapi.controllers.v2.{PrivilegedIndividualsController}
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
-import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
+import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
@@ -51,7 +51,7 @@ class PrivilegedIndividualsControllerSpec
 
   trait Setup extends ScopesConfigHelper {
 
-    val mockCitizenMatchingService = mock[LiveCitizenMatchingService]
+    val mockCitizenMatchingService = mock[CitizenMatchingService]
 
     val mockAuthConnector = mock[AuthConnector]
     val mockAuditHelper = mock[AuditHelper]
@@ -62,18 +62,11 @@ class PrivilegedIndividualsControllerSpec
 
     implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
-    val liveController = new LivePrivilegedIndividualsController(
+    val liveController = new PrivilegedIndividualsController(
       mockCitizenMatchingService,
       mockScopesService,
-      mockAuthConnector,
       mockAuditHelper,
-      controllerComponents)
-
-    val sandboxController = new SandboxPrivilegedIndividualsController(
-      new SandboxCitizenMatchingService(),
-      mockScopesService,
       mockAuthConnector,
-      mockAuditHelper,
       controllerComponents)
 
     given(mockAuthConnector.authorise(any(), refEq(Retrievals.allEnrolments))(any(), any()))
@@ -167,35 +160,6 @@ class PrivilegedIndividualsControllerSpec
       )
 
       verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
-    }
-  }
-
-  "The sandbox matched individual function" should {
-
-    "respond with http 404 (not found) for an invalid matchId" in new Setup {
-      val eventualResult =
-        sandboxController
-          .matchedIndividual(uuid.toString)
-          .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId)))
-      status(eventualResult) mustBe NOT_FOUND
-      contentAsJson(eventualResult) mustBe Json.parse(
-        """{"code":"NOT_FOUND","message":"The resource can not be found"}""")
-    }
-
-    "respond with http 200 (ok) for sandbox valid matchId and citizen details exist" in new Setup {
-      val eventualResult = sandboxController
-        .matchedIndividual(sandboxMatchId.toString)
-        .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId)))
-      status(eventualResult) mustBe OK
-      contentAsJson(eventualResult) mustBe Json.parse(response(sandboxMatchId))
-    }
-
-    "not require bearer token authentication" in new Setup {
-      val eventualResult = sandboxController
-        .matchedIndividual(sandboxMatchId.toString)
-        .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId)))
-      status(eventualResult) mustBe OK
-      verifyZeroInteractions(mockAuthConnector)
     }
   }
 

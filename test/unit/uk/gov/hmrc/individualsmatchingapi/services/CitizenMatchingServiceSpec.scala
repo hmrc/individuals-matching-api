@@ -17,6 +17,7 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
 import java.util.UUID
+
 import org.joda.time.LocalDate
 import org.mockito.Matchers.{any, refEq}
 import org.mockito.Mockito.{verifyZeroInteractions, when}

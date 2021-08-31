@@ -29,14 +29,14 @@ import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, Privile
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.{maybeCorrelationId, validateCorrelationId}
-import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
-import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, ScopesService}
 
 import scala.concurrent.ExecutionContext
 
-abstract class PrivilegedCitizenMatchingController(
+class PrivilegedCitizenMatchingController(
   citizenMatchingService: CitizenMatchingService,
   scopeService: ScopesService,
+  val authConnector: AuthConnector,
   cc: ControllerComponents,
   bodyParsers: PlayBodyParsers,
   implicit val auditHelper: AuditHelper)(implicit val ec: ExecutionContext)
@@ -70,33 +70,5 @@ abstract class PrivilegedCitizenMatchingController(
       }
     } recover recoveryWithAudit(maybeCorrelationId(request), request.body.toString, "/individuals/matching/")
   }
-}
-
-@Singleton
-class LivePrivilegedCitizenMatchingController @Inject()(
-  liveCitizenMatchingService: LiveCitizenMatchingService,
-  scopeService: ScopesService,
-  val authConnector: AuthConnector,
-  auditHelper: AuditHelper,
-  cc: ControllerComponents,
-  bodyParser: PlayBodyParsers)(override implicit val ec: ExecutionContext)
-    extends PrivilegedCitizenMatchingController(liveCitizenMatchingService, scopeService, cc, bodyParser, auditHelper) {
-  override val environment = PRODUCTION
-}
-
-@Singleton
-class SandboxPrivilegedCitizenMatchingController @Inject()(
-  sandboxCitizenMatchingService: SandboxCitizenMatchingService,
-  scopeService: ScopesService,
-  val authConnector: AuthConnector,
-  auditHelper: AuditHelper,
-  cc: ControllerComponents,
-  bodyParser: PlayBodyParsers)(override implicit val ec: ExecutionContext)
-    extends PrivilegedCitizenMatchingController(
-      sandboxCitizenMatchingService,
-      scopeService,
-      cc,
-      bodyParser,
-      auditHelper) {
-  override val environment = SANDBOX
+  val environment = PRODUCTION
 }

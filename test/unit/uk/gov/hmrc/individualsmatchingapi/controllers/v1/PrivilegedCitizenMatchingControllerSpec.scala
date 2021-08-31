@@ -34,7 +34,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.v1.{LivePrivilegedCitizenMatchingController, SandboxPrivilegedCitizenMatchingController}
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain._
-import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
+import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, SandboxCitizenMatchingService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import scala.concurrent.Future
@@ -55,7 +55,7 @@ class PrivilegedCitizenMatchingControllerSpec
       mockAuthConnector,
       controllerComponents)
 
-    val mockLiveCitizenMatchingService = mock[LiveCitizenMatchingService]
+    val mockLiveCitizenMatchingService = mock[CitizenMatchingService]
     val mockAuthConnector = mock[AuthConnector]
 
     val liveController = new LivePrivilegedCitizenMatchingController(
