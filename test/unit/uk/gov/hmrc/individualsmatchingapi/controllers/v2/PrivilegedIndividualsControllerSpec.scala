@@ -35,7 +35,7 @@ import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.PrivilegedIndividualsController
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
-import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesHelper, ScopesService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
@@ -57,6 +57,7 @@ class PrivilegedIndividualsControllerSpec
     val mockAuditHelper = mock[AuditHelper]
 
     val mockScopesService = new ScopesService(mockScopesConfig)
+    val scopesHelper = new ScopesHelper(mockScopesService)
 
     val controllerComponents = fakeApplication.injector.instanceOf[ControllerComponents]
 
@@ -65,6 +66,7 @@ class PrivilegedIndividualsControllerSpec
     val liveController = new PrivilegedIndividualsController(
       mockCitizenMatchingService,
       mockScopesService,
+      scopesHelper,
       mockAuditHelper,
       mockAuthConnector,
       controllerComponents)

@@ -29,13 +29,14 @@ import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.{maybeCorrelationId, validateCorrelationId}
-import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesHelper, ScopesService}
 
 import scala.concurrent.ExecutionContext
 
 class PrivilegedIndividualsController @Inject()(
   citizenMatchingService: LiveCitizenMatchingService,
   scopeService: ScopesService,
+  scopesHelper: ScopesHelper,
   implicit val auditHelper: AuditHelper,
   val authConnector: AuthConnector,
   cc: ControllerComponents)(implicit val ec: ExecutionContext)
@@ -48,7 +49,8 @@ class PrivilegedIndividualsController @Inject()(
         citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
           val selfLink = HalLink("self", s"/individuals/matching/$matchId")
           val data = obj("individual" -> toJson(citizenDetails))
-          val response = state(data) ++ linksSeq(getApiLinks(matchId, authScopes) ++ Seq(selfLink))
+          val links = scopesHelper.getHalLinks(matchUuid, None, authScopes, None, excludeInternal = true) ++ selfLink
+          val response = state(data) ++ links
 
           auditHelper.auditApiResponse(
             correlationId.toString,
@@ -65,11 +67,4 @@ class PrivilegedIndividualsController @Inject()(
   }
 
   val environment = PRODUCTION
-
-  private def getApiLinks(matchId: String, scopes: Iterable[String]): Seq[HalLink] =
-    scopeService
-      .getEndpoints(scopes)
-      .map(endpoint =>
-        HalLink(endpoint.name, endpoint.link.replaceAllLiterally("<matchId>", matchId), title = Some(endpoint.title)))
-      .toSeq
 }
