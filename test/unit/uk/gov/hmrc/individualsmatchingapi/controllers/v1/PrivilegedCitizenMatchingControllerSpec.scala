@@ -24,7 +24,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, MustMatchers}
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
-import play.api.mvc.{BodyParser, ControllerComponents, Results}
+import play.api.mvc.{ControllerComponents, Results}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
