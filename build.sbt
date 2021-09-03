@@ -7,7 +7,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 val appName = "individuals-matching-api"
 val hmrc = "uk.gov.hmrc"
 
-lazy val appDependencies: Seq[ModuleID] = compile ++ test()
+lazy val appDependencies: Seq[ModuleID] = AppDependencies.compile ++ AppDependencies.test()
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
@@ -16,42 +16,6 @@ def unitFilter(name: String): Boolean = name startsWith "unit"
 def componentFilter(name: String): Boolean = name startsWith "component"
 
 lazy val ComponentTest = config("component") extend Test
-
-val akkaVersion = "2.5.23"
-
-val akkaHttpVersion = "10.0.15"
-
-dependencyOverrides += "com.typesafe.akka" %% "akka-stream" % akkaVersion
-
-dependencyOverrides += "com.typesafe.akka" %% "akka-protobuf" % akkaVersion
-
-dependencyOverrides += "com.typesafe.akka" %% "akka-slf4j" % akkaVersion
-
-dependencyOverrides += "com.typesafe.akka" %% "akka-actor" % akkaVersion
-
-dependencyOverrides += "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion
-
-val compile = Seq(
-  ws,
-  hmrc                %% "bootstrap-backend-play-26" % "5.7.0",
-  hmrc                %% "domain"                    % "6.1.0-play-26",
-  hmrc                %% "simple-reactivemongo"      % "8.0.0-play-26",
-  hmrc                %% "play-hal"                  % "2.1.0-play-26",
-  hmrc                %% "play-hmrc-api"             % "6.4.0-play-26",
-  "com.typesafe.play" %% "play-json-joda"            % "2.6.14"
-)
-
-def test(scope: String = "test,it") = Seq(
-  hmrc                     %% "hmrctest"           % "3.10.0-play-26"    % scope,
-  hmrc                     %% "reactivemongo-test" % "5.0.0-play-26"     % scope,
-  "org.scalatest"          %% "scalatest"          % "3.0.9"             % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3"             % scope,
-  "org.pegdown"            % "pegdown"             % "1.6.0"             % scope,
-  "org.mockito"            % "mockito-all"         % "1.10.19"           % scope,
-  "org.scalaj"             %% "scalaj-http"        % "2.4.2"             % scope,
-  "com.github.tomakehurst" % "wiremock-jre8"       % "2.27.2"            % scope,
-  "com.typesafe.play"      %% "play-test"          % PlayVersion.current % scope
-)
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
@@ -81,6 +45,7 @@ lazy val microservice =
     .settings(defaultSettings(): _*)
     .settings(scalafmtOnCompile := true)
     .settings(
+      dependencyOverrides ++= AppDependencies.overrides,
       libraryDependencies ++= appDependencies,
       testOptions in Test := Seq(Tests.Filter(unitFilter)),
       retrieveManaged := true,

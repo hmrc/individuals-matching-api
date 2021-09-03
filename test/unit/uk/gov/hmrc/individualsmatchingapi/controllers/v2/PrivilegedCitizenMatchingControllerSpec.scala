@@ -19,9 +19,9 @@ package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 import java.util.UUID
 
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, refEq}
+import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach, MustMatchers}
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse

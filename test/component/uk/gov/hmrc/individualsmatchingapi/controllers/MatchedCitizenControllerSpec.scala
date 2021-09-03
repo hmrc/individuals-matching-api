@@ -58,8 +58,8 @@ class MatchedCitizenControllerSpec extends BaseSpec {
 
       Then("The response status should be 404 (Not Found)")
       response.code shouldBe NOT_FOUND
-      import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
-      response.body shouldBe Json.toJson(ErrorNotFound).toString()
+      Json.parse(response.body) shouldBe Json.parse(
+        s"""{"code":"NOT_FOUND", "message":"The resource can not be found"}""")
     }
   }
 }
