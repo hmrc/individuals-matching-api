@@ -16,15 +16,11 @@
 
 package component.uk.gov.hmrc.individualsmatchingapi.controllers
 
-import java.util.UUID
-
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.BaseSpec
 import play.api.test.Helpers.{await, _}
 import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import scalaj.http.Http
-import uk.gov.hmrc.individualsmatchingapi.domain.ErrorNotFound
 
 class MatchedCitizenControllerSpec extends BaseSpec {
 
@@ -58,8 +54,8 @@ class MatchedCitizenControllerSpec extends BaseSpec {
 
       Then("The response status should be 404 (Not Found)")
       response.code shouldBe NOT_FOUND
-      import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
-      response.body shouldBe Json.toJson(ErrorNotFound).toString()
+      Json.parse(response.body) shouldBe Json.parse(
+        s"""{"code":"NOT_FOUND", "message":"The resource can not be found"}""")
     }
   }
 }

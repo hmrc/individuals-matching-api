@@ -37,7 +37,6 @@ trait BaseSpec
     extends FeatureSpec with BeforeAndAfterAll with BeforeAndAfterEach with Matchers with GuiceOneServerPerSuite
     with GivenWhenThen {
 
-  override lazy val port = 9000
   implicit override lazy val app: Application = GuiceApplicationBuilder()
     .configure(
       "auditing.enabled"                           -> false,

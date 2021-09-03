@@ -19,11 +19,11 @@ package unit.uk.gov.hmrc.individualsmatchingapi.services
 import java.util.UUID
 
 import org.joda.time.LocalDate
-import org.mockito.Matchers.{any, refEq}
+import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito.{verifyZeroInteractions, when}
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.{CitizenDetailsConnector, MatchingConnector}

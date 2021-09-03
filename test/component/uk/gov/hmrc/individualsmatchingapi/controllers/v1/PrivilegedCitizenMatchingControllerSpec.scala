@@ -136,7 +136,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       response.code shouldBe FORBIDDEN
 
       And("The correct error message is returned")
-      parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
+      Json.parse(response.body) shouldBe Json.parse(
+        s"""{"code":"MATCHING_FAILED","message":"There is no match for the information provided"}""")
     }
 
     scenario("Citizen does not exist for the given NINO") {
@@ -154,7 +155,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       response.code shouldBe FORBIDDEN
 
       And("The correct error message is returned")
-      parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
+      Json.parse(response.body) shouldBe Json.parse(
+        s"""{"code":"MATCHING_FAILED","message":"There is no match for the information provided"}""")
     }
 
     scenario("Invalid NINO provided") {
@@ -172,7 +174,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       response.code shouldBe FORBIDDEN
 
       And("The correct error message is returned")
-      parse(response.body) shouldBe Json.toJson(ErrorMatchingFailed)
+      Json.parse(response.body) shouldBe Json.parse(
+        s"""{"code":"MATCHING_FAILED","message":"There is no match for the information provided"}""")
     }
   }
 

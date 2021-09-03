@@ -20,11 +20,14 @@ import com.typesafe.config.ConfigFactory
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.{Application, Configuration}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.PlayBodyParsers
 import unit.uk.gov.hmrc.individualsmatchingapi.util.UnitSpec
 
 trait SpecBase extends UnitSpec with GuiceOneAppPerSuite {
 
   lazy val additionalConfig = Configuration()
+
+  lazy val bodyParsers: PlayBodyParsers = fakeApplication.injector.instanceOf[PlayBodyParsers]
 
   def buildFakeApplication(extraConfig: Configuration): Application =
     new GuiceApplicationBuilder()

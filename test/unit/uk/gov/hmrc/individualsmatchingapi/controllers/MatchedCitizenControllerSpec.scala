@@ -18,10 +18,10 @@ package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
 import java.util.UUID
 
-import org.mockito.Matchers.{any, refEq}
+import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito.when
 import org.scalatest.Matchers
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents}

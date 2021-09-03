@@ -12,7 +12,7 @@ addSbtPlugin("uk.gov.hmrc" % "sbt-distributables" % "2.1.0")
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-artifactory" % "2.0.0")
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.23" exclude("org.slf4j", "slf4j-simple"))
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.7" exclude("org.slf4j", "slf4j-simple"))
 
 addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.16")
 

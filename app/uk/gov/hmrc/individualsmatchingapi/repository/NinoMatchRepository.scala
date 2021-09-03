@@ -43,7 +43,8 @@ class NinoMatchRepository @Inject()(mongoConnectionProvider: MongoConnectionProv
       JsonFormatters.ninoMatchJsonFormat,
       JsonFormatters.uuidJsonFormat) {
 
-  private lazy val ninoMatchTtl = configuration.getInt("mongo.ninoMatchTtlInSeconds").getOrElse(60 * 60 * 5)
+  private lazy val ninoMatchTtl =
+    configuration.getOptional[Int]("mongo.ninoMatchTtlInSeconds").getOrElse(60 * 60 * 5)
 
   override lazy val indexes = Seq(
     Index(Seq(("id", Ascending)), Some("idIndex"), background = true, unique = true),

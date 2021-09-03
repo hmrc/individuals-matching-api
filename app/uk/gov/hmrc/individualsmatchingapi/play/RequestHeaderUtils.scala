@@ -17,7 +17,6 @@
 package uk.gov.hmrc.individualsmatchingapi.play
 
 import java.util.UUID
-
 import play.api.http.HeaderNames.ACCEPT
 import play.api.mvc.{Request, RequestHeader, Result}
 import uk.gov.hmrc.http.BadRequestException
@@ -54,9 +53,11 @@ object RequestHeaderUtils {
 
   def getVersionedRequest(originalRequest: RequestHeader) = {
     val version = getVersion(originalRequest)
-    originalRequest.copy(
-      uri = versionedUri(originalRequest.uri, version),
-      path = versionedUri(originalRequest.path, version)
+
+    originalRequest.withTarget(
+      originalRequest.target
+        .withUriString(versionedUri(originalRequest.uri, version))
+        .withPath(versionedUri(originalRequest.path, version))
     )
   }
 

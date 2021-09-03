@@ -20,7 +20,7 @@ import controllers.Assets
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.when
 import org.scalatest.Matchers
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.Configuration
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.JsValue

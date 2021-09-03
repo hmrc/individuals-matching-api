@@ -19,19 +19,18 @@ package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 import java.util.UUID
 
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, refEq}
+import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach, MustMatchers}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.{BeforeAndAfterEach, MustMatchers}
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
 import play.api.mvc.{ControllerComponents, PlayBodyParsers, Results}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
-import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.PrivilegedCitizenMatchingController
 import uk.gov.hmrc.individualsmatchingapi.domain._
@@ -39,7 +38,7 @@ import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, 
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.Future.{failed, successful}
+import scala.concurrent.Future.failed
 import scala.util.Random
 
 class PrivilegedCitizenMatchingControllerSpec

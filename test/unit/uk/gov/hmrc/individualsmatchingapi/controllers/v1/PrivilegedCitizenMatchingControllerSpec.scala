@@ -17,11 +17,10 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
 import java.util.UUID
-
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers.{any, refEq}
+import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito.{verifyZeroInteractions, when}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfter, MustMatchers}
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
@@ -53,6 +52,7 @@ class PrivilegedCitizenMatchingControllerSpec
     val sandboxController = new SandboxPrivilegedCitizenMatchingController(
       sandboxCitizenMatchingService,
       mockAuthConnector,
+      bodyParsers,
       controllerComponents)
 
     val mockLiveCitizenMatchingService = mock[LiveCitizenMatchingService]
@@ -61,6 +61,7 @@ class PrivilegedCitizenMatchingControllerSpec
     val liveController = new LivePrivilegedCitizenMatchingController(
       mockLiveCitizenMatchingService,
       mockAuthConnector,
+      bodyParsers,
       controllerComponents)
 
     given(mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any(), any()))
