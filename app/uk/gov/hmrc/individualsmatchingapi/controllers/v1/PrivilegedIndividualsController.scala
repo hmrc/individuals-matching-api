@@ -35,7 +35,7 @@ abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMa
 
   def matchedIndividual(matchId: String) = Action.async { implicit request =>
     requiresPrivilegedAuthentication {
-      withUuid(matchId) { matchUuid =>
+      withValidUuid(matchId) { matchUuid =>
         citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
           val selfLink = HalLink("self", s"/individuals/matching/$matchId")
           val incomeLink = HalLink(

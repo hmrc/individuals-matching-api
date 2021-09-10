@@ -33,6 +33,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import java.util.UUID
 
 import javax.inject.Inject
+import uk.gov.hmrc.individualsmatchingapi.utils.UuidValidator
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -66,6 +67,13 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
     Try(UUID.fromString(uuidString)) match {
       case Success(uuid) => f(uuid)
       case _             => successful(ErrorNotFound.toHttpResponse)
+    }
+
+  protected def withValidUuid(uuidString: String)(f: UUID => Future[Result]): Future[Result] =
+    if (UuidValidator.validate(uuidString)) {
+      f(UUID.fromString(uuidString))
+    } else {
+      successful(ErrorNotFound.toHttpResponse)
     }
 
   private def fieldName[T](errs: Seq[(JsPath, Seq[JsonValidationError])]) =
