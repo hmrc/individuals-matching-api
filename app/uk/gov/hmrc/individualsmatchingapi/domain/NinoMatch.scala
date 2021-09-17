@@ -17,8 +17,12 @@
 package uk.gov.hmrc.individualsmatchingapi.domain
 
 import java.util.UUID
-
 import org.joda.time.{DateTime, DateTimeZone}
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.domain.Nino
 
 case class NinoMatch(nino: Nino, id: UUID, createdAt: DateTime = DateTime.now.withZone(DateTimeZone.UTC))
+
+object NinoMatch {
+  implicit val format: OFormat[NinoMatch] = Json.format[NinoMatch]
+}
