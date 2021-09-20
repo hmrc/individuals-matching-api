@@ -17,7 +17,6 @@
 package component.uk.gov.hmrc.individualsmatchingapi.stubs
 
 import java.util.concurrent.TimeUnit
-
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
@@ -28,6 +27,8 @@ import play.api.http.HeaderNames.{ACCEPT, AUTHORIZATION, CONTENT_TYPE}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.mvc.Http.MimeTypes.JSON
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
+import unit.uk.gov.hmrc.individualsmatchingapi.util.UnitSpec
 
 import scala.concurrent.Await.result
 import scala.concurrent.duration.Duration
@@ -72,7 +73,7 @@ trait BaseSpec
 
   override protected def beforeEach(): Unit = {
     mocks.foreach(m => if (!m.server.isRunning) m.server.start())
-    result(mongoRepository.drop, timeout)
+    result(mongoRepository.collection.drop.headOption(), timeout)
     result(mongoRepository.ensureIndexes, timeout)
   }
 
@@ -81,7 +82,7 @@ trait BaseSpec
 
   override def afterAll(): Unit = {
     mocks.foreach(_.server.stop())
-    result(mongoRepository.drop, timeout)
+    result(mongoRepository.collection.drop.headOption(), timeout)
   }
 }
 

@@ -27,7 +27,6 @@ object AppDependencies {
     hmrc                %% "domain"                     % "6.2.0-play-28",
     hmrc                %% "play-hal"                   % "2.1.0-play-27",
     hmrc                %% "play-hmrc-api"              % "6.4.0-play-28",
-    hmrc                %% "mongo-caching"              % "7.0.0-play-28",
     hmrc                %% "json-encryption"            % "4.10.0-play-28",
     "com.typesafe.play" %% "play-json-joda"             % "2.9.2",
     hmrcMongo           %% "hmrc-mongo-play-28"         % "0.53.0"
@@ -40,7 +39,6 @@ object AppDependencies {
     "org.scalaj"             %% "scalaj-http"              % "2.4.2"             % scope,
     "org.pegdown"            % "pegdown"                   % "1.6.0"             % scope,
     "com.github.tomakehurst" % "wiremock-jre8"             % "2.27.2"            % scope,
-    hmrc                     %% "reactivemongo-test"       % "5.0.0-play-28"     % scope,
     hmrc                     %% "service-integration-test" % "1.1.0-play-28"     % scope,
     hmrcMongo                %% "hmrc-mongo-test-play-28"  % "0.53.0"            % scope
   )

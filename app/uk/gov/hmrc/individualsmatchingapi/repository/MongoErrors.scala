@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.individualsmatchingapi.repository
 
-import javax.inject.{Inject, Singleton}
-
-import play.modules.reactivemongo.ReactiveMongoComponent
-
-@Singleton
-class MongoConnectionProvider @Inject()(reactiveMongoComponent: ReactiveMongoComponent) {
-  lazy val mongoDatabase = reactiveMongoComponent.mongoConnector.db
+object MongoErrors {
+  object Duplicate {
+    def unapply(ex: Exception): Option[Exception] =
+      if (ex.getMessage.contains("E11000")) Some(ex) else None
+  }
 }

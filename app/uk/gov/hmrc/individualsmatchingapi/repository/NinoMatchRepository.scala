@@ -16,61 +16,57 @@
 
 package uk.gov.hmrc.individualsmatchingapi.repository
 
+import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
+import org.mongodb.scala.model.Indexes.ascending
+import play.api.Configuration
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.individualsmatchingapi.domain.NinoMatch
+import uk.gov.hmrc.individualsmatchingapi.repository.MongoErrors.Duplicate
+import uk.gov.hmrc.mongo.play.json.Codecs.toBson
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+
 import java.util.UUID
 import java.util.UUID.randomUUID
+import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-
-import play.api.Configuration
-import play.api.libs.json.Json
-import reactivemongo.api.ReadPreference
-import reactivemongo.api.commands.MultiBulkWriteResult
-import reactivemongo.api.indexes.Index
-import reactivemongo.api.indexes.IndexType.Ascending
-import reactivemongo.bson.BSONDocument
-import reactivemongo.play.json._
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.individualsmatchingapi.domain.{JsonFormatters, NinoMatch}
-import uk.gov.hmrc.mongo.ReactiveRepository
-
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NinoMatchRepository @Inject()(mongoConnectionProvider: MongoConnectionProvider, configuration: Configuration)(
-  implicit ec: ExecutionContext)
-    extends ReactiveRepository[NinoMatch, UUID](
-      "ninoMatch",
-      mongoConnectionProvider.mongoDatabase,
-      JsonFormatters.ninoMatchJsonFormat,
-      JsonFormatters.uuidJsonFormat) {
-
-  private lazy val ninoMatchTtl =
-    configuration.getOptional[Int]("mongo.ninoMatchTtlInSeconds").getOrElse(60 * 60 * 5)
-
-  override lazy val indexes = Seq(
-    Index(Seq(("id", Ascending)), Some("idIndex"), background = true, unique = true),
-    Index(
-      Seq(("createdAt", Ascending)),
-      Some("createdAtIndex"),
-      options = BSONDocument("expireAfterSeconds" -> ninoMatchTtl),
-      background = true)
-  )
+class NinoMatchRepository @Inject()(mongo: MongoComponent, configuration: Configuration)(implicit ec: ExecutionContext)
+    extends PlayMongoRepository[NinoMatch](
+      mongoComponent = mongo,
+      collectionName = "ninoMatch",
+      domainFormat = NinoMatch.format,
+      replaceIndexes = true,
+      indexes = Seq(
+        IndexModel(ascending("id"), IndexOptions().name("idIndex").unique(true).background(true)),
+        IndexModel(
+          ascending("createdAt"),
+          IndexOptions()
+            .name("createdAtIndex")
+            .expireAfter(
+              configuration.getOptional[Int]("mongo.ninoMatchTtlInSeconds").getOrElse(60 * 60 * 5).toLong,
+              TimeUnit.SECONDS)
+            .background(true)
+        )
+      )
+    ) {
 
   def create(nino: Nino): Future[NinoMatch] = {
     val ninoMatch = NinoMatch(nino, generateUuid)
-    insert(ninoMatch) map { writeResult =>
-      if (writeResult.n == 1) ninoMatch
-      else throw new RuntimeException(s"failed to persist nino match $ninoMatch")
-    }
+
+    collection
+      .insertOne(ninoMatch)
+      .toFuture
+      .map(_ => ninoMatch)
+      .recover {
+        case Duplicate(_) => throw new RuntimeException(s"failed to persist nino match $ninoMatch")
+      }
   }
 
-  def read(uuid: UUID): Future[Option[NinoMatch]] = findById(uuid)
-
-  override def findById(id: UUID, readPreference: ReadPreference)(
-    implicit ec: ExecutionContext): Future[Option[NinoMatch]] =
-    collection.find(Json.obj("id" -> id.toString)).one[NinoMatch]
-
-  override def bulkInsert(entities: Seq[NinoMatch])(implicit ec: ExecutionContext): Future[MultiBulkWriteResult] =
-    throw new UnsupportedOperationException
+  def read(id: UUID): Future[Option[NinoMatch]] =
+    collection.find(Filters.equal("id", toBson(id))).headOption()
 
   private def generateUuid = randomUUID()
 }

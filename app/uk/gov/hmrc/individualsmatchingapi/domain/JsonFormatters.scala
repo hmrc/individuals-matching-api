@@ -22,7 +22,6 @@ import org.joda.time.LocalDate
 import play.api.libs.json.JodaWrites._
 import play.api.libs.json.JodaReads._
 import play.api.libs.json._
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 import scala.language.implicitConversions
 object JsonFormatters {
@@ -80,7 +79,6 @@ object JsonFormatters {
       JsSuccess(UUID.fromString(json.asInstanceOf[JsString].value))
   }
 
-  implicit val dateTimeFormat = ReactiveMongoFormats.dateTimeFormats
   implicit val ninoMatchJsonFormat = Json.format[NinoMatch]
   implicit val matchedCitizenRecordJsonFormat =
     Json.format[MatchedCitizenRecord]
