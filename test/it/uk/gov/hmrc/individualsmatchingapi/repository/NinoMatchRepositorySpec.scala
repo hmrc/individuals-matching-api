@@ -16,17 +16,15 @@
 
 package it.uk.gov.hmrc.individualsmatchingapi.repository
 
-import java.util.UUID
+import org.mongodb.scala.model.IndexModel
 
+import java.util.UUID
 import org.scalatest.{BeforeAndAfterEach, Matchers}
 import play.api.Configuration
 import play.api.inject.guice.GuiceableModule
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
-import uk.gov.hmrc.mongo.test.{CleanMongoCollectionSupport, DefaultPlayMongoRepositorySupport}
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfterEach {
 
@@ -34,8 +32,9 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
 
   val bindModules: Seq[GuiceableModule] = Seq()
 
-  protected def databaseName: String = "test-" + this.getClass.getSimpleName
-  protected def mongoUri: String = s"mongodb://localhost:27017/$databaseName"
+  protected val databaseName: String = "test-" + this.getClass.getSimpleName
+  protected val mongoUri: String =
+    s"mongodb://127.0.0.1:27017/$databaseName?heartbeatFrequencyMS=1000&rm.failover=default"
 
   override lazy val fakeApplication = buildFakeApplication(
     Configuration("mongodb.uri" -> mongoUri, "mongo.ninoMatchTtlInSeconds" -> ninoMatchTtl))
@@ -53,26 +52,26 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
   }
 
   "collection" should {
-    "have a unique index on id" in {
-      val indexes = await(ninoMatchRepository.collection.listIndexes().headOption())
+    "have the correct indices" in {
+      val indices = await(
+        ninoMatchRepository.collection.listIndexes[Seq[IndexModel]].toFuture()
+      ).toString
 
-      println("ACHI: " + indexes)
-//      await(ninoMatchRepository.collection.indexesManager.list()).find({ i =>
-//        i.name == Some("idIndex") &&
-//          i.key == Seq("id" -> IndexType.Ascending) &&
-//          i.background &&
-//          i.unique
-//      }) should not be None
-    }
+      indices.contains(
+        "name -> idIndex, " +
+          s"ns -> $databaseName.ninoMatch, " +
+          "background -> true, " +
+          "key -> Map(id -> 1), " +
+          "v -> 2, " +
+          "unique -> true") shouldBe true
 
-    "have a non-unique index and expiring ttl on createAt" in {
-//      await(ninoMatchRepository.collection.indexesManager.list()).find({ i =>
-//        i.key == Seq("createdAt" -> IndexType.Ascending) &&
-//          i.name == Some("createdAtIndex") &&
-//          i.background &&
-//          !i.unique &&
-//          i.options == BSONDocument("expireAfterSeconds" -> ninoMatchTtl)
-//      }) should not be None
+      indices.contains(
+        "name -> createdAtIndex, " +
+          s"ns -> $databaseName.ninoMatch, " +
+          "background -> true, " +
+          "key -> Map(createdAt -> 1), " +
+          "v -> 2, " +
+          s"expireAfterSeconds -> $ninoMatchTtl") shouldBe true
     }
   }
 
