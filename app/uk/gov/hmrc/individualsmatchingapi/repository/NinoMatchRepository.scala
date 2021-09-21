@@ -46,7 +46,7 @@ class NinoMatchRepository @Inject()(mongo: MongoComponent, configuration: Config
           IndexOptions()
             .name("createdAtIndex")
             .expireAfter(
-              configuration.getOptional[Int]("mongo.ninoMatchTtlInSeconds").getOrElse(60 * 60 * 5).toLong,
+              configuration.getOptional[Int]("mongodb.ninoMatchTtlInSeconds").getOrElse(60 * 60 * 5).toLong,
               TimeUnit.SECONDS)
             .background(true)
         )
