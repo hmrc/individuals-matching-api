@@ -28,9 +28,7 @@ import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.mongo.play.json.Codecs.toBson
-
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationDouble
 
 class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
@@ -43,9 +41,9 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
   val matchingRequest =
     CitizenMatchingRequest(firstName, lastName, nino, dateOfBirthSensibleformat)
 
-  feature("citizen matching is open and accessible") {
+  Feature("citizen matching is open and accessible") {
 
-    scenario("valid request to the sandbox implementation. Individual's details match sandbox citizen") {
+    Scenario("valid request to the sandbox implementation. Individual's details match sandbox citizen") {
 
       When("I request individual income for the sandbox matchId")
       val response = Http(s"$serviceUrl/sandbox/")
@@ -74,7 +72,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       )
     }
 
-    scenario("Valid request to the live implementation. Individual's details match existing citizen records") {
+    Scenario("Valid request to the live implementation. Individual's details match existing citizen records") {
 
       Given("A valid privileged Auth bearer token")
       AuthStub.willAuthorizePrivilegedAuthToken(authToken)
@@ -117,8 +115,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     }
   }
 
-  feature("Citizen matching error handling") {
-    scenario("No match. Individual's details do not match existing citizen records") {
+  Feature("Citizen matching error handling") {
+    Scenario("No match. Individual's details do not match existing citizen records") {
 
       Given("A valid privileged Auth bearer token")
       AuthStub.willAuthorizePrivilegedAuthToken(authToken)
@@ -142,7 +140,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
         s"""{"code":"MATCHING_FAILED","message":"There is no match for the information provided"}""")
     }
 
-    scenario("Citizen does not exist for the given NINO") {
+    Scenario("Citizen does not exist for the given NINO") {
 
       Given("A valid privileged Auth bearer token")
       AuthStub.willAuthorizePrivilegedAuthToken(authToken)
@@ -161,7 +159,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
         s"""{"code":"MATCHING_FAILED","message":"There is no match for the information provided"}""")
     }
 
-    scenario("Invalid NINO provided") {
+    Scenario("Invalid NINO provided") {
 
       Given("A valid privileged Auth bearer token")
       AuthStub.willAuthorizePrivilegedAuthToken(authToken)
@@ -181,7 +179,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     }
   }
 
-  scenario("NINO provided with wrong format") {
+  Scenario("NINO provided with wrong format") {
 
     Given("A valid privileged Auth bearer token")
     AuthStub.willAuthorizePrivilegedAuthToken(authToken)

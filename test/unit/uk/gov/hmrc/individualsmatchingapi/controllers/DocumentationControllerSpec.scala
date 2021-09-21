@@ -19,7 +19,7 @@ package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 import controllers.Assets
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.when
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Configuration
 import play.api.http.HttpErrorHandler

@@ -20,22 +20,21 @@ import java.util.concurrent.TimeUnit
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import org.scalatest._
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, GivenWhenThen}
+import org.scalatest.featurespec.AnyFeatureSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.http.HeaderNames.{ACCEPT, AUTHORIZATION, CONTENT_TYPE}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.mvc.Http.MimeTypes.JSON
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
-import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
-import unit.uk.gov.hmrc.individualsmatchingapi.util.UnitSpec
 
 import scala.concurrent.Await.result
 import scala.concurrent.duration.Duration
-import scala.concurrent.ExecutionContext.Implicits.global
 
 trait BaseSpec
-    extends FeatureSpec with BeforeAndAfterAll with BeforeAndAfterEach with Matchers with GuiceOneServerPerSuite
+    extends AnyFeatureSpec with BeforeAndAfterAll with BeforeAndAfterEach with Matchers with GuiceOneServerPerSuite
     with GivenWhenThen {
 
   implicit override lazy val app: Application = GuiceApplicationBuilder()

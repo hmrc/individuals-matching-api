@@ -19,7 +19,8 @@ package it.uk.gov.hmrc.individualsmatchingapi.repository
 import org.mongodb.scala.model.IndexModel
 
 import java.util.UUID
-import org.scalatest.{BeforeAndAfterEach, Matchers}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
 import play.api.inject.guice.GuiceableModule
 import uk.gov.hmrc.domain.Nino

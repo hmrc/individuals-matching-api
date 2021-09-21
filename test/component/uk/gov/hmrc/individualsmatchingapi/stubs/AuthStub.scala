@@ -30,11 +30,6 @@ object AuthStub extends MockHost(22000) {
   def authPredicate(scopes: Iterable[String]): Predicate =
     scopes.map(Enrolment(_): Predicate).reduce(_ or _)
 
-  private def privilegedAuthority(scope: String) = obj(
-    "authorise" -> arr(toJson(Enrolment(scope))),
-    "retrieve"  -> JsArray()
-  )
-
   private def privilegedAuthority(scopes: List[String]) = {
 
     val predicateJson = authPredicate(scopes).toJson match {

@@ -17,13 +17,12 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import java.util.UUID
-
 import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
+import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfterEach, MustMatchers}
-import play.api.Configuration
+import org.scalatest.BeforeAndAfterEach
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 import play.api.mvc.{ControllerComponents, Results}
@@ -31,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.PrivilegedIndividualsController
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
@@ -43,7 +42,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.{failed, successful}
 
 class PrivilegedIndividualsControllerSpec
-    extends SpecBase with MustMatchers with Results with MockitoSugar with BeforeAndAfterEach with Individuals {
+    extends SpecBase with Matchers with Results with MockitoSugar with BeforeAndAfterEach with Individuals {
 
   implicit val headerCarrier = new HeaderCarrier()
   val uuid = UUID.randomUUID()
@@ -120,7 +119,7 @@ class PrivilegedIndividualsControllerSpec
       status(res) mustBe UNAUTHORIZED
       contentAsJson(res) mustBe Json.parse("""{"code":"UNAUTHORIZED","message":"Insufficient Enrolments"}""")
 
-      verifyZeroInteractions(mockCitizenMatchingService)
+      verifyNoInteractions(mockCitizenMatchingService)
       verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
@@ -165,12 +164,7 @@ class PrivilegedIndividualsControllerSpec
     }
   }
 
-  private def response(
-    matchId: UUID,
-    firstName: String = "Amanda",
-    lastName: String = "Joseph",
-    nino: String = "NA000799C",
-    dateOfBirth: String = "1960-01-15") =
+  private def response(matchId: UUID, firstName: String, lastName: String, nino: String, dateOfBirth: String) =
     s"""
       {
          "individual": {

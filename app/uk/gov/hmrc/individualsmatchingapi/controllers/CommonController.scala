@@ -54,8 +54,7 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
         successful(ErrorInvalidRequest("Unable to process request").toHttpResponse)
     }
 
-  protected def withJsonBodyV2[T](
-    f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]) =
+  protected def withJsonBodyV2[T](f: (T) => Future[Result])(implicit request: Request[JsValue], reads: Reads[T]) =
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _))                    => f(payload)
       case Success(JsError(errs))                            => throw new InvalidBodyException(s"${fieldName(errs)} is required")

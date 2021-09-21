@@ -17,12 +17,12 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
 import java.util.UUID
-
 import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.{verifyZeroInteractions, when}
+import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfterEach, MustMatchers}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.matchers.must.Matchers
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 import play.api.mvc.{ControllerComponents, Results}
@@ -41,7 +41,7 @@ import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 import scala.concurrent.Future.{failed, successful}
 
 class PrivilegedIndividualsControllerSpec
-    extends SpecBase with MustMatchers with Results with MockitoSugar with BeforeAndAfterEach with Individuals {
+    extends SpecBase with Matchers with Results with MockitoSugar with BeforeAndAfterEach with Individuals {
 
   implicit val headerCarrier = new HeaderCarrier()
   val uuid = UUID.randomUUID()
@@ -94,7 +94,7 @@ class PrivilegedIndividualsControllerSpec
         await(liveController.matchedIndividual(uuid.toString).apply(FakeRequest()))
       }
 
-      verifyZeroInteractions(mockCitizenMatchingService)
+      verifyNoInteractions(mockCitizenMatchingService)
     }
   }
 
@@ -121,7 +121,7 @@ class PrivilegedIndividualsControllerSpec
         .matchedIndividual(sandboxMatchId.toString)
         .apply(FakeRequest())
       status(eventualResult) mustBe OK
-      verifyZeroInteractions(mockAuthConnector)
+      verifyNoInteractions(mockAuthConnector)
     }
   }
 

@@ -17,12 +17,11 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
 import java.util.UUID
-
 import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.{verifyZeroInteractions, when}
-import org.scalatest.Matchers
+import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
@@ -81,7 +80,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
         .thenReturn(Future.failed(new CitizenNotFoundException))
 
       intercept[CitizenNotFoundException](await(liveService.matchCitizen(citizenMatchingRequest)))
-      verifyZeroInteractions(mockMatchingConnector, mockNinoMatchRepository)
+      verifyNoInteractions(mockMatchingConnector, mockNinoMatchRepository)
     }
 
     "propagate exception for an invalid nino" in new Setup {

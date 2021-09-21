@@ -21,7 +21,6 @@ import play.api.http.Status
 import play.api.libs.json.Json
 import scalaj.http.Http
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 
 import scala.concurrent.Await.result
 
@@ -49,9 +48,9 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
     "read:individuals-matching-laa-c3"
   )
 
-  feature("matched individual is open and accessible") {
+  Feature("matched individual is open and accessible") {
 
-    scenario("valid request to the live implementation") {
+    Scenario("valid request to the live implementation") {
 
       Given("A valid privileged Auth bearer token")
       AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)

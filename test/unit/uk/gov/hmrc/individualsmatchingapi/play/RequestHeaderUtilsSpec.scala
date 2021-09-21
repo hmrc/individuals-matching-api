@@ -16,7 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.play
 
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{ACCEPT, GET}
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils._

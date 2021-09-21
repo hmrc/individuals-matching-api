@@ -18,13 +18,9 @@ package uk.gov.hmrc.individualsmatchingapi.play
 
 import java.util.UUID
 import play.api.http.HeaderNames.ACCEPT
-import play.api.mvc.{Request, RequestHeader, Result}
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.BadRequestException
-import uk.gov.hmrc.individualsmatchingapi.domain.{ErrorInvalidRequest, ErrorNotFound}
 import uk.gov.hmrc.individualsmatchingapi.utils.UuidValidator
-
-import scala.concurrent.Future
-import scala.concurrent.Future.successful
 import scala.util.{Success, Try}
 
 object RequestHeaderUtils {

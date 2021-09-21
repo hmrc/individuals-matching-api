@@ -17,12 +17,12 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import java.util.UUID
-
 import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
+import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfterEach, MustMatchers}
+import org.scalatest.BeforeAndAfterEach
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
 import play.api.mvc.{ControllerComponents, PlayBodyParsers, Results}
@@ -42,7 +42,7 @@ import scala.concurrent.Future.failed
 import scala.util.Random
 
 class PrivilegedCitizenMatchingControllerSpec
-    extends SpecBase with MustMatchers with MockitoSugar with Results with BeforeAndAfterEach {
+    extends SpecBase with Matchers with MockitoSugar with Results with BeforeAndAfterEach {
 
   trait Setup extends ScopesConfigHelper {
 
@@ -325,7 +325,7 @@ class PrivilegedCitizenMatchingControllerSpec
     }
 
     "fail with UnauthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
-      var requestBody =
+      val requestBody =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
 
       given(mockAuthConnector.authorise(any(), refEq(Retrievals.allEnrolments))(any(), any()))
@@ -336,7 +336,7 @@ class PrivilegedCitizenMatchingControllerSpec
 
       contentAsJson(res) mustBe Json
         .obj("code" -> "UNAUTHORIZED", "message" -> "Insufficient Enrolments")
-      verifyZeroInteractions(mockLiveCitizenMatchingService)
+      verifyNoInteractions(mockLiveCitizenMatchingService)
 
       verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
     }

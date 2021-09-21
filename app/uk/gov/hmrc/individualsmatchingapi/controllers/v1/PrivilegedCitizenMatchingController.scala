@@ -20,9 +20,8 @@ import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
 import play.api.hal.Hal.links
 import play.api.hal.HalLink
-import play.api.libs.json.Json
 import play.api.mvc.hal._
-import play.api.mvc.{BodyParsers, ControllerComponents, PlayBodyParsers}
+import play.api.mvc.{ControllerComponents, PlayBodyParsers}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
@@ -37,9 +36,6 @@ abstract class PrivilegedCitizenMatchingController(
   bodyParser: PlayBodyParsers,
   cc: ControllerComponents)
     extends CommonController(cc) with PrivilegedAuthentication {
-
-  private def seeOthers(location: String) =
-    new Status(SEE_OTHER)(Json.obj()).withHeaders(LOCATION -> location)
 
   val logger = LoggerFactory.getLogger(this.getClass)
 

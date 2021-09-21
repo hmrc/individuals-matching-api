@@ -19,9 +19,10 @@ package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 import java.util.UUID
 import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.{verifyZeroInteractions, when}
+import org.mockito.Mockito.{verifyNoInteractions, when}
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfter, MustMatchers}
+import org.scalatest.{BeforeAndAfter}
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
 import play.api.mvc.{ControllerComponents, Results}
@@ -41,7 +42,7 @@ import scala.concurrent.Future.{failed, successful}
 import scala.util.Random
 
 class PrivilegedCitizenMatchingControllerSpec
-    extends SpecBase with MustMatchers with MockitoSugar with Results with BeforeAndAfter {
+    extends SpecBase with Matchers with MockitoSugar with Results with BeforeAndAfter {
 
   trait Setup {
     val fakeRequest = FakeRequest()
@@ -281,7 +282,7 @@ class PrivilegedCitizenMatchingControllerSpec
     }
 
     "fail with UnauthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
-      var requestBody =
+      val requestBody =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
 
       given(
@@ -292,13 +293,11 @@ class PrivilegedCitizenMatchingControllerSpec
         await(liveController.matchCitizen()(fakeRequest.withBody(requestBody)))
       }
 
-      verifyZeroInteractions(mockLiveCitizenMatchingService)
+      verifyNoInteractions(mockLiveCitizenMatchingService)
     }
   }
 
   "Sandbox match citizen function" should {
-
-    val matchId = UUID.randomUUID()
 
     "return 200 (Ok) for the sandbox matchId" in new Setup {
       val eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
@@ -393,7 +392,7 @@ class PrivilegedCitizenMatchingControllerSpec
       val eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
 
       status(eventualResult) mustBe OK
-      verifyZeroInteractions(mockAuthConnector)
+      verifyNoInteractions(mockAuthConnector)
     }
   }
 
