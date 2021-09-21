@@ -18,6 +18,7 @@ package component.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.{AuthStub, BaseSpec, CitizenDetailsStub, MatchingStub}
 import org.joda.time.LocalDate
+import org.mongodb.scala.model.Filters
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
@@ -26,6 +27,7 @@ import scalaj.http.{Http, HttpResponse}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.domain._
+import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -90,7 +92,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
 
       Then("a single ninoMatch record is stored in mongo with its corresponding NINO and generated matchId")
       val ninoMatchRecords =
-        Await.result(mongoRepository.find("nino" -> nino), 3 second)
+        Await.result(mongoRepository.collection.find(Filters.equal("nino", toBson(nino))).headOption(), 3 second)
       ninoMatchRecords.size shouldBe 1
 
       And("The response status should be 200 (Ok)")

@@ -16,60 +16,62 @@
 
 package it.uk.gov.hmrc.individualsmatchingapi.repository
 
-import java.util.UUID
+import org.mongodb.scala.model.IndexModel
 
+import java.util.UUID
 import org.scalatest.{BeforeAndAfterEach, Matchers}
 import play.api.Configuration
 import play.api.inject.guice.GuiceableModule
-import reactivemongo.api.indexes.IndexType
-import reactivemongo.bson.BSONDocument
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.individualsmatchingapi.domain.NinoMatch
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
-import uk.gov.hmrc.mongo.MongoSpecSupport
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
-class NinoMatchRepositorySpec extends SpecBase with Matchers with MongoSpecSupport with BeforeAndAfterEach {
+class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfterEach {
 
   val ninoMatchTtl = 60
 
   val bindModules: Seq[GuiceableModule] = Seq()
 
+  protected val databaseName: String = "test-" + this.getClass.getSimpleName
+  protected val mongoUri: String =
+    s"mongodb://127.0.0.1:27017/$databaseName?heartbeatFrequencyMS=1000&rm.failover=default"
+
   override lazy val fakeApplication = buildFakeApplication(
-    Configuration("mongodb.uri" -> mongoUri, "mongo.ninoMatchTtlInSeconds" -> ninoMatchTtl))
+    Configuration("mongodb.uri" -> mongoUri, "mongodb.ninoMatchTtlInSeconds" -> ninoMatchTtl))
 
   val nino = Nino("AB123456A")
   val ninoMatchRepository = fakeApplication.injector.instanceOf[NinoMatchRepository]
 
   override def beforeEach() {
-    await(ninoMatchRepository.drop)
+    await(ninoMatchRepository.collection.drop)
     await(ninoMatchRepository.ensureIndexes)
   }
 
   override def afterEach() {
-    await(ninoMatchRepository.drop)
+    await(ninoMatchRepository.collection.drop)
   }
 
   "collection" should {
-    "have a unique index on id" in {
-      await(ninoMatchRepository.collection.indexesManager.list()).find({ i =>
-        i.name == Some("idIndex") &&
-        i.key == Seq("id" -> IndexType.Ascending) &&
-        i.background &&
-        i.unique
-      }) should not be None
-    }
+    "have the correct indices" in {
+      val indices = await(
+        ninoMatchRepository.collection.listIndexes[Seq[IndexModel]].toFuture()
+      ).toString
 
-    "have a non-unique index and expiring ttl on createAt" in {
-      await(ninoMatchRepository.collection.indexesManager.list()).find({ i =>
-        i.key == Seq("createdAt" -> IndexType.Ascending) &&
-        i.name == Some("createdAtIndex") &&
-        i.background &&
-        !i.unique &&
-        i.options == BSONDocument("expireAfterSeconds" -> ninoMatchTtl)
-      }) should not be None
+      indices.contains(
+        "name -> idIndex, " +
+          s"ns -> $databaseName.ninoMatch, " +
+          "background -> true, " +
+          "key -> Map(id -> 1), " +
+          "v -> 2, " +
+          "unique -> true") shouldBe true
+
+      indices.contains(
+        "name -> createdAtIndex, " +
+          s"ns -> $databaseName.ninoMatch, " +
+          "background -> true, " +
+          "key -> Map(createdAt -> 1), " +
+          "v -> 2, " +
+          s"expireAfterSeconds -> $ninoMatchTtl") shouldBe true
     }
   }
 
@@ -77,7 +79,7 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with MongoSpecSuppo
     "save an ninoMatch" in {
       val ninoMatch = await(ninoMatchRepository.create(nino))
 
-      val storedNinoMatch = await(ninoMatchRepository.findById(ninoMatch.id))
+      val storedNinoMatch = await(ninoMatchRepository.read(ninoMatch.id))
       storedNinoMatch shouldBe Some(ninoMatch)
     }
 
@@ -103,13 +105,6 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with MongoSpecSuppo
       val result = await(ninoMatchRepository.read(UUID.randomUUID()))
 
       result shouldBe None
-    }
-  }
-
-  "bulk insert" should {
-    "throw an unsupported operation exception" in {
-      val ninoMatch = NinoMatch(nino, UUID.randomUUID())
-      intercept[UnsupportedOperationException](await(ninoMatchRepository.bulkInsert(Seq(ninoMatch))))
     }
   }
 }
