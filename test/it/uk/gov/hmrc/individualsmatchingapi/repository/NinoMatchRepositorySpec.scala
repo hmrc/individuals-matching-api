@@ -37,7 +37,7 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
     s"mongodb://127.0.0.1:27017/$databaseName?heartbeatFrequencyMS=1000&rm.failover=default"
 
   override lazy val fakeApplication = buildFakeApplication(
-    Configuration("mongodb.uri" -> mongoUri, "mongo.ninoMatchTtlInSeconds" -> ninoMatchTtl))
+    Configuration("mongodb.uri" -> mongoUri, "mongodb.ninoMatchTtlInSeconds" -> ninoMatchTtl))
 
   val nino = Nino("AB123456A")
   val ninoMatchRepository = fakeApplication.injector.instanceOf[NinoMatchRepository]
