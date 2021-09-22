@@ -23,14 +23,14 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.detailsMatchRequestFormat
 import uk.gov.hmrc.individualsmatchingapi.domain.{DetailsMatchRequest, MatchingException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.Future
 
 @Singleton
 class MatchingConnector @Inject()(config: Configuration, http: HttpClient, servicesConfig: ServicesConfig) {
 
-  val serviceUrl = servicesConfig.baseUrl("matching")
+  val serviceUrl: String = servicesConfig.baseUrl("matching")
 
   def validateMatch(matchingRequest: DetailsMatchRequest)(implicit hc: HeaderCarrier): Future[Unit] =
     http

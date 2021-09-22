@@ -1,8 +1,8 @@
-import play.core.PlayVersion
 import sbt.Keys.compile
 import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+import play.sbt.routes.RoutesKeys
 
 val appName = "individuals-matching-api"
 val hmrc = "uk.gov.hmrc"
@@ -16,6 +16,9 @@ def unitFilter(name: String): Boolean = name startsWith "unit"
 def componentFilter(name: String): Boolean = name startsWith "component"
 
 lazy val ComponentTest = config("component") extend Test
+
+RoutesKeys.routesImport := Seq.empty
+TwirlKeys.templateImports := Seq.empty
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
@@ -78,7 +81,7 @@ lazy val microservice =
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
   tests.map { test =>
-    new Group(test.name, Seq(test), SubProcess(ForkOptions().withRunJVMOptions(Vector(s"-Dtest.name=${test.name}"))))
+    Group(test.name, Seq(test), SubProcess(ForkOptions().withRunJVMOptions(Vector(s"-Dtest.name=${test.name}"))))
   }
 
 lazy val compileAll = taskKey[Unit]("Compiles sources in all configurations.")

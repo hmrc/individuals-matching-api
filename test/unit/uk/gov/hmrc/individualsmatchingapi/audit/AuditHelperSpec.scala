@@ -19,9 +19,11 @@ package unit.uk.gov.hmrc.individualsmatchingapi.audit
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify}
 import org.mockito.{ArgumentCaptor, Mockito}
-import org.scalatest.{AsyncWordSpec, Matchers}
+import org.scalatest.wordspec.AsyncWordSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
@@ -30,20 +32,20 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 class AuditHelperSpec extends AsyncWordSpec with Matchers with MockitoSugar {
 
-  implicit val hc = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   val nino = "CS700100A"
   val correlationId = "test"
   val scopes = "test"
   val matchId = "80a6bb14-d888-436e-a541-4000674c60aa"
   val applicationId = "80a6bb14-d888-436e-a541-4000674c60bb"
-  val request = FakeRequest().withHeaders("X-Application-Id" -> applicationId)
-  val response = Some(Json.toJson("some" -> "json"))
+  val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders("X-Application-Id" -> applicationId)
+  val response: Some[JsValue] = Some(Json.toJson("some" -> "json"))
   val ifUrl =
     s"host/individuals/employments/paye/nino/$nino?startDate=2019-01-01&endDate=2020-01-01&fields=some(vals(val1),val2)"
   val endpoint = "/test"
 
-  val auditConnector = mock[AuditConnector]
+  val auditConnector: AuditConnector = mock[AuditConnector]
   val auditHelper = new AuditHelper(auditConnector)
 
   "Auth helper" should {

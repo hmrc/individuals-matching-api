@@ -21,7 +21,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.Json.{arr, obj, toJson}
-import play.api.libs.json.{JsArray, Json}
+import play.api.libs.json.{JsArray, JsObject, Json}
 import uk.gov.hmrc.auth.core.Enrolment
 import uk.gov.hmrc.auth.core.authorise.Predicate
 
@@ -29,11 +29,6 @@ object AuthStub extends MockHost(22000) {
 
   def authPredicate(scopes: Iterable[String]): Predicate =
     scopes.map(Enrolment(_): Predicate).reduce(_ or _)
-
-  private def privilegedAuthority(scope: String) = obj(
-    "authorise" -> arr(toJson(Enrolment(scope))),
-    "retrieve"  -> JsArray()
-  )
 
   private def privilegedAuthority(scopes: List[String]) = {
 
@@ -89,7 +84,7 @@ object AuthStub extends MockHost(22000) {
           .withStatus(Status.UNAUTHORIZED)
           .withHeader(HeaderNames.WWW_AUTHENTICATE, """MDTP detail="InsufficientConfidenceLevel"""")))
 
-  val privilegedAuthority = Json.obj(
+  val privilegedAuthority: JsObject = Json.obj(
     "authorise" -> Json.arr(Json.toJson(Enrolment("read:individuals-matching"))),
     "retrieve"  -> JsArray()
   )

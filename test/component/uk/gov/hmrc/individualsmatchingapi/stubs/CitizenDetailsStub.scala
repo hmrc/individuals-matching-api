@@ -17,11 +17,16 @@
 package component.uk.gov.hmrc.individualsmatchingapi.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, urlPathEqualTo}
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
 
 object CitizenDetailsStub extends MockHost(22001) {
 
-  def getByNinoReturnsCitizenDetails(nino: String, firstName: String, lastName: String, dateOfBirth: String) =
+  def getByNinoReturnsCitizenDetails(
+    nino: String,
+    firstName: String,
+    lastName: String,
+    dateOfBirth: String): StubMapping =
     mock.register(
       get(urlPathEqualTo(s"/citizen-details/nino/$nino"))
         .willReturn(

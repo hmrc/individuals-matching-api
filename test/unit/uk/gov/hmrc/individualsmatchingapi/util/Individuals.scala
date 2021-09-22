@@ -21,7 +21,7 @@ import uk.gov.hmrc.individualsmatchingapi.domain.CitizenDetails
 
 trait Individuals {
 
-  def citizenDetails(firstName: String, lastName: String, nino: String, dateOfBirth: String) =
+  def citizenDetails(firstName: String, lastName: String, nino: String, dateOfBirth: String): CitizenDetails =
     CitizenDetails(Option(firstName), Option(lastName), Option(nino), Some(parse(dateOfBirth)))
 
 }

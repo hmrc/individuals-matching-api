@@ -17,11 +17,11 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import javax.inject.Inject
-import play.api.hal.Hal.{linksSeq, state}
+import play.api.hal.Hal.state
 import play.api.hal.HalLink
 import play.api.libs.json.Json
 import play.api.libs.json.Json.{obj, toJson}
-import play.api.mvc.ControllerComponents
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import play.api.mvc.hal._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
@@ -42,7 +42,7 @@ class PrivilegedIndividualsController @Inject()(
   cc: ControllerComponents)(implicit val ec: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
-  def matchedIndividual(matchId: String) = Action.async { implicit request =>
+  def matchedIndividual(matchId: String): Action[AnyContent] = Action.async { implicit request =>
     authenticate(scopeService.getAllScopes, matchId) { authScopes =>
       val correlationId = validateCorrelationId(request)
       withValidUuid(matchId) { matchUuid =>
@@ -66,5 +66,5 @@ class PrivilegedIndividualsController @Inject()(
     } recover recoveryWithAudit(maybeCorrelationId(request), request.body.toString, s"/individuals/matching/$matchId")
   }
 
-  val environment = PRODUCTION
+  val environment: String = PRODUCTION
 }

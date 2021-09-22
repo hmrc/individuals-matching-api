@@ -18,7 +18,6 @@ package component.uk.gov.hmrc.individualsmatchingapi
 
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.{AuthStub, BaseSpec}
 import play.api.Application
-import play.api.http.Status
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -37,9 +36,9 @@ class VersioningSpec extends BaseSpec {
     )
     .build()
 
-  feature("Versioning") {
+  Feature("Versioning") {
 
-    scenario("Requests with an accept header version P1") {
+    Scenario("Requests with an accept header version P1") {
 
       When("A request to the match citizen endpoint is made with version P1 accept header")
       val response = invokeWithHeaders(s"/sandbox/$sandboxMatchId", AUTHORIZATION -> authToken, acceptHeaderP1)
@@ -75,7 +74,7 @@ class VersioningSpec extends BaseSpec {
             }""")
     }
 
-    scenario("Requests without an accept header default to version 1") {
+    Scenario("Requests without an accept header default to version 1") {
 
       When("A request to the match citizen endpoint is made without an accept header")
       val response = invokeWithHeaders(s"/sandbox/$sandboxMatchId", AUTHORIZATION -> authToken)
@@ -84,7 +83,7 @@ class VersioningSpec extends BaseSpec {
       response.code shouldBe NOT_FOUND
     }
 
-    scenario("Requests with an accept header version 1 are correctly forwarded") {
+    Scenario("Requests with an accept header version 1 are correctly forwarded") {
 
       When("A request to the match citizen endpoint is made with version 1 accept header")
       val response = invokeWithHeaders(s"/sandbox/$sandboxMatchId", AUTHORIZATION -> authToken, acceptHeaderV1)
@@ -93,7 +92,7 @@ class VersioningSpec extends BaseSpec {
       response.code shouldBe NOT_FOUND
     }
 
-    scenario("Requests with an accept header with an invalid version") {
+    Scenario("Requests with an accept header with an invalid version") {
 
       When("A request to the match citizen endpoint is made with version 10.0 accept header")
       val response = invokeWithHeaders(

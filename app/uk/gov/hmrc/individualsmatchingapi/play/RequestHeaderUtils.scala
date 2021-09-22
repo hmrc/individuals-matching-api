@@ -18,13 +18,9 @@ package uk.gov.hmrc.individualsmatchingapi.play
 
 import java.util.UUID
 import play.api.http.HeaderNames.ACCEPT
-import play.api.mvc.{Request, RequestHeader, Result}
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.BadRequestException
-import uk.gov.hmrc.individualsmatchingapi.domain.{ErrorInvalidRequest, ErrorNotFound}
 import uk.gov.hmrc.individualsmatchingapi.utils.UuidValidator
-
-import scala.concurrent.Future
-import scala.concurrent.Future.successful
 import scala.util.{Success, Try}
 
 object RequestHeaderUtils {
@@ -33,10 +29,10 @@ object RequestHeaderUtils {
 
   private val uriRegex = "(/[a-zA-Z0-9-_]*)/?.*$".r
 
-  def extractUriContext(requestHeader: RequestHeader) =
+  def extractUriContext(requestHeader: RequestHeader): String =
     (uriRegex.findFirstMatchIn(requestHeader.uri) map (_.group(1))).get
 
-  def validateCorrelationId(requestHeader: RequestHeader) =
+  def validateCorrelationId(requestHeader: RequestHeader): UUID =
     requestHeader.headers.get("CorrelationId") match {
       case Some(uuidString) =>
         if (UuidValidator.validate(uuidString)) {
@@ -47,13 +43,13 @@ object RequestHeaderUtils {
       case None => throw new BadRequestException("CorrelationId is required")
     }
 
-  def maybeCorrelationId(requestHeader: RequestHeader) =
+  def maybeCorrelationId(requestHeader: RequestHeader): Option[String] =
     Try(validateCorrelationId(requestHeader)) match {
       case Success(value) => Some(value.toString)
       case _              => None
     }
 
-  def getVersionedRequest(originalRequest: RequestHeader) = {
+  def getVersionedRequest(originalRequest: RequestHeader): RequestHeader = {
     val version = getVersion(originalRequest)
 
     originalRequest.withTarget(

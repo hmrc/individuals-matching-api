@@ -25,7 +25,7 @@ import unit.uk.gov.hmrc.individualsmatchingapi.util.UnitSpec
 
 trait SpecBase extends UnitSpec with GuiceOneAppPerSuite {
 
-  lazy val additionalConfig = Configuration()
+  lazy val additionalConfig: Configuration = Configuration()
 
   lazy val bodyParsers: PlayBodyParsers = fakeApplication.injector.instanceOf[PlayBodyParsers]
 
@@ -37,7 +37,7 @@ trait SpecBase extends UnitSpec with GuiceOneAppPerSuite {
                                       | metrics.jvm = false
                                       | metrics.enabled = true
           """.stripMargin)
-        ) ++ extraConfig)
+        ) withFallback extraConfig)
       .build()
 
   override lazy val fakeApplication: Application = buildFakeApplication(additionalConfig)

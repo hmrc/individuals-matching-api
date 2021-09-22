@@ -20,7 +20,7 @@ import play.api.Configuration
 
 trait ScopesConfigHelper {
 
-  val mockScopesConfig = Configuration(
+  val mockScopesConfig: Configuration = Configuration(
     (s"api-config.scopes.test-scope.endpoints", List("A", "B", "C", "D")),
     (s"api-config.endpoints.external.benefits-and-credits.key", "A"),
     (

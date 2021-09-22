@@ -20,7 +20,8 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import org.joda.time.LocalDate
-import org.scalatest.{BeforeAndAfterEach, Matchers}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.MatchingConnector
@@ -29,19 +30,21 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
+import scala.concurrent.Future
+
 class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEach {
-  val stubPort = sys.env.getOrElse("WIREMOCK", "11122").toInt
+  val stubPort: Int = sys.env.getOrElse("WIREMOCK", "11122").toInt
   val stubHost = "localhost"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
-  val http = fakeApplication.injector.instanceOf[DefaultHttpClient]
-  val config = fakeApplication.injector.instanceOf[Configuration]
-  val servicesConfig = fakeApplication.injector.instanceOf[ServicesConfig]
+  val http: DefaultHttpClient = fakeApplication.injector.instanceOf[DefaultHttpClient]
+  val config: Configuration = fakeApplication.injector.instanceOf[Configuration]
+  val servicesConfig: ServicesConfig = fakeApplication.injector.instanceOf[ServicesConfig]
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest = new MatchingConnector(config, http, servicesConfig) {
+    val underTest: MatchingConnector = new MatchingConnector(config, http, servicesConfig) {
       override val serviceUrl = "http://127.0.0.1:11122"
     }
   }
@@ -78,7 +81,8 @@ class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEa
           ))
           .willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[]}""")))
 
-      val f = underTest.validateMatch(DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))
+      val f: Future[Unit] =
+        underTest.validateMatch(DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))
       noException should be thrownBy await(f)
     }
 

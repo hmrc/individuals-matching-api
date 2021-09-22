@@ -52,14 +52,14 @@ class LiveCitizenMatchingService @Inject()(
       ninoMatch <- liveNinoMatchRepository.create(Nino(citizenMatchingRequest.nino))
     } yield ninoMatch.id
 
-  override def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier) =
+  override def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier): Future[CitizenDetails] =
     liveNinoMatchRepository.read(matchId) flatMap {
       case Some(ninoMatch) =>
         citizenDetailsConnector.citizenDetails(ninoMatch.nino.nino)
       case _ => failed(new MatchNotFoundException)
     }
 
-  override def fetchMatchedCitizenRecord(matchId: UUID)(implicit hc: HeaderCarrier) =
+  override def fetchMatchedCitizenRecord(matchId: UUID)(implicit hc: HeaderCarrier): Future[MatchedCitizenRecord] =
     liveNinoMatchRepository.read(matchId) flatMap {
       case Some(ninoMatch) =>
         successful(MatchedCitizenRecord(ninoMatch.nino, ninoMatch.id))
@@ -94,7 +94,7 @@ class SandboxCitizenMatchingService extends CitizenMatchingService {
     }
   }
 
-  override def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier) =
+  override def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier): Future[CitizenDetails] =
     SandboxData.findByMatchId(matchId) match {
       case Some(individual) =>
         successful(
@@ -106,6 +106,6 @@ class SandboxCitizenMatchingService extends CitizenMatchingService {
       case _ => failed(new MatchNotFoundException)
     }
 
-  override def fetchMatchedCitizenRecord(matchId: UUID)(implicit hc: HeaderCarrier) =
+  override def fetchMatchedCitizenRecord(matchId: UUID)(implicit hc: HeaderCarrier): Future[MatchedCitizenRecord] =
     failed(new NotImplementedException)
 }

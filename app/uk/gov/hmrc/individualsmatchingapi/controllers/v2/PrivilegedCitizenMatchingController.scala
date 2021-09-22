@@ -17,7 +17,7 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.hal.Hal.links
 import play.api.hal.HalLink
 import play.api.libs.json.{JsValue, Json}
@@ -43,7 +43,7 @@ class PrivilegedCitizenMatchingController @Inject()(
   implicit val auditHelper: AuditHelper)(implicit val ec: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
-  val logger = LoggerFactory.getLogger(this.getClass)
+  val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   def matchCitizen: Action[JsValue] = Action.async(bodyParsers.json) { implicit request =>
     authenticate(scopeService.getAllScopes, request.body.toString()) { authScopes =>
@@ -56,7 +56,7 @@ class PrivilegedCitizenMatchingController @Inject()(
             s"/individuals/matching/$matchId",
             title = Option("Get a matched individual’s information"))
 
-          val response = links(selfLink, individualLink);
+          val response = links(selfLink, individualLink)
 
           auditHelper.auditApiResponse(
             correlationId.toString,
@@ -71,5 +71,5 @@ class PrivilegedCitizenMatchingController @Inject()(
       }
     } recover recoveryWithAudit(maybeCorrelationId(request), request.body.toString, "/individuals/matching/")
   }
-  val environment = PRODUCTION
+  val environment: String = PRODUCTION
 }

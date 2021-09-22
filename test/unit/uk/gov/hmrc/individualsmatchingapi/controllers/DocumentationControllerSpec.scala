@@ -16,31 +16,32 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
+import akka.stream.Materializer
 import controllers.Assets
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.when
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Configuration
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.JsValue
-import play.api.mvc.{ControllerComponents, Result}
+import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.individualsmatchingapi.controllers.DocumentationController
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSugar {
 
-  implicit lazy val materializer = fakeApplication.materializer
+  implicit lazy val materializer: Materializer = fakeApplication.materializer
 
   trait Setup {
-    val configuration = mock[Configuration]
-    val HttpErrorHandler = mock[HttpErrorHandler]
+    val configuration: Configuration = mock[Configuration]
+    val HttpErrorHandler: HttpErrorHandler = mock[HttpErrorHandler]
 
-    val request = FakeRequest()
-    val controllerComponents =
+    val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+    val controllerComponents: ControllerComponents =
       fakeApplication.injector.instanceOf[ControllerComponents]
-    val assets =
+    val assets: Assets =
       fakeApplication.injector.instanceOf[Assets]
 
     val underTest =
@@ -61,7 +62,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
       given(configuration.getOptional[String]("api.access.version-1.0.accessType"))
         .willReturn(None)
 
-      val result = await(underTest.definition()(request))
+      val result: Result = await(underTest.definition()(request))
 
       (apiVersion(result, "1.0") \ "access" \ "type")
         .as[String] shouldBe "PRIVATE"
@@ -71,7 +72,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
       given(configuration.getOptional[String]("api.access.version-1.0.accessType"))
         .willReturn(Some("PRIVATE"))
 
-      val result = await(underTest.definition()(request))
+      val result: Result = await(underTest.definition()(request))
 
       (apiVersion(result, "1.0") \ "access" \ "type")
         .as[String] shouldBe "PRIVATE"
@@ -81,7 +82,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
       given(configuration.getOptional[String]("api.access.version-1.0.accessType"))
         .willReturn(Some("PUBLIC"))
 
-      val result = await(underTest.definition()(request))
+      val result: Result = await(underTest.definition()(request))
 
       (apiVersion(result, "1.0") \ "access" \ "type")
         .as[String] shouldBe "PUBLIC"
@@ -89,7 +90,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
 
     "return 2.0 as BETA when api.access.version-2.0.status is not set" in new Setup {
 
-      val result = await(underTest.definition()(request))
+      val result: Result = await(underTest.definition()(request))
 
       (apiVersion(result, "2.0") \ "status")
         .as[String] shouldBe "BETA"
@@ -99,7 +100,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
       given(configuration.getOptional[String]("api.access.version-2.0.status"))
         .willReturn(Some("ALPHA"))
 
-      val result = await(underTest.definition()(request))
+      val result: Result = await(underTest.definition()(request))
 
       (apiVersion(result, "2.0") \ "status")
         .as[String] shouldBe "ALPHA"
@@ -107,7 +108,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
 
     "return endpoints enabled true when api.access.version-2.0.endpointsEnabled is not set" in new Setup {
 
-      val result = await(underTest.definition()(request))
+      val result: Result = await(underTest.definition()(request))
 
       (apiVersion(result, "2.0") \ "endpointsEnabled")
         .as[Boolean] shouldBe true
@@ -118,7 +119,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
       given(configuration.getOptional[Boolean]("api.access.version-2.0.endpointsEnabled"))
         .willReturn(Some(false))
 
-      val result = await(underTest.definition()(request))
+      val result: Result = await(underTest.definition()(request))
 
       (apiVersion(result, "2.0") \ "endpointsEnabled")
         .as[Boolean] shouldBe false
@@ -132,7 +133,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
       when(configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds"))
         .thenReturn(Some(Seq("appV1")))
 
-      val result = await(underTest.definition()(request))
+      val result: Result = await(underTest.definition()(request))
 
       (apiVersion(result, "1.0") \ "access" \ "whitelistedApplicationIds")
         .as[Seq[String]] shouldBe Seq("appV1")

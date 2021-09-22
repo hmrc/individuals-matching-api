@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.hal.Hal._
 import play.api.hal.HalLink
 import play.api.libs.json.Json.{obj, toJson}
-import play.api.mvc.ControllerComponents
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import play.api.mvc.hal._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
@@ -33,7 +33,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMatchingService, cc: ControllerComponents)
     extends CommonController(cc) with PrivilegedAuthentication {
 
-  def matchedIndividual(matchId: String) = Action.async { implicit request =>
+  def matchedIndividual(matchId: String): Action[AnyContent] = Action.async { implicit request =>
     requiresPrivilegedAuthentication {
       withValidUuid(matchId) { matchUuid =>
         citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
@@ -62,7 +62,7 @@ class LivePrivilegedIndividualsController @Inject()(
   val authConnector: AuthConnector,
   cc: ControllerComponents)
     extends PrivilegedIndividualsController(liveCitizenMatchingService, cc) {
-  override val environment = PRODUCTION
+  override val environment: String = PRODUCTION
 }
 
 @Singleton
@@ -71,5 +71,5 @@ class SandboxPrivilegedIndividualsController @Inject()(
   val authConnector: AuthConnector,
   cc: ControllerComponents)
     extends PrivilegedIndividualsController(sandboxCitizenMatchingService, cc) {
-  override val environment = SANDBOX
+  override val environment: String = SANDBOX
 }

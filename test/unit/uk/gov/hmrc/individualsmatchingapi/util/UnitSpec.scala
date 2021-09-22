@@ -17,16 +17,16 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.util
 
 import java.nio.charset.Charset
-
 import akka.stream.Materializer
 import akka.util.ByteString
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait UnitSpec extends WordSpec {
+//noinspection LanguageFeature
+trait UnitSpec extends AnyWordSpec {
 
   import scala.concurrent.duration._
   import scala.concurrent.{Await, Future}

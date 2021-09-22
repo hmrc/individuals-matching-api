@@ -16,7 +16,8 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
-import org.scalatest.{BeforeAndAfterEach, Matchers}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Json
 import uk.gov.hmrc.individualsmatchingapi.services.{ScopesHelper, ScopesService}
 import unit.uk.gov.hmrc.individualsmatchingapi.util.UnitSpec

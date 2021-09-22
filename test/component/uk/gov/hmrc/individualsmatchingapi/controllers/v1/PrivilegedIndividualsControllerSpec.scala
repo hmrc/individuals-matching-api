@@ -29,9 +29,9 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
 
   val nino = "NA000799C"
 
-  feature("matched individual is open and accessible") {
+  Feature("matched individual is open and accessible") {
 
-    scenario("valid request to the live implementation") {
+    Scenario("valid request to the live implementation") {
 
       Given("A valid privileged Auth bearer token")
       AuthStub.willAuthorizePrivilegedAuthToken(authToken)
@@ -76,7 +76,7 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
          """)
     }
 
-    scenario("valid request to the sandbox implementation") {
+    Scenario("valid request to the sandbox implementation") {
 
       When("I request available resources for a matched individual")
       val response = Http(s"$serviceUrl/sandbox/$sandboxMatchId").headers(requestHeaders(acceptHeaderP1)).asString

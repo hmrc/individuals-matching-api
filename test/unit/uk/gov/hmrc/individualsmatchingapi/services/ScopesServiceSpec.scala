@@ -16,7 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.individualsmatchingapi.services.ScopesService
 import unit.uk.gov.hmrc.individualsmatchingapi.util.UnitSpec
 
@@ -119,6 +119,6 @@ class ScopesServiceSpec extends UnitSpec with Matchers with ScopesConfig {
 
   "Gets all scopes correctly" in {
     val scopes = scopesService.getAllScopes
-    scopes.toSeq shouldBe Seq(mockScopeFour, mockScopeOne, mockScopeThree, mockScopeTwo)
+    scopes shouldBe Seq(mockScopeFour, mockScopeOne, mockScopeThree, mockScopeTwo)
   }
 }

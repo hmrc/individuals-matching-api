@@ -33,7 +33,7 @@ class AuditHelper @Inject()(auditConnector: AuditConnector)(implicit ec: Executi
     scopes: String,
     request: RequestHeader,
     selfLink: String,
-    response: Option[JsValue])(implicit hc: HeaderCarrier) =
+    response: Option[JsValue])(implicit hc: HeaderCarrier): Unit =
     auditConnector.sendExplicitAudit(
       "ApiResponseEvent",
       ApiResponseEventModel(
@@ -56,7 +56,7 @@ class AuditHelper @Inject()(auditConnector: AuditConnector)(implicit ec: Executi
     matchId: String,
     request: RequestHeader,
     requestUrl: String,
-    msg: String)(implicit hc: HeaderCarrier) =
+    msg: String)(implicit hc: HeaderCarrier): Unit =
     auditConnector.sendExplicitAudit(
       "ApiFailureEvent",
       ApiFailureResponseEventModel(
@@ -73,7 +73,7 @@ class AuditHelper @Inject()(auditConnector: AuditConnector)(implicit ec: Executi
       )
     )
 
-  def auditAuthScopes(matchId: String, scopes: String, request: RequestHeader)(implicit hc: HeaderCarrier) =
+  def auditAuthScopes(matchId: String, scopes: String, request: RequestHeader)(implicit hc: HeaderCarrier): Unit =
     auditConnector.sendExplicitAudit(
       "AuthScopesAuditEvent",
       ScopesAuditEventModel(

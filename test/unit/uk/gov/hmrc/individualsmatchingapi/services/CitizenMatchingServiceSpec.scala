@@ -17,12 +17,11 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
 import java.util.UUID
-
 import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.{verifyZeroInteractions, when}
-import org.scalatest.Matchers
+import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
@@ -38,18 +37,18 @@ import scala.concurrent.Future
 class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSugar with ScalaFutures {
 
   val authBearerToken = "AUTH_BEARER_TOKEN"
-  val matchId = UUID.randomUUID()
+  val matchId: UUID = UUID.randomUUID()
   val ninoString = "NA000799C"
-  val nino = Nino(ninoString)
-  val ninoMatch = NinoMatch(nino, matchId)
+  val nino: Nino = Nino(ninoString)
+  val ninoMatch: NinoMatch = NinoMatch(nino, matchId)
 
   trait Setup {
 
-    implicit val headers = HeaderCarrier()
+    implicit val headers: HeaderCarrier = HeaderCarrier()
 
-    val mockNinoMatchRepository = mock[NinoMatchRepository]
-    val mockCitizenDetailsConnector = mock[CitizenDetailsConnector]
-    val mockMatchingConnector = mock[MatchingConnector]
+    val mockNinoMatchRepository: NinoMatchRepository = mock[NinoMatchRepository]
+    val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
+    val mockMatchingConnector: MatchingConnector = mock[MatchingConnector]
 
     val liveService =
       new LiveCitizenMatchingService(mockNinoMatchRepository, mockCitizenDetailsConnector, mockMatchingConnector)
@@ -71,7 +70,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
         .thenReturn(Future.successful(()))
       when(mockNinoMatchRepository.create(refEq(nino))).thenReturn(Future.successful(ninoMatch))
 
-      val result = await(liveService.matchCitizen(citizenMatchingRequest))
+      val result: UUID = await(liveService.matchCitizen(citizenMatchingRequest))
 
       result shouldBe matchId
     }
@@ -81,7 +80,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
         .thenReturn(Future.failed(new CitizenNotFoundException))
 
       intercept[CitizenNotFoundException](await(liveService.matchCitizen(citizenMatchingRequest)))
-      verifyZeroInteractions(mockMatchingConnector, mockNinoMatchRepository)
+      verifyNoInteractions(mockMatchingConnector, mockNinoMatchRepository)
     }
 
     "propagate exception for an invalid nino" in new Setup {
@@ -129,10 +128,10 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
   "liveCitizenMatchingService fetch matched citizen record function" should {
 
     "return a matched citizen record for a valid matchId" in new Setup {
-      val matchedCitizenRecord = MatchedCitizenRecord(Nino(ninoString), matchId)
+      val matchedCitizenRecord: MatchedCitizenRecord = MatchedCitizenRecord(Nino(ninoString), matchId)
       when(mockNinoMatchRepository.read(matchId)).thenReturn(Future.successful(Some(ninoMatch)))
 
-      val result = await(liveService.fetchMatchedCitizenRecord(matchId))
+      val result: MatchedCitizenRecord = await(liveService.fetchMatchedCitizenRecord(matchId))
       result shouldBe matchedCitizenRecord
     }
 
@@ -145,19 +144,19 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
   "sandboxCitizenMatchingService match citizen function" should {
 
     "return default matchId for a successful match" in new Setup {
-      val result = await(sandboxService.matchCitizen(aCitizenMatchingRequest()))
+      val result: UUID = await(sandboxService.matchCitizen(aCitizenMatchingRequest()))
 
       result shouldBe sandboxMatchId
     }
 
     "return default matchId for a successful match on first letter of first name only" in new Setup {
-      val result = await(sandboxService.matchCitizen(aCitizenMatchingRequest(firstName = "A")))
+      val result: UUID = await(sandboxService.matchCitizen(aCitizenMatchingRequest(firstName = "A")))
 
       result shouldBe sandboxMatchId
     }
 
     "return default matchId for a successful match on first three letters of last name only" in new Setup {
-      val result = await(sandboxService.matchCitizen(aCitizenMatchingRequest(lastName = "Jos")))
+      val result: UUID = await(sandboxService.matchCitizen(aCitizenMatchingRequest(lastName = "Jos")))
 
       result shouldBe sandboxMatchId
     }
@@ -211,16 +210,18 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     firstName: String = "Amanda",
     lastName: String = "Joseph",
     nino: String = ninoString,
-    dateOfBirth: String = "1960-01-15") =
+    dateOfBirth: String = "1960-01-15"): CitizenMatchingRequest =
     CitizenMatchingRequest(firstName, lastName, nino, dateOfBirth)
 
-  def aDetailsMatchRequest(citizenMatchingRequest: CitizenMatchingRequest, citizenDetails: CitizenDetails) =
+  def aDetailsMatchRequest(
+    citizenMatchingRequest: CitizenMatchingRequest,
+    citizenDetails: CitizenDetails): DetailsMatchRequest =
     DetailsMatchRequest(citizenMatchingRequest, Seq(citizenDetails))
 
   def citizenDetails(
     firstName: Option[String] = Some("Amanda"),
     lastName: Option[String] = Some("Joseph"),
     nino: Option[String] = Some(ninoString),
-    dateOfBirth: Option[String] = Some("1960-01-15")) =
+    dateOfBirth: Option[String] = Some("1960-01-15")): CitizenDetails =
     CitizenDetails(firstName, lastName, nino, dateOfBirth.map(LocalDate.parse(_)))
 }
