@@ -31,7 +31,7 @@ import play.mvc.Http.MimeTypes.JSON
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
 
 import scala.concurrent.Await.result
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration.{Duration, FiniteDuration}
 
 trait BaseSpec
     extends AnyFeatureSpec with BeforeAndAfterAll with BeforeAndAfterEach with Matchers with GuiceOneServerPerSuite
@@ -50,17 +50,17 @@ trait BaseSpec
     )
     .build()
 
-  val timeout = Duration(5, TimeUnit.SECONDS)
+  val timeout: FiniteDuration = Duration(5, TimeUnit.SECONDS)
   val serviceUrl = s"http://localhost:$port"
   val mocks = Seq(AuthStub, CitizenDetailsStub, MatchingStub)
-  val mongoRepository = app.injector.instanceOf[NinoMatchRepository]
+  val mongoRepository: NinoMatchRepository = app.injector.instanceOf[NinoMatchRepository]
   val authToken = "Bearer AUTH_TOKEN"
 
-  val acceptHeaderV1 = ACCEPT                        -> "application/vnd.hmrc.1.0+json"
-  val acceptHeaderP1 = ACCEPT                        -> "application/vnd.hmrc.P1.0+json"
-  val acceptHeaderP2 = ACCEPT                        -> "application/vnd.hmrc.2.0+json"
-  val testCorrelationHeader = "CorrelationId"        -> "188e9400-b636-4a3b-80ba-230a8c72b92a"
-  val invalidTestCorrelationHeader = "CorrelationId" -> "test"
+  val acceptHeaderV1: (String, String) = ACCEPT                        -> "application/vnd.hmrc.1.0+json"
+  val acceptHeaderP1: (String, String) = ACCEPT                        -> "application/vnd.hmrc.P1.0+json"
+  val acceptHeaderP2: (String, String) = ACCEPT                        -> "application/vnd.hmrc.2.0+json"
+  val testCorrelationHeader: (String, String) = "CorrelationId"        -> "188e9400-b636-4a3b-80ba-230a8c72b92a"
+  val invalidTestCorrelationHeader: (String, String) = "CorrelationId" -> "test"
 
   protected def requestHeaders(
     acceptHeader: (String, String) = acceptHeaderV1,

@@ -30,6 +30,7 @@ import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationDouble
 
+//noinspection LanguageFeature
 class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
 
   val nino = "CS700100A"
@@ -37,7 +38,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
   val lastName = "Joseph"
   val dateOfBirthDesFormat = "13101972"
   val dateOfBirthSensibleformat = "1972-10-13"
-  val matchingRequest =
+  val matchingRequest: CitizenMatchingRequest =
     CitizenMatchingRequest(firstName, lastName, nino, dateOfBirthSensibleformat)
 
   // Scopes list MUST be in alphabetical order
@@ -194,9 +195,13 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       .headers(requestHeaders(acceptHeaderP2))
       .asString
 
-  def citizenMatchingRequest(firstName: String, lastName: String, nino: String, dateOfBirth: String) =
+  def citizenMatchingRequest(
+    firstName: String,
+    lastName: String,
+    nino: String,
+    dateOfBirth: String): CitizenMatchingRequest =
     CitizenMatchingRequest(firstName, lastName, nino, dateOfBirth)
 
-  def citizenDetails(firstName: String, lastName: String, nino: String, dateOfBirth: String) =
+  def citizenDetails(firstName: String, lastName: String, nino: String, dateOfBirth: String): CitizenDetails =
     CitizenDetails(Some(firstName), Some(lastName), Some(nino), Some(LocalDate.parse(dateOfBirth)))
 }

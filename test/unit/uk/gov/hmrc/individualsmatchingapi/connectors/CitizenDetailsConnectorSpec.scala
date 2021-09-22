@@ -31,18 +31,18 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEach {
-  val stubPort = sys.env.getOrElse("WIREMOCK", "11121").toInt
+  val stubPort: Int = sys.env.getOrElse("WIREMOCK", "11121").toInt
   val stubHost = "localhost"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
-  val http = fakeApplication.injector.instanceOf[DefaultHttpClient]
-  val config = fakeApplication.injector.instanceOf[Configuration]
-  val servicesConfig = fakeApplication.injector.instanceOf[ServicesConfig]
+  val http: DefaultHttpClient = fakeApplication.injector.instanceOf[DefaultHttpClient]
+  val config: Configuration = fakeApplication.injector.instanceOf[Configuration]
+  val servicesConfig: ServicesConfig = fakeApplication.injector.instanceOf[ServicesConfig]
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest = new CitizenDetailsConnector(config, http, servicesConfig) {
+    val underTest: CitizenDetailsConnector = new CitizenDetailsConnector(config, http, servicesConfig) {
       override val serviceUrl = "http://127.0.0.1:11121"
     }
   }
@@ -71,7 +71,7 @@ class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndA
                 "dateOfBirth":"13101972"
               }""")))
 
-      val result = await(underTest.citizenDetails(nino))
+      val result: CitizenDetails = await(underTest.citizenDetails(nino))
 
       result shouldBe CitizenDetails(Some("Amanda"), Some("Joseph"), Some(nino), Some(LocalDate.parse("1972-10-13")))
     }
@@ -87,7 +87,7 @@ class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndA
                 "ids":{"sautr":"2432552635","nino":"$nino"}
               }""")))
 
-      val result = await(underTest.citizenDetails(nino))
+      val result: CitizenDetails = await(underTest.citizenDetails(nino))
 
       result shouldBe CitizenDetails(Some("Amanda"), Some("Joseph"), Some(nino), None)
     }

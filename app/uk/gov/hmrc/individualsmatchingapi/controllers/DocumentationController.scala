@@ -76,7 +76,7 @@ class DocumentationController @Inject()(
   ): Action[AnyContent] =
     assets.at(s"/public/api/documentation/$version", s"${endpointName.replaceAll(" ", "-")}.xml")
 
-  def raml(version: String, file: String) =
+  def raml(version: String, file: String): Action[AnyContent] =
     assets.at(s"/public/api/conf/$version", file)
 
 }

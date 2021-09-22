@@ -119,6 +119,6 @@ class ScopesServiceSpec extends UnitSpec with Matchers with ScopesConfig {
 
   "Gets all scopes correctly" in {
     val scopes = scopesService.getAllScopes
-    scopes.toSeq shouldBe Seq(mockScopeFour, mockScopeOne, mockScopeThree, mockScopeTwo)
+    scopes shouldBe Seq(mockScopeFour, mockScopeOne, mockScopeThree, mockScopeTwo)
   }
 }

@@ -43,7 +43,7 @@ import scala.util.{Failure, Success, Try}
 abstract class CommonController @Inject()(cc: ControllerComponents) extends BackendController(cc) {
 
   override protected def withJsonBody[T](
-    f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
+    f: T => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
       case Success(JsError(errs)) =>
@@ -54,7 +54,8 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
         successful(ErrorInvalidRequest("Unable to process request").toHttpResponse)
     }
 
-  protected def withJsonBodyV2[T](f: (T) => Future[Result])(implicit request: Request[JsValue], reads: Reads[T]) =
+  protected def withJsonBodyV2[T](
+    f: T => Future[Result])(implicit request: Request[JsValue], reads: Reads[T]): Future[Result] =
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _))                    => f(payload)
       case Success(JsError(errs))                            => throw new InvalidBodyException(s"${fieldName(errs)} is required")
@@ -89,54 +90,42 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
   private[controllers] def recoveryWithAudit(correlationId: Option[String], matchId: String, url: String)(
     implicit request: RequestHeader,
     auditHelper: AuditHelper): PartialFunction[Throwable, Result] = {
-    case _: MatchNotFoundException => {
+    case _: MatchNotFoundException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, "Not Found")
       ErrorNotFound.toHttpResponse
-    }
-    case e: InvalidBodyException => {
+    case e: InvalidBodyException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)
       ErrorInvalidRequest(e.getMessage).toHttpResponse
-    }
-    case _: CitizenNotFoundException => {
+    case _: CitizenNotFoundException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, "Not Found")
       ErrorMatchingFailedNotFound.toHttpResponse
-    }
-    case _: InvalidNinoException => {
+    case _: InvalidNinoException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, "Not Found")
       ErrorMatchingFailedNotFound.toHttpResponse
-    }
-    case _: MatchingException => {
+    case _: MatchingException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, "Not Found")
       ErrorMatchingFailedNotFound.toHttpResponse
-    }
-    case e: InsufficientEnrolments => {
+    case e: InsufficientEnrolments =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)
       ErrorUnauthorized("Insufficient Enrolments").toHttpResponse
-    }
-    case e: AuthorisationException => {
+    case e: AuthorisationException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)
       ErrorUnauthorized(e.getMessage).toHttpResponse
-    }
-    case tmr: TooManyRequestException => {
+    case tmr: TooManyRequestException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, tmr.getMessage)
       ErrorTooManyRequests.toHttpResponse
-    }
-    case br: BadRequestException => {
+    case br: BadRequestException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, br.getMessage)
       ErrorInvalidRequest(br.getMessage).toHttpResponse
-    }
-    case e: IllegalArgumentException => {
+    case e: IllegalArgumentException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)
       ErrorInvalidRequest(e.getMessage).toHttpResponse
-    }
-    case e: InternalServerException => {
+    case e: InternalServerException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)
       ErrorInternalServer("Something went wrong.").toHttpResponse
-    }
-    case e => {
+    case e =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)
       ErrorInternalServer("Something went wrong.").toHttpResponse
-    }
   }
 }
 
@@ -158,12 +147,10 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
       f(endpointScopes.toList)
     else {
       authorised(authPredicate(endpointScopes)).retrieve(Retrievals.allEnrolments) {
-        case scopes => {
-
+        case scopes =>
           auditHelper.auditAuthScopes(matchId, scopes.enrolments.map(e => e.key).mkString(","), request)
 
           f(scopes.enrolments.map(e => e.key))
-        }
       }
     }
   }

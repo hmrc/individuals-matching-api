@@ -25,6 +25,7 @@ import play.api.mvc.Result
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
+//noinspection LanguageFeature
 trait UnitSpec extends AnyWordSpec {
 
   import scala.concurrent.duration._

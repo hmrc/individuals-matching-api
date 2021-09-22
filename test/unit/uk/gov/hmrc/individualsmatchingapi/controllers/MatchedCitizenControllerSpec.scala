@@ -16,6 +16,8 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
+import akka.stream.Materializer
+
 import java.util.UUID
 import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito.when
@@ -23,7 +25,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status._
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContentAsEmpty, ControllerComponents}
+import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
@@ -35,10 +37,10 @@ import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import scala.concurrent.Future
 
 class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSugar {
-  implicit lazy val materializer = fakeApplication.materializer
+  implicit lazy val materializer: Materializer = fakeApplication.materializer
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
     val matchId: UUID = UUID.randomUUID()
     val ninoString: String = "AA100009B"
     val matchedCitizenRecord: MatchedCitizenRecord =
@@ -46,7 +48,7 @@ class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSu
     val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val mockCitizenMatchingService: LiveCitizenMatchingService =
       mock[LiveCitizenMatchingService]
-    val controllerComponents =
+    val controllerComponents: ControllerComponents =
       fakeApplication.injector.instanceOf[ControllerComponents]
 
     val matchedCitizenController = new MatchedCitizenController(controllerComponents, mockCitizenMatchingService)
@@ -58,7 +60,7 @@ class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSu
       when(mockCitizenMatchingService.fetchMatchedCitizenRecord(refEq(matchId))(any[HeaderCarrier]))
         .thenReturn(matchedCitizenRecord)
 
-      val result = await(matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest))
+      val result: Result = await(matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest))
 
       status(result) shouldBe OK
       jsonBodyOf(result) shouldBe Json.parse(
@@ -70,7 +72,7 @@ class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSu
       when(mockCitizenMatchingService.fetchMatchedCitizenRecord(refEq(matchId))(any[HeaderCarrier]))
         .thenReturn(Future.failed(new MatchNotFoundException))
 
-      val result = await(matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest))
+      val result: Result = await(matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest))
 
       status(result) shouldBe NOT_FOUND
       jsonBodyOf(result) shouldBe Json.parse(

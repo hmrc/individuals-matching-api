@@ -17,11 +17,14 @@
 package component.uk.gov.hmrc.individualsmatchingapi.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenMatchingRequest}
 
 object MatchingStub extends MockHost(22002) {
 
-  def performMatchReturnsNoErrorCodes(matchingRequest: CitizenMatchingRequest, citizenDetails: CitizenDetails) =
+  def performMatchReturnsNoErrorCodes(
+    matchingRequest: CitizenMatchingRequest,
+    citizenDetails: CitizenDetails): StubMapping =
     mock.register(
       post(urlPathEqualTo(s"/matching/perform-match/cycle3"))
         .withRequestBody(equalToJson(
@@ -42,7 +45,9 @@ object MatchingStub extends MockHost(22002) {
         ))
         .willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[]}""")))
 
-  def performMatchReturnsErrorCodes(matchingRequest: CitizenMatchingRequest, citizenDetails: CitizenDetails) =
+  def performMatchReturnsErrorCodes(
+    matchingRequest: CitizenMatchingRequest,
+    citizenDetails: CitizenDetails): StubMapping =
     mock.register(
       post(urlPathEqualTo(s"/matching/perform-match/cycle3"))
         .withRequestBody(equalToJson(

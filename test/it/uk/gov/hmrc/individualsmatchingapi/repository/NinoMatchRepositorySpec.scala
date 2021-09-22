@@ -21,7 +21,7 @@ import org.mongodb.scala.model.IndexModel
 import java.util.UUID
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
-import play.api.Configuration
+import play.api.{Application, Configuration}
 import play.api.inject.guice.GuiceableModule
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
@@ -37,11 +37,11 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
   protected val mongoUri: String =
     s"mongodb://127.0.0.1:27017/$databaseName?heartbeatFrequencyMS=1000&rm.failover=default"
 
-  override lazy val fakeApplication = buildFakeApplication(
+  override lazy val fakeApplication: Application = buildFakeApplication(
     Configuration("mongodb.uri" -> mongoUri, "mongodb.ninoMatchTtlInSeconds" -> ninoMatchTtl))
 
-  val nino = Nino("AB123456A")
-  val ninoMatchRepository = fakeApplication.injector.instanceOf[NinoMatchRepository]
+  val nino: Nino = Nino("AB123456A")
+  val ninoMatchRepository: NinoMatchRepository = fakeApplication.injector.instanceOf[NinoMatchRepository]
 
   override def beforeEach() {
     await(ninoMatchRepository.collection.drop)

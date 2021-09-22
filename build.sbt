@@ -81,7 +81,7 @@ lazy val microservice =
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
   tests.map { test =>
-    new Group(test.name, Seq(test), SubProcess(ForkOptions().withRunJVMOptions(Vector(s"-Dtest.name=${test.name}"))))
+    Group(test.name, Seq(test), SubProcess(ForkOptions().withRunJVMOptions(Vector(s"-Dtest.name=${test.name}"))))
   }
 
 lazy val compileAll = taskKey[Unit]("Compiles sources in all configurations.")

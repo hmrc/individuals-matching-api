@@ -25,7 +25,7 @@ import unit.uk.gov.hmrc.individualsmatchingapi.util.UnitSpec
 
 trait SpecBase extends UnitSpec with GuiceOneAppPerSuite {
 
-  lazy val additionalConfig = Configuration()
+  lazy val additionalConfig: Configuration = Configuration()
 
   lazy val bodyParsers: PlayBodyParsers = fakeApplication.injector.instanceOf[PlayBodyParsers]
 

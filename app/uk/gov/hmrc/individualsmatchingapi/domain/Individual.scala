@@ -26,13 +26,13 @@ case class Individual(matchId: UUID, nino: String, firstName: String, lastName: 
 
 object SandboxData {
 
-  val sandboxNino = Nino("NA000799C")
+  val sandboxNino: Nino = Nino("NA000799C")
 
-  val sandboxMatchId = UUID.fromString("57072660-1df9-4aeb-b4ea-cd2d7f96e430")
+  val sandboxMatchId: UUID = UUID.fromString("57072660-1df9-4aeb-b4ea-cd2d7f96e430")
 
-  def findByMatchId(matchId: UUID) = individuals.find(_.matchId == matchId)
+  def findByMatchId(matchId: UUID): Option[Individual] = individuals.find(_.matchId == matchId)
 
-  def findByNino(nino: String) = individuals.find(_.nino == nino)
+  def findByNino(nino: String): Option[Individual] = individuals.find(_.nino == nino)
 
   private lazy val individuals = Seq(amanda())
 

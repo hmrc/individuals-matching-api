@@ -74,9 +74,10 @@ class ScopesService @Inject()(configuration: Configuration) {
     val uniqueDataFields = scopes.flatMap(getScopeFieldKeys).toList.distinct
     val endpointDataItems = endpoints.flatMap(e => getEndpointFieldKeys(e).toSet).toList
     val keys = uniqueDataFields.filter(endpointDataItems.contains)
-    keys.nonEmpty match {
-      case true => keys.reduce(_ + _)
-      case _    => ""
+    if (keys.nonEmpty) {
+      keys.reduce(_ + _)
+    } else {
+      ""
     }
   }
 

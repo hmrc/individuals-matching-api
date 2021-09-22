@@ -31,7 +31,7 @@ import scala.concurrent.Future
 @Singleton
 class CitizenDetailsConnector @Inject()(config: Configuration, http: HttpClient, serviceConfig: ServicesConfig) {
 
-  val serviceUrl = serviceConfig.baseUrl("citizen-details")
+  val serviceUrl: String = serviceConfig.baseUrl("citizen-details")
 
   def citizenDetails(nino: String)(implicit hc: HeaderCarrier): Future[CitizenDetails] =
     http.GET[CitizenDetails](s"$serviceUrl/citizen-details/nino/$nino") recover {

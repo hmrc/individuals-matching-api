@@ -17,11 +17,12 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
 import javax.inject.{Inject, Singleton}
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.hal.Hal.links
 import play.api.hal.HalLink
+import play.api.libs.json.JsValue
 import play.api.mvc.hal._
-import play.api.mvc.{ControllerComponents, PlayBodyParsers}
+import play.api.mvc.{Action, ControllerComponents, PlayBodyParsers}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
@@ -37,9 +38,9 @@ abstract class PrivilegedCitizenMatchingController(
   cc: ControllerComponents)
     extends CommonController(cc) with PrivilegedAuthentication {
 
-  val logger = LoggerFactory.getLogger(this.getClass)
+  val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def matchCitizen = Action.async(bodyParser.json) { implicit request =>
+  def matchCitizen: Action[JsValue] = Action.async(bodyParser.json) { implicit request =>
     requiresPrivilegedAuthentication {
       withJsonBody[CitizenMatchingRequest] { matchCitizen =>
         liveCitizenMatchingService.matchCitizen(matchCitizen) map { matchId =>
@@ -63,7 +64,7 @@ class LivePrivilegedCitizenMatchingController @Inject()(
   bodyParser: PlayBodyParsers,
   cc: ControllerComponents)
     extends PrivilegedCitizenMatchingController(liveCitizenMatchingService, bodyParser, cc) {
-  override val environment = PRODUCTION
+  override val environment: String = PRODUCTION
 }
 
 @Singleton
@@ -73,5 +74,5 @@ class SandboxPrivilegedCitizenMatchingController @Inject()(
   bodyParser: PlayBodyParsers,
   cc: ControllerComponents)
     extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService, bodyParser, cc) {
-  override val environment = SANDBOX
+  override val environment: String = SANDBOX
 }

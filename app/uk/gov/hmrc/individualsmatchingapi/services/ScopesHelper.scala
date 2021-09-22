@@ -69,11 +69,11 @@ class ScopesHelper @Inject()(scopesService: ScopesService) {
     allowedList: Option[List[String]],
     excludeInternal: Boolean = false): HalResource = {
 
-    val links = excludeInternal match {
-      case true => getAllHalLinks(matchId, excludeList, allowedList, () => scopesService.getExternalEndpoints(scopes))
-      case false =>
-        getAllHalLinks(matchId, excludeList, allowedList, () => scopesService.getInternalEndpoints(scopes)) ++
-          getAllHalLinks(matchId, excludeList, allowedList, () => scopesService.getExternalEndpoints(scopes))
+    val links = if (excludeInternal) {
+      getAllHalLinks(matchId, excludeList, allowedList, () => scopesService.getExternalEndpoints(scopes))
+    } else {
+      getAllHalLinks(matchId, excludeList, allowedList, () => scopesService.getInternalEndpoints(scopes)) ++
+        getAllHalLinks(matchId, excludeList, allowedList, () => scopesService.getExternalEndpoints(scopes))
     }
 
     linksSeq(links)

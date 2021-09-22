@@ -25,9 +25,9 @@ import play.api.libs.json._
 
 object JsonFormatters {
 
-  implicit val citizenMatchingFormat = Json.format[CitizenMatchingRequest]
+  implicit val citizenMatchingFormat: OFormat[CitizenMatchingRequest] = Json.format[CitizenMatchingRequest]
 
-  implicit val citizenDetailsFormat = new Format[CitizenDetails] {
+  implicit val citizenDetailsFormat: Format[CitizenDetails] = new Format[CitizenDetails] {
     override def reads(json: JsValue): JsResult[CitizenDetails] =
       JsSuccess(
         CitizenDetails(
@@ -46,8 +46,8 @@ object JsonFormatters {
         "dateOfBirth" -> citizenDetails.dateOfBirth)
   }
 
-  implicit val detailsMatchRequestFormat = new Format[DetailsMatchRequest] {
-    def reads(json: JsValue) =
+  implicit val detailsMatchRequestFormat: Format[DetailsMatchRequest] = new Format[DetailsMatchRequest] {
+    def reads(json: JsValue): JsResult[DetailsMatchRequest] =
       JsSuccess(
         DetailsMatchRequest(
           (json \ "verifyPerson").as[CitizenMatchingRequest],
@@ -57,12 +57,12 @@ object JsonFormatters {
       Json.obj("verifyPerson" -> matchingRequest.verifyPerson, "cidPersons" -> matchingRequest.cidPersons)
   }
 
-  implicit val errorResponseWrites = new Writes[ErrorResponse] {
+  implicit val errorResponseWrites: Writes[ErrorResponse] = new Writes[ErrorResponse] {
     def writes(e: ErrorResponse): JsValue =
       Json.obj("code" -> e.errorCode, "message" -> e.message)
   }
 
-  implicit val errorInvalidRequestFormat = new Format[ErrorInvalidRequest] {
+  implicit val errorInvalidRequestFormat: Format[ErrorInvalidRequest] = new Format[ErrorInvalidRequest] {
     def reads(json: JsValue): JsResult[ErrorInvalidRequest] = JsSuccess(
       ErrorInvalidRequest((json \ "message").as[String])
     )
@@ -71,14 +71,14 @@ object JsonFormatters {
       Json.obj("code" -> error.errorCode, "message" -> error.message)
   }
 
-  implicit val uuidJsonFormat = new Format[UUID] {
-    override def writes(uuid: UUID) = JsString(uuid.toString)
+  implicit val uuidJsonFormat: Format[UUID] = new Format[UUID] {
+    override def writes(uuid: UUID): JsValue = JsString(uuid.toString)
 
-    override def reads(json: JsValue) =
+    override def reads(json: JsValue): JsResult[UUID] =
       JsSuccess(UUID.fromString(json.asInstanceOf[JsString].value))
   }
 
-  implicit val ninoMatchJsonFormat = Json.format[NinoMatch]
-  implicit val matchedCitizenRecordJsonFormat =
+  implicit val ninoMatchJsonFormat: OFormat[NinoMatch] = Json.format[NinoMatch]
+  implicit val matchedCitizenRecordJsonFormat: OFormat[MatchedCitizenRecord] =
     Json.format[MatchedCitizenRecord]
 }
