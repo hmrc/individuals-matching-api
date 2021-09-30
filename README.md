@@ -1,8 +1,15 @@
 # individuals-matching-api
 
-[ ![Download](https://api.bintray.com/packages/hmrc/releases/individuals-matching-api/images/download.svg) ](https://bintray.com/hmrc/releases/individuals-matching-api/_latestVersion)
-
 This API allows users to check HMRC records to find information about an individual.
+
+### Documentation
+The documentation on [confluence](https://confluence.tools.tax.service.gov.uk/display/MDS/Development+space) includes:
+- Configuration driven management of data and scopes
+- Scope driven query strings for Integration Framework (IF)
+- Caching strategy to alleviate load on backend systems
+
+Please ensure you reference the OGD Data Item matrix to ensure the right data items are mapped and keep this document up to date if further data items are added.
+(The matrix was last validated at V1.1, please ensure you update with any changes you make.)
 
 ### Running tests
 
