@@ -11,6 +11,7 @@ The documentation on [confluence](https://confluence.tools.tax.service.gov.uk/di
 - Caching strategy to alleviate load on backend systems
 
 Please ensure you reference the OGD Data Item matrix to ensure the right data items are mapped and keep this document up to date if further data items are added.
+(The matrix was last validated at V1.1, please ensure you update with any changes you make.)
 
 ### Running tests
 
