@@ -35,6 +35,7 @@ object AppDependencies {
   def test(scope: String = "test,it") = Seq(
     "org.scalatestplus.play" %% "scalatestplus-play"       % "5.1.0"             % scope,
     "org.scalatestplus"      %% "mockito-3-4"              % "3.2.1.0"           % scope,
+    "org.scalatestplus"      %% "scalacheck-1-15"          % "3.2.10.0"          % scope,
     "com.vladsch.flexmark"   % "flexmark-all"              % "0.35.10"           % scope,
     "org.scalaj"             %% "scalaj-http"              % "2.4.2"             % scope,
     "org.pegdown"            % "pegdown"                   % "1.6.0"             % scope,
