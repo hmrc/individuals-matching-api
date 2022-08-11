@@ -75,6 +75,11 @@
       "description": "Scope for HO ECP to match an individual from their details"
     },
     {
+      "key": "read:individuals-matching-ho-v2",
+      "name": "match individual from their details for HO v2",
+      "description": "Scope for HO that replicates the v1 version of the same scope"
+    },
+    {
       "key": "assigned",
       "name": "The scopes you have been assigned",
       "description": "An OAuth 2.0 Bearer Token with the scopes you have been assigned"
