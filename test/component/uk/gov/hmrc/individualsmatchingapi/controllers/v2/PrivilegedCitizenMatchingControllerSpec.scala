@@ -48,6 +48,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     "read:individuals-matching-hmcts-c4",
     "read:individuals-matching-ho-ecp",
     "read:individuals-matching-ho-rp2",
+    "read:individuals-matching-ho-v2",
     "read:individuals-matching-laa-c1",
     "read:individuals-matching-laa-c2",
     "read:individuals-matching-laa-c3",
