@@ -1,0 +1,388 @@
+openapi: 3.0.3
+info:
+  title: Individuals Matching
+  contact: {}
+  version: 'P1.0'
+servers:
+- url: https://api.service.hmrc.gov.uk/
+  variables: {}
+paths:
+  /individuals/matching/:
+    post:
+      tags:
+      - individuals
+      summary: Match an individual's details against HMRC data
+      description: "<p>This resource is used to match an individual's first name, last name, date of birth and National Insurance Number (NINO) against HMRC’s records. On a successful match, a matchId is returned.</p>\n<p>The following set of criteria must all be met for a successful match of the data provided, against HMRC’s records:</p>\n<table>\n  <thead>\n    <tr>\n      <th>Parameter</th>\n      <th>Match Criteria</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td><p>firstName</p></td>\n      <td><p>First character must be identical; all remaining characters are ignored</p></td>\n    </tr>    \n    <tr>\n      <td><p>lastName</p></td>\n      <td><p>First three characters must be identical; all remaining characters are ignored</p></td>\n    </tr>    \n    <tr>\n      <td><p>nino</p></td>\n      <td><p>All characters must be identical</p></td>\n    </tr>\n    <tr>\n      <td><p>dateOfBirth</p></td>\n      <td><p>All characters must be identical</p></td>\n    </tr>\n  </tbody>\n</table>\n"
+      operationId: Matchanindividual'sdetailsagainstHMRCdata
+      parameters:
+      - name: Authorization
+        in: header
+        description: OAuth 2.0 Bearer Token with the read:individuals-matching scope.
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: Bearer <BEARER_TOKEN>
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/IndividualsMatchingrequest'
+              - example:
+                  firstName: Amanda
+                  lastName: Joseph
+                  nino: NA000799C
+                  dateOfBirth: 1960-01-15
+            example:
+              firstName: Amanda
+              lastName: Joseph
+              nino: NA000799C
+              dateOfBirth: 1960-01-15
+        required: true
+      responses:
+        '200':
+          description: The available resources to retrieve the matched individual's details
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse'
+                - example:
+                    _links:
+                      individual:
+                        href: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                        name: GET
+                        title: Individual Details
+                      self:
+                        href: /individuals/matching/
+              example:
+                _links:
+                  individual:
+                    href: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                    name: GET
+                    title: Individual Details
+                  self:
+                    href: /individuals/matching/
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/errorResponse'
+                - example:
+                    code: INVALID_REQUEST
+              examples:
+                BadRequest:
+                  description: Invalid request
+                  value:
+                    code: INVALID_REQUEST
+        '403':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/errorResponse'
+                - example:
+                    code: MATCHING_FAILED
+              examples:
+                Forbidden:
+                  description: The individual's details provided did not match with HMRC’s records
+                  value:
+                    code: MATCHING_FAILED
+      deprecated: false
+      security:
+        - userScheme:
+            - user-restricted-access
+  /individuals/matching/{matchId}:
+    get:
+      tags:
+      - individuals
+      summary: Retrieve matched individual's details
+      description: >
+        <p>Enables access to the functionality provided for matched individuals.</p>
+
+        <p>The matchId is a short-lived UUID, typically valid for several hours. If the matchId has expired, subsequent requests will return a 404 error.</p>
+      operationId: Retrievematchedindividual'sdetails
+      parameters:
+      - name: matchId
+        in: path
+        description: A short-lived UUID, typically valid for several hours
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: 57072660-1df9-4aeb-b4ea-cd2d7f96e430
+      - name: Authorization
+        in: header
+        description: OAuth 2.0 Bearer Token with the read:individuals-matching scope.
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: Bearer <BEARER_TOKEN>
+      - name: CorrelationId
+        in: header
+        description: A CorrelationId provided by you.
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: 188e9400-b636-4a3b-80ba-230a8c72b92a
+      responses:
+        '200':
+          description: The individual's details for the given match id
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse1'
+                - example:
+                    _links:
+                      income:
+                        href: /individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                        name: GET
+                        title: View individual's income
+                      employments:
+                        href: /individuals/employments/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                        name: GET
+                        title: View individual's employments
+                      self:
+                        href: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                    individual:
+                      firstName: Amanda
+                      lastName: Joseph
+                      nino: NA000799C
+                      dateOfBirth: 1960-01-15
+              example:
+                _links:
+                  income:
+                    href: /individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                    name: GET
+                    title: View individual's income
+                  employments:
+                    href: /individuals/employments/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                    name: GET
+                    title: View individual's employments
+                  self:
+                    href: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                individual:
+                  firstName: Amanda
+                  lastName: Joseph
+                  nino: NA000799C
+                  dateOfBirth: 1960-01-15
+        '404':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/errorResponse'
+                - example:
+                    code: NOT_FOUND
+              examples:
+                NotFound:
+                  description: Not found
+                  value:
+                    code: NOT_FOUND
+      deprecated: false
+      security:
+        - userScheme:
+            - user-restricted-access
+components:
+  securitySchemes:
+    userScheme:
+      type: oauth2
+      description: HMRC supports OAuth 2.0 for authenticating User-restricted API requests
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
+          scopes:
+            user-restricted-access: user-restricted access
+  schemas:
+    errorResponse:
+      title: errorResponse
+      required:
+      - code
+      type: object
+      properties:
+        code:
+          type: string
+    Employments:
+      title: Employments
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          example: /individuals/employments/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+        name:
+          type: string
+          example: GET
+        title:
+          type: string
+          example: View individual's employments
+      description: The URI for the resource to get the individual's employments.
+    Income:
+      title: Income
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          example: /individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+        name:
+          type: string
+          example: GET
+        title:
+          type: string
+          example: View individual's income
+      description: The URI for the resource to get the individual's income.
+    Individual:
+      title: Individual
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          example: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+        name:
+          type: string
+          example: GET
+        title:
+          type: string
+          example: Individual Details
+      description: The URI for the resource to get the individual's information.
+    Individual1:
+      title: Individual1
+      required:
+      - firstName
+      - lastName
+      - nino
+      - dateOfBirth
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: The individual's first name
+        lastName:
+          type: string
+          description: The individual's last name
+        nino:
+          type: string
+          description: The individual's national insurance number
+        dateOfBirth:
+          type: string
+          description: The individual's date of birth
+          format: date
+      description: The matched individual.
+    IndividualsMatchingrequest:
+      title: IndividualsMatchingrequest
+      required:
+      - firstName
+      - lastName
+      - dateOfBirth
+      - nino
+      type: object
+      properties:
+        firstName:
+          maxLength: 35
+          minLength: 1
+          type: string
+          description: Individual's first name. Must only contain letters, `, -, and '
+        lastName:
+          maxLength: 35
+          minLength: 1
+          type: string
+          description: Individual's first name. Must only contain letters, `, -, and '
+        dateOfBirth:
+          type: string
+          format: date
+        nino:
+          type: string
+          description: Individual's national insurance number
+      description: Individual matching request
+    IndividualsMatchingresponse:
+      title: IndividualsMatchingresponse
+      required:
+      - _links
+      type: object
+      properties:
+        _links:
+          $ref: '#/components/schemas/Links'
+      description: Matched Individual
+    IndividualsMatchingresponse1:
+      title: IndividualsMatchingresponse1
+      required:
+      - _links
+      - individual
+      type: object
+      properties:
+        _links:
+          $ref: '#/components/schemas/Links1'
+        individual:
+          allOf:
+          - $ref: '#/components/schemas/Individual1'
+          - description: The matched individual.
+      description: Individuals Matching
+    Links:
+      title: Links
+      required:
+      - individual
+      - self
+      type: object
+      properties:
+        individual:
+          allOf:
+          - $ref: '#/components/schemas/Individual'
+          - description: The URI for the resource to get the individual's information.
+        self:
+          allOf:
+          - $ref: '#/components/schemas/Self'
+          - description: The URI to this resource
+    Links1:
+      title: Links1
+      required:
+      - income
+      - employments
+      - self
+      type: object
+      properties:
+        income:
+          allOf:
+          - $ref: '#/components/schemas/Income'
+          - description: The URI for the resource to get the individual's income.
+        employments:
+          allOf:
+          - $ref: '#/components/schemas/Employments'
+          - description: The URI for the resource to get the individual's employments.
+        self:
+          allOf:
+          - $ref: '#/components/schemas/Self'
+          - description: The URI to this resource
+    Self:
+      title: Self
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          example: /individuals/matching/
+      description: The URI to this resource
+tags:
+- name: individuals
+  description: ''
