@@ -1,0 +1,458 @@
+openapi: 3.0.3
+info:
+  title: Individuals Matching
+  contact: {}
+  version: '2.0'
+servers:
+- url: https://api.service.hmrc.gov.uk/
+  variables: {}
+paths:
+  /individuals/matching/:
+    post:
+      tags:
+      - individuals
+      summary: Match an individual's details against HMRC data
+      description: "<p>Use this endpoint to match an individual's first name, last name, date of birth and National Insurance number (nino) against HMRC’s records. On a successful match, a matchId is returned.</p>\n<h3>Match Criteria</h3>\n<p>For a successful match, the following set of criteria must be met. </p>\n<table>\n  <thead>\n    <tr>\n      <th>Parameter</th>\n      <th>Match criteria</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td><p>firstName</p></td>\n      <td><p>First character must be identical; all remaining characters are ignored.</p></td>\n    </tr>    \n    <tr>\n      <td><p>lastName</p></td>\n      <td><p>First three characters must be identical; all remaining characters are ignored.</p></td>\n    </tr>    \n    <tr>\n      <td><p>nino</p></td>\n      <td><p>All characters must be identical.</p></td>\n    </tr>\n    <tr>\n      <td><p>dateOfBirth</p></td>\n      <td><p>All characters must be identical.</p></td>\n    </tr>\n  </tbody>\n</table>\n"
+      operationId: Matchanindividual'sdetailsagainstHMRCdata
+      parameters:
+      - name: CorrelationId
+        in: header
+        description: >-
+          <p>A UUID, used for traceability purposes.</p>
+
+          <p>Must conform to the regular expression <code class="code--slim">^[0-9a-fA-F]{8}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{12}$</code></p>
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: 58072660-1df9-4deb-b4ca-cd2d7f96e480
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/IndividualsMatchingrequest'
+              - example:
+                  firstName: Amanda
+                  lastName: Joseph
+                  nino: NA000799C
+                  dateOfBirth: 1960-01-15
+            example:
+              firstName: Amanda
+              lastName: Joseph
+              nino: NA000799C
+              dateOfBirth: 1960-01-15
+        required: true
+      responses:
+        '200':
+          description: The available resources to retrieve the matched individual's details
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse'
+                - example:
+                    _links:
+                      individual:
+                        href: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                        name: GET
+                        title: Get a matched individual’s information
+                      self:
+                        href: /individuals/matching/
+              example:
+                _links:
+                  individual:
+                    href: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                    name: GET
+                    title: Get a matched individual’s information
+                  self:
+                    href: /individuals/matching/
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/errorResponse'
+                - example:
+                    code: INVALID_REQUEST
+              examples:
+                BadRequest:
+                  description: Invalid request
+                  value:
+                    code: INVALID_REQUEST
+        '404':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/errorResponse'
+                - example:
+                    code: MATCHING_FAILED
+              examples:
+                Forbidden:
+                  description: The individual's details provided did not match with HMRC’s records
+                  value:
+                    code: MATCHING_FAILED
+      deprecated: false
+      security:
+        - userScheme:
+            - user-restricted-access
+  /individuals/matching/{matchId}:
+    get:
+      tags:
+      - individuals
+      summary: Get matched individual's details
+      description: >
+        <p>This endpoint provides links you can use to get information about a matched individual. This includes the individual's details, as well as income, employment, and benefits and credits information.</p>
+
+        <p>The matchId is a short-lived universally unique identifier (UUID), typically valid for several hours. If the matchId has expired, subsequent requests will return a 404 error.</p>
+
+        <p>You will get a subset of the JSON response shown below based on your assigned scopes.</p>
+      operationId: Getmatchedindividual'sdetails
+      parameters:
+      - name: matchId
+        in: path
+        description: A short-lived UUID, typically valid for several hours.
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: 57072660-1df9-4aeb-b4ea-cd2d7f96e430
+      - name: CorrelationId
+        in: header
+        description: >-
+          <p>A UUID, used for traceability purposes.</p>
+
+          <p>Must conform to the regular expression <code class="code--slim">^[0-9a-fA-F]{8}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{12}$</code></p>
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: 58072660-1df9-4deb-b4ca-cd2d7f96e480
+      responses:
+        '200':
+          description: The individual's details for the given match id
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse1'
+                - example:
+                    _links:
+                      income:
+                        href: /individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                        name: GET
+                        title: Get the individual's income data
+                      employments:
+                        href: /individuals/employments/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                        name: GET
+                        title: Get the individual's employment data
+                      benefits-and-credits:
+                        href: /individuals/benefits-and-credits/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                        name: GET
+                        title: Get the individual's benefits and credits data
+                      details:
+                        href: /individuals/details/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                        name: GET
+                        title: Get the individual's details
+                      self:
+                        href: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                    individual:
+                      firstName: Amanda
+                      lastName: Joseph
+                      nino: NA000799C
+                      dateOfBirth: 1960-01-15
+              example:
+                _links:
+                  income:
+                    href: /individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                    name: GET
+                    title: Get the individual's income data
+                  employments:
+                    href: /individuals/employments/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                    name: GET
+                    title: Get the individual's employment data
+                  benefits-and-credits:
+                    href: /individuals/benefits-and-credits/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                    name: GET
+                    title: Get the individual's benefits and credits data
+                  details:
+                    href: /individuals/details/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                    name: GET
+                    title: Get the individual's details
+                  self:
+                    href: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                individual:
+                  firstName: Amanda
+                  lastName: Joseph
+                  nino: NA000799C
+                  dateOfBirth: 1960-01-15
+        '404':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/errorResponse'
+                - example:
+                    code: NOT_FOUND
+              examples:
+                NotFound:
+                  description: Not found
+                  value:
+                    code: NOT_FOUND
+      deprecated: false
+      security:
+        - userScheme:
+            - user-restricted-access
+components:
+  securitySchemes:
+    userScheme:
+      type: oauth2
+      description: HMRC supports OAuth 2.0 for authenticating User-restricted API requests
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
+          scopes:
+            user-restricted-access: user-restricted access
+  schemas:
+    errorResponse:
+      title: errorResponse
+      required:
+      - code
+      type: object
+      properties:
+        code:
+          type: string
+    BenefitsAndCredits:
+      title: BenefitsAndCredits
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the endpoint.
+          example: /individuals/benefits-and-credits/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+        name:
+          type: string
+          description: The HTTP Action to use on this endpoint.
+          example: GET
+        title:
+          type: string
+          description: Get the individual's benefits and credits data.
+      description: The URI for the endpoint to get the individual's benefits and credits data.
+    Details:
+      title: Details
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the endpoint.
+          example: /individuals/details/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+        name:
+          type: string
+          description: The HTTP Action to use on this endpoint.
+          example: GET
+        title:
+          type: string
+          description: Get the individual's details.
+      description: The URI for the endpoint to get the individual's details.
+    Employments:
+      title: Employments
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the endpoint.
+          example: /individuals/employments/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+        name:
+          type: string
+          description: The HTTP Action to use on this endpoint.
+          example: GET
+        title:
+          type: string
+          description: Get the individual's employment data.
+      description: The URI for the endpoint to get the individual's employment data.
+    Income:
+      title: Income
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the endpoint.
+          example: /individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
+        name:
+          type: string
+          description: The HTTP Action to use on this endpoint.
+          example: GET
+        title:
+          type: string
+          description: Get the individual's income data.
+      description: The Uniform Resource Identifier (URI) for the endpoint to get the individual's income data.
+    Individual:
+      title: Individual
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the endpoint.
+          example: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+        name:
+          type: string
+          example: GET
+        title:
+          type: string
+          description: Get matched individual's details.
+      description: The Uniform Resource Identifier (URI) for the endpoint to get the individual's information.
+    Individual1:
+      title: Individual1
+      required:
+      - firstName
+      - lastName
+      - nino
+      - dateOfBirth
+      type: object
+      properties:
+        firstName:
+          pattern: ^[a-zA-Z `\-\'^]{1,35}$
+          type: string
+          description: The individual's first name.
+          example: Amanda
+        lastName:
+          pattern: ^[a-zA-Z `\-\'^]{1,35}$
+          type: string
+          description: The individual's last name.
+          example: Joseph
+        nino:
+          type: string
+          description: The individual's National Insurance number.
+          example: NA000799C
+        dateOfBirth:
+          type: string
+          description: The individual's date of birth
+          format: date
+          example: 1960-01-15
+      description: The matched individual.
+    IndividualsMatchingrequest:
+      title: IndividualsMatchingrequest
+      required:
+      - firstName
+      - lastName
+      - dateOfBirth
+      - nino
+      type: object
+      properties:
+        firstName:
+          maxLength: 35
+          minLength: 1
+          type: string
+          description: "The individual's first name. Must conform to the regular expression: ^[\\p{L} `\\-\\'^.]{1,35}$"
+          example: Amanda
+        lastName:
+          maxLength: 35
+          minLength: 1
+          type: string
+          description: "The individual's last name. Must conform to the regular expression: ^[\\p{L} `\\-\\'^.]{1,35}$"
+          example: Joseph
+        dateOfBirth:
+          type: string
+          description: The individual’s date of birth.
+          example: 1960-01-15
+        nino:
+          type: string
+          description: Individual's National Insurance number.
+          example: NA000799C
+      description: Individual matching request
+    IndividualsMatchingresponse:
+      title: IndividualsMatchingresponse
+      required:
+      - _links
+      type: object
+      properties:
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/Links'
+          - description: A list of links for possible actions related to this endpoint.
+      description: Matched Individual
+    IndividualsMatchingresponse1:
+      title: IndividualsMatchingresponse1
+      required:
+      - _links
+      - individual
+      type: object
+      properties:
+        _links:
+          allOf:
+          - $ref: '#/components/schemas/Links1'
+          - description: A list of links for possible actions related to this endpoint.
+        individual:
+          allOf:
+          - $ref: '#/components/schemas/Individual1'
+          - description: The matched individual.
+      description: Individuals Matching
+    Links:
+      title: Links
+      required:
+      - individual
+      - self
+      type: object
+      properties:
+        individual:
+          allOf:
+          - $ref: '#/components/schemas/Individual'
+          - description: The Uniform Resource Identifier (URI) for the endpoint to get the individual's information.
+        self:
+          allOf:
+          - $ref: '#/components/schemas/Self'
+          - description: The URI for this endpoint.
+      description: A list of links for possible actions related to this endpoint.
+    Links1:
+      title: Links1
+      required:
+      - self
+      type: object
+      properties:
+        income:
+          allOf:
+          - $ref: '#/components/schemas/Income'
+          - description: The Uniform Resource Identifier (URI) for the endpoint to get the individual's income data.
+        employments:
+          allOf:
+          - $ref: '#/components/schemas/Employments'
+          - description: The URI for the endpoint to get the individual's employment data.
+        benefits-and-credits:
+          allOf:
+          - $ref: '#/components/schemas/BenefitsAndCredits'
+          - description: The URI for the endpoint to get the individual's benefits and credits data.
+        details:
+          allOf:
+          - $ref: '#/components/schemas/Details'
+          - description: The URI for the endpoint to get the individual's details.
+        self:
+          allOf:
+          - $ref: '#/components/schemas/Self'
+          - description: The URI for this endpoint.
+      description: A list of links for possible actions related to this endpoint.
+    Self:
+      title: Self
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          description: The URL of the endpoint.
+          example: /individuals/matching/
+      description: The URI for this endpoint.
+tags:
+- name: individuals
+  description: ''
