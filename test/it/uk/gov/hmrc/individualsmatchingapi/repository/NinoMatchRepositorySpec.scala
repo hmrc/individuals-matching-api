@@ -53,17 +53,19 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
   }
 
   "collection" should {
-    "have the correct indices" in {
-      val indices = await(
-        ninoMatchRepository.collection.listIndexes[Seq[IndexModel]].toFuture()
-      ).toString
+    val indices = await(
+      ninoMatchRepository.collection.listIndexes[Seq[IndexModel]].toFuture()
+    ).toString
+    "have the idIndex" in {
       indices should include(
         "name -> idIndex, " +
           "background -> true, " +
           "key -> Map(id -> 1), " +
           "v -> 2, " +
           "unique -> true")
+    }
 
+    "have the createdAtIndex" in {
       indices should include(
         "name -> createdAtIndex, " +
           "background -> true, " +
