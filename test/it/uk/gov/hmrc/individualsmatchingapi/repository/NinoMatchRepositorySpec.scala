@@ -57,22 +57,21 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
       val indices = await(
         ninoMatchRepository.collection.listIndexes[Seq[IndexModel]].toFuture()
       ).toString
-
-      indices.contains(
+      indices should include(
         "name -> idIndex, " +
           s"ns -> $databaseName.ninoMatch, " +
           "background -> true, " +
           "key -> Map(id -> 1), " +
           "v -> 2, " +
-          "unique -> true") shouldBe true
+          "unique -> true")
 
-      indices.contains(
+      indices should include(
         "name -> createdAtIndex, " +
           s"ns -> $databaseName.ninoMatch, " +
           "background -> true, " +
           "key -> Map(createdAt -> 1), " +
           "v -> 2, " +
-          s"expireAfterSeconds -> $ninoMatchTtl") shouldBe true
+          s"expireAfterSeconds -> $ninoMatchTtl")
     }
   }
 
