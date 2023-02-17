@@ -59,7 +59,6 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
       ).toString
       indices should include(
         "name -> idIndex, " +
-          s"ns -> $databaseName.ninoMatch, " +
           "background -> true, " +
           "key -> Map(id -> 1), " +
           "v -> 2, " +
@@ -67,7 +66,6 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
 
       indices should include(
         "name -> createdAtIndex, " +
-          s"ns -> $databaseName.ninoMatch, " +
           "background -> true, " +
           "key -> Map(createdAt -> 1), " +
           "v -> 2, " +
