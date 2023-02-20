@@ -39,7 +39,7 @@ lazy val microservice =
       SbtAutoBuildPlugin,
       SbtGitVersioning,
       SbtDistributablesPlugin,
-      SbtArtifactory) ++ plugins: _*)
+      ) ++ plugins: _*)
     .settings(playSettings: _*)
     .settings(scalaSettings: _*)
     .settings(scoverageSettings: _*)

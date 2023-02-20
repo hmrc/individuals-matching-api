@@ -1,0 +1,433 @@
+openapi: 3.0.3
+info:
+  title: Individuals Matching
+  contact: {}
+  version: '1.0'
+  description: |
+    #Overview
+    This API allows you to collect individual(s) information via searching records or providing a specific ID
+servers:
+- url: https://api.service.hmrc.gov.uk
+  variables: {}
+
+paths:
+  /individuals/matching/:
+    post:
+      tags:
+      - individuals
+      summary: Search HMRC’s records for a individual
+      description: >
+        Search HMRC’s records for an individual by their name, date of birth and National Insurance number.
+
+
+        A successful search will return a link you can use to check an individual’s information.
+      operationId: SearchHMRC’srecordsforaindividual
+      parameters:
+      - name: Authorization
+        in: header
+        description: OAuth 2.0 Bearer Token with the read:individuals-matching scope.
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: Bearer <BEARER_TOKEN>
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/IndividualsMatchingrequest'
+              - example:
+                  nino: BB123456B
+                  firstName: John
+                  lastName: Smith
+                  dateOfBirth: 1975-05-25
+            example:
+              nino: BB123456B
+              firstName: John
+              lastName: Smith
+              dateOfBirth: 1975-05-25
+        required: true
+      responses:
+        '200':
+          description: The individual information provided has matched with HMRC records.
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse'
+                - example:
+                    _links:
+                      individual:
+                        href: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                        name: GET
+                        title: Individual Details
+                      self:
+                        href: /individuals/matching/
+              example:
+                _links:
+                  individual:
+                    href: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+                    name: GET
+                    title: Individual Details
+                  self:
+                    href: /individuals/matching/
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - example:
+                    code: BAD_REQUEST
+                    message: Bad Request
+              examples:
+                notOpenStatus:
+                  description: Bad Request
+                  value:
+                    code: BAD_REQUEST
+                    message: Bad Request
+        '403':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - description: The individual details provided did not match with HMRC’s records.
+                  example:
+                    code: MATCHING_FAILED
+                    message: The individual details provided did not match with HMRC’s records.
+              example:
+                code: MATCHING_FAILED
+                message: The individual details provided did not match with HMRC’s records.
+        '404':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - example:
+                    code: NOT_FOUND
+                    message: Resource Not Found
+              examples:
+                ResourceNotFound:
+                  description: Resource Not Found
+                  value:
+                    code: NOT_FOUND
+                    message: Resource Not Found
+        '406':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - example:
+                    code: ACCEPT_HEADER_INVALID
+                    message: Accept header invalid
+              examples:
+                headerInvalid:
+                  description: Accept header invalid
+                  value:
+                    code: ACCEPT_HEADER_INVALID
+                    message: Accept header invalid
+        '500':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - example:
+                    code: INTERNAL_SERVER_ERROR
+                    message: Internal Server Error
+              examples:
+                internalServerError:
+                  description: Internal Server Error
+                  value:
+                    code: INTERNAL_SERVER_ERROR
+                    message: Internal Server Error
+      deprecated: false
+      security:
+      - userScheme:
+          - user-restricted-access
+  /individuals/matching/{matchId}:
+    get:
+      tags:
+      - individuals
+      summary: Check a individual’s information
+      description: >
+        Returns a URL you can use to check a individual’s information. Currently, the only check available is to
+
+        check if the individual is a Scottish taxpayer.
+
+
+        The URL is only valid for a limited period of time. After expiry a 404 will be returned if accessed.
+      operationId: Checkaindividual’sinformation
+      parameters:
+      - name: matchId
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          pattern: ^[0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}$
+          type: string
+          example: 6b853b58-625f-4e64-955e-43a7cdff5c03
+      - name: Authorization
+        in: header
+        description: OAuth 2.0 Bearer Token with the read:individuals-matching scope.
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: Bearer <BEARER_TOKEN>
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse1'
+                - example:
+                    _links:
+                    - name: self
+                      href: /individuals/matching/633e0ee7-315b-49e6-baed-d79c3dffe467
+                    - name: relief-at-source
+                      href: /relief-at-source/individual/633e0ee7-315b-49e6-baed-d79c3dffe467/residency-status
+              example:
+                _links:
+                - name: self
+                  href: /individuals/matching/633e0ee7-315b-49e6-baed-d79c3dffe467
+                - name: relief-at-source
+                  href: /relief-at-source/individual/633e0ee7-315b-49e6-baed-d79c3dffe467/residency-status
+        '403':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - description: >
+                    The match has timed out and the UUID is no longer valid.
+
+                    The match (POST to /match) will need to repeated.
+                  example:
+                    code: INVALID_UUID
+                    message: The match has timed out and the UUID is no longer valid. The match (POST to /match) will need to repeated.
+              example:
+                code: INVALID_UUID
+                message: The match has timed out and the UUID is no longer valid. The match (POST to /match) will need to repeated.
+        '404':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - example:
+                    code: NOT_FOUND
+                    message: Resource Not Found
+              examples:
+                ResourceNotFound:
+                  description: Resource Not Found
+                  value:
+                    code: NOT_FOUND
+                    message: Resource Not Found
+        '406':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - example:
+                    code: ACCEPT_HEADER_INVALID
+                    message: Accept header invalid
+              examples:
+                headerInvalid:
+                  description: Accept header invalid
+                  value:
+                    code: ACCEPT_HEADER_INVALID
+                    message: Accept header invalid
+        '500':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - example:
+                    code: INTERNAL_SERVER_ERROR
+                    message: Internal Server Error
+              examples:
+                internalServerError:
+                  description: Internal Server Error
+                  value:
+                    code: INTERNAL_SERVER_ERROR
+                    message: Internal Server Error
+      deprecated: false
+      security:
+        - userScheme:
+            - user-restricted-access
+components:
+  securitySchemes:
+    userScheme:
+      type: oauth2
+      description: HMRC supports OAuth 2.0 for authenticating User-restricted API requests
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
+          scopes:
+            user-restricted-access: user-restricted access
+  schemas:
+    IndividualsMatchingrequest:
+      title: IndividualsMatchingrequest
+      required:
+      - nino
+      - firstName
+      - lastName
+      - dateOfBirth
+      type: object
+      properties:
+        nino:
+          pattern: ^((?!(BG|GB|KN|NK|NT|TN|ZZ)|(D|F|I|Q|U|V)[A-Z]|[A-Z](D|F|I|O|Q|U|V))[A-Z]{2})[0-9]{6}[A-D]?$
+          type: string
+          example: BC123456
+        firstName:
+          pattern: ^[a-zA-Z &`\-\'^]{1,35}$
+          type: string
+          description: The individuals’s first name.
+          example: FirstNameMe
+        lastName:
+          pattern: ^[a-zA-Z &`\-\'^]{1,35}$
+          type: string
+          description: The individual’s last name.
+          example: lastNameDough
+        dateOfBirth:
+          pattern: ^\d{4}-\d{2}-\d{2}$
+          type: string
+          example: 1989-04-22
+    IndividualsMatchingresponse:
+      title: IndividualsMatchingresponse
+      required:
+      - _links
+      type: object
+      properties:
+        _links:
+          $ref: '#/components/schemas/Links'
+      description: Matched Individual
+    Links:
+      title: Links
+      required:
+      - individual
+      - self
+      type: object
+      properties:
+        individual:
+          allOf:
+          - $ref: '#/components/schemas/Individual'
+          - description: The URI for the resource to get the individual's available information.
+        self:
+          allOf:
+          - $ref: '#/components/schemas/Self'
+          - description: The URI to this resource
+    Individual:
+      title: Individual
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          example: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
+        name:
+          type: string
+          example: GET
+        title:
+          type: string
+          example: Individual Details
+      description: The URI for the resource to get the individual's available information.
+    Self:
+      title: Self
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          example: /individuals/matching/
+      description: The URI to this resource
+    error-codeType:
+      title: error-codeType
+      enum:
+      - INTERNAL_SERVER_ERROR
+      - ACCEPT_HEADER_INVALID
+      - NOT_FOUND
+      - BAD_REQUEST
+      - MATCHING_FAILED
+      - INVALID_UUID
+      type: string
+    IndividualsMatchingresponse400:
+      title: IndividualsMatchingresponse400
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/error-codeType'
+        message:
+          type: string
+    IndividualsMatchingresponse1:
+      title: IndividualsMatchingresponse1
+      required:
+      - _links
+      type: object
+      properties:
+        _links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Links1'
+          description: ''
+      example:
+        _links:
+        - name: self
+          href: /individuals/matching/633e0ee7-315b-49e6-baed-d79c3dffe467
+        - name: relief-at-source
+          href: /relief-at-source/individual/633e0ee7-315b-49e6-baed-d79c3dffe467/residency-status
+    Links1:
+      title: Links1
+      required:
+      - name
+      - href
+      type: object
+      properties:
+        name:
+          type: string
+        href:
+          type: string
+      example:
+        name: self
+        href: /individuals/matching/633e0ee7-315b-49e6-baed-d79c3dffe467
+tags:
+- name: individuals
+  description: ''
