@@ -101,8 +101,7 @@ paths:
                     code: MATCHING_FAILED
       deprecated: false
       security:
-        - userScheme:
-            - user-restricted-access
+        - userRestricted: []
   /individuals/matching/{matchId}:
     get:
       tags:
@@ -211,11 +210,10 @@ paths:
                     code: NOT_FOUND
       deprecated: false
       security:
-        - userScheme:
-            - user-restricted-access
+        - userRestricted: []
 components:
   securitySchemes:
-    userScheme:
+    userRestricted:
       type: oauth2
       description: HMRC supports OAuth 2.0 for authenticating User-restricted API requests
       flows:
