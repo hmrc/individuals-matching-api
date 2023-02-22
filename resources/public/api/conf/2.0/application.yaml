@@ -101,7 +101,7 @@ paths:
                     code: MATCHING_FAILED
       deprecated: false
       security:
-        - userRestricted: []
+        - userRestricted: [ "read:individuals-matching" ]
   /individuals/matching/{matchId}:
     get:
       tags:
@@ -210,7 +210,7 @@ paths:
                     code: NOT_FOUND
       deprecated: false
       security:
-        - userRestricted: []
+        - userRestricted: [ "read:individuals-matching" ]
 components:
   securitySchemes:
     userRestricted:
