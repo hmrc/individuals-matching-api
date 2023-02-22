@@ -159,7 +159,7 @@ paths:
                     message: Internal Server Error
       deprecated: false
       security:
-        - userRestricted: []
+        - userRestricted: [ "read:individuals-matching" ]
   /individuals/matching/{matchId}:
     get:
       tags:
@@ -283,7 +283,7 @@ paths:
                     message: Internal Server Error
       deprecated: false
       security:
-        - userRestricted: []
+        - userRestricted: [ "read:individuals-matching" ]
 components:
   securitySchemes:
     userRestricted:
