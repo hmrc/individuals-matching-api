@@ -98,8 +98,7 @@ paths:
                     code: MATCHING_FAILED
       deprecated: false
       security:
-        - userScheme:
-            - user-restricted-access
+        - userRestricted: [ "read:individuals-matching" ]
   /individuals/matching/{matchId}:
     get:
       tags:
@@ -195,11 +194,10 @@ paths:
                     code: NOT_FOUND
       deprecated: false
       security:
-        - userScheme:
-            - user-restricted-access
+        - userRestricted: [ "read:individuals-matching" ]
 components:
   securitySchemes:
-    userScheme:
+    userRestricted:
       type: oauth2
       description: HMRC supports OAuth 2.0 for authenticating User-restricted API requests
       flows:
@@ -207,8 +205,23 @@ components:
           authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
-          scopes:
-            user-restricted-access: user-restricted access
+          scopes: {
+            read:individuals-matching: Match individual from their details,
+            read:individuals-matching-laa-c1: Scope for LAA use case 1 to match an individual from their details,
+            read:individuals-matching-laa-c2: Scope for LAA use case 2 to match an individual from their details,
+            read:individuals-matching-laa-c3: Scope for LAA use case 3 to match an individual from their details,
+            read:individuals-matching-laa-c4: Scope for LAA use case 4 to match an individual from their details,
+            read:individuals-matching-hmcts-c2: Scope for HMCTS use case 2 to match an individual from their details,
+            read:individuals-matching-hmcts-c3: Scope for HMCTS use case 3 to match an individual from their details,
+            read:individuals-matching-hmcts-c4: Scope for HMCTS use case 4 to match an individual from their details,
+            read:individuals-matching-lsani-c1: Scope for LSANI use case 1 to match an individual from their details,
+            read:individuals-matching-lsani-c3: Scope for LSANI use case 3 to match an individual from their details,
+            read:individuals-matching-nictsejo-c4: Scope for NICTSEJO use case 4 to match an individual from their details,
+            read:individuals-matching-ho-rp2: Scope for HO RP2 to match an individual from their details,
+            read:individuals-matching-ho-ecp: Scope for HO ECP to match an individual from their details,
+            read:individuals-matching-ho-v2: Scope for HO that replicates the v1 version of the same scope,
+            assigned: An OAuth 2.0 Bearer Token with the scopes you have been assigned
+          }
   schemas:
     errorResponse:
       title: errorResponse
