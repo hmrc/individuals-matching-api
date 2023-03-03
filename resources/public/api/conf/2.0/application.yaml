@@ -9,6 +9,15 @@ info:
     This version of the API lets you:
       - search for an individual using their name, date of birth and National Insurance number
       - get links you can use to get the individual's details, as well as income, employments, and benefits and credits information
+    
+    # Testing
+    You can use the sandbox environment to [test this API](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing). 
+  
+    It does not currently support [stateful behaviour](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing/stateful-behaviour).
+    However, the sandbox service for this API supports all the successful match responses and error scenarios described in the Endpoints section.
+    
+    You can set up a test user which is an individual using the [Create Test User API](https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/api-platform-test-user/1.0#_create-a-test-user-which-is-an-organisation_post_accordion).
+
 servers:
 - url: https://api.service.hmrc.gov.uk/
   variables: {}
