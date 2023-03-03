@@ -20,7 +20,13 @@ paths:
       tags:
       - individuals
       summary: Match an individual's details against HMRC data
-      description: "<p>This resource is used to match an individual's first name, last name, date of birth and National Insurance Number (NINO) against HMRC’s records. On a successful match, a matchId is returned.</p>\n<p>The following set of criteria must all be met for a successful match of the data provided, against HMRC’s records:</p>\n<table>\n  <thead>\n    <tr>\n      <th>Parameter</th>\n      <th>Match Criteria</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td><p>firstName</p></td>\n      <td><p>First character must be identical; all remaining characters are ignored</p></td>\n    </tr>    \n    <tr>\n      <td><p>lastName</p></td>\n      <td><p>First three characters must be identical; all remaining characters are ignored</p></td>\n    </tr>    \n    <tr>\n      <td><p>nino</p></td>\n      <td><p>All characters must be identical</p></td>\n    </tr>\n    <tr>\n      <td><p>dateOfBirth</p></td>\n      <td><p>All characters must be identical</p></td>\n    </tr>\n  </tbody>\n</table>\n"
+      description: "<p>This resource is used to match an individual's first name, last name, date of birth and National Insurance Number (NINO) against HMRC’s records. On a successful match, a matchId is returned.</p>\n<p>The following set of criteria must all be met for a successful match of the data provided, against HMRC’s records:</p>\n<table>\n  <thead>\n    <tr>\n      <th>Parameter</th>\n      <th>Match Criteria</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td><p>firstName</p></td>\n      <td><p>First character must be identical; all remaining characters are ignored</p></td>\n    </tr>    \n    <tr>\n      <td><p>lastName</p></td>\n      <td><p>First three characters must be identical; all remaining characters are ignored</p></td>\n    </tr>    \n    <tr>\n      <td><p>nino</p></td>\n      <td><p>All characters must be identical</p></td>\n    </tr>\n    <tr>\n      <td><p>dateOfBirth</p></td>\n      <td><p>All characters must be identical</p></td>\n    </tr>\n  </tbody>\n</table>\n
+        \n#### Authorisation
+
+        \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
+
+        \nSee also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
+      "
       operationId: Matchanindividual'sdetailsagainstHMRCdata
       parameters:
       - name: Authorization
@@ -112,10 +118,16 @@ paths:
       tags:
       - individuals
       summary: Retrieve matched individual's details
-      description: >
+      description: "
         <p>Enables access to the functionality provided for matched individuals.</p>
 
-        <p>The matchId is a short-lived UUID, typically valid for several hours. If the matchId has expired, subsequent requests will return a 404 error.</p>
+        <p>The matchId is a short-lived UUID, typically valid for several hours. If the matchId has expired, subsequent requests will return a 404 error.</p>\n
+        \n#### Authorisation
+
+        \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
+
+        \nSee also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
+      "
       operationId: Retrievematchedindividual'sdetails
       parameters:
       - name: matchId
