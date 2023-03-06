@@ -101,9 +101,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/errorResponse'
-                - example:
-                    code: INVALID_REQUEST
+                - $ref: '#/components/schemas/errorResponse400'
               examples:
                 BadRequest:
                   description: Invalid request
@@ -116,9 +114,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/errorResponse'
-                - example:
-                    code: MATCHING_FAILED
+                - $ref: '#/components/schemas/errorResponse403'
               examples:
                 Forbidden:
                   description: The individual's details provided did not match with HMRC’s records
@@ -218,9 +214,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/errorResponse'
-                - example:
-                    code: NOT_FOUND
+                - $ref: '#/components/schemas/errorResponse404'
               examples:
                 NotFound:
                   description: Not found
@@ -260,7 +254,7 @@ components:
             assigned: An OAuth 2.0 Bearer Token with the scopes you have been assigned
           }
   schemas:
-    errorResponse:
+    errorResponse404:
       title: errorResponse
       required:
       - code
@@ -268,6 +262,31 @@ components:
       properties:
         code:
           type: string
+          description: Code always has value of "NOT_FOUND"
+      example:
+        code: NOT_FOUND
+    errorResponse400:
+      title: errorResponse
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+          description: Code always has value of "INVALID_REQUEST"
+      example:
+        code: INVALID_REQUEST
+    errorResponse403:
+      title: errorResponse
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+          description: Code always has value of "MATCHING_FAILED"
+      example:
+        code: MATCHING_FAILED
     Employments:
       title: Employments
       required:
