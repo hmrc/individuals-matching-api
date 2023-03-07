@@ -91,13 +91,13 @@ paths:
                   self:
                     href: /individuals/matching/
         '400':
-          description: ''
+          description: Invalid Request
           headers: {}
           content:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/errorResponse'
+                - $ref: '#/components/schemas/errorResponse400'
                 - example:
                     code: INVALID_REQUEST
               examples:
@@ -106,13 +106,13 @@ paths:
                   value:
                     code: INVALID_REQUEST
         '404':
-          description: ''
+          description: Matching Failed
           headers: {}
           content:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/errorResponse'
+                - $ref: '#/components/schemas/errorResponse404A'
                 - example:
                     code: MATCHING_FAILED
               examples:
@@ -222,13 +222,13 @@ paths:
                   nino: NA000799C
                   dateOfBirth: 1960-01-15
         '404':
-          description: ''
+          description: 'Not Found'
           headers: {}
           content:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/errorResponse'
+                - $ref: '#/components/schemas/errorResponse404B'
                 - example:
                     code: NOT_FOUND
               examples:
@@ -267,7 +267,7 @@ components:
             assigned: An OAuth 2.0 Bearer Token with the scopes you have been assigned
           }
   schemas:
-    errorResponse:
+    errorResponse400:
       title: errorResponse
       required:
       - code
@@ -275,6 +275,25 @@ components:
       properties:
         code:
           type: string
+          description: Invalid request
+    errorResponse404A:
+      title: errorResponse
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+          description: Matching failed
+    errorResponse404B:
+      title: errorResponse
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+          description: Not found
     BenefitsAndCredits:
       title: BenefitsAndCredits
       type: object
