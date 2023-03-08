@@ -9,6 +9,15 @@ info:
     This version of the API lets you:
       - search for an individual using their name, date of birth and National Insurance number
       - get links you can use to get the individual's details, as well as income, employments, and benefits and credits information
+    
+    # Testing
+    You can use the sandbox environment to [test this API](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing). 
+  
+    It does not currently support [stateful behaviour](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing/stateful-behaviour).
+    However, the sandbox service for this API supports all the successful match responses and error scenarios described in the Endpoints section.
+    
+    You can set up a test user which is an individual using the [Create Test User API](https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/api-platform-test-user/1.0#_create-a-test-user-which-is-an-organisation_post_accordion).
+
 servers:
 - url: https://api.service.hmrc.gov.uk/
   variables: {}
@@ -18,7 +27,21 @@ paths:
       tags:
       - individuals
       summary: Match an individual's details against HMRC data
-      description: "<p>Use this endpoint to match an individual's first name, last name, date of birth and National Insurance number (nino) against HMRC’s records. On a successful match, a matchId is returned.</p>\n<h3>Match Criteria</h3>\n<p>For a successful match, the following set of criteria must be met. </p>\n<table>\n  <thead>\n    <tr>\n      <th>Parameter</th>\n      <th>Match criteria</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td><p>firstName</p></td>\n      <td><p>First character must be identical; all remaining characters are ignored.</p></td>\n    </tr>    \n    <tr>\n      <td><p>lastName</p></td>\n      <td><p>First three characters must be identical; all remaining characters are ignored.</p></td>\n    </tr>    \n    <tr>\n      <td><p>nino</p></td>\n      <td><p>All characters must be identical.</p></td>\n    </tr>\n    <tr>\n      <td><p>dateOfBirth</p></td>\n      <td><p>All characters must be identical.</p></td>\n    </tr>\n  </tbody>\n</table>\n"
+      description: |-
+        
+        |Parameter|Match Criteria
+        |---|---
+        |firstName|First character must be identical; all remaining characters are ignored.
+        |lastName|First three characters must be identical; all remaining characters are ignored.
+        |nino|All characters must be identical.
+        |dateOfBirth|All characters must be identical.
+        
+        #### Authorisation
+
+        This endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
+
+        See also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
+
       operationId: Matchanindividual'sdetailsagainstHMRCdata
       parameters:
       - name: CorrelationId
@@ -76,13 +99,13 @@ paths:
                   self:
                     href: /individuals/matching/
         '400':
-          description: ''
+          description: Invalid Request
           headers: {}
           content:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/errorResponse'
+                - $ref: '#/components/schemas/errorResponse400'
                 - example:
                     code: INVALID_REQUEST
               examples:
@@ -91,13 +114,13 @@ paths:
                   value:
                     code: INVALID_REQUEST
         '404':
-          description: ''
+          description: Matching Failed
           headers: {}
           content:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/errorResponse'
+                - $ref: '#/components/schemas/errorResponse404A'
                 - example:
                     code: MATCHING_FAILED
               examples:
@@ -113,12 +136,19 @@ paths:
       tags:
       - individuals
       summary: Get matched individual's details
-      description: >
-        <p>This endpoint provides links you can use to get information about a matched individual. This includes the individual's details, as well as income, employment, and benefits and credits information.</p>
+      description: |-
+        This endpoint provides links you can use to get information about a matched individual. This includes the individual's details, as well as income, employment, and benefits and credits information.
 
-        <p>The matchId is a short-lived universally unique identifier (UUID), typically valid for several hours. If the matchId has expired, subsequent requests will return a 404 error.</p>
+        The matchId is a short-lived universally unique identifier (UUID), typically valid for several hours. If the matchId has expired, subsequent requests will return a 404 error.
 
-        <p>You will get a subset of the JSON response shown below based on your assigned scopes.</p>
+        You will get a subset of the JSON response shown below based on your assigned scopes.
+        
+        #### Authorisation
+
+        This endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
+
+        See also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
+
       operationId: Getmatchedindividual'sdetails
       parameters:
       - name: matchId
@@ -200,13 +230,13 @@ paths:
                   nino: NA000799C
                   dateOfBirth: 1960-01-15
         '404':
-          description: ''
+          description: 'Not Found'
           headers: {}
           content:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/errorResponse'
+                - $ref: '#/components/schemas/errorResponse404B'
                 - example:
                     code: NOT_FOUND
               examples:
@@ -245,7 +275,7 @@ components:
             assigned: An OAuth 2.0 Bearer Token with the scopes you have been assigned
           }
   schemas:
-    errorResponse:
+    errorResponse400:
       title: errorResponse
       required:
       - code
@@ -253,6 +283,25 @@ components:
       properties:
         code:
           type: string
+          description: Invalid request
+    errorResponse404A:
+      title: errorResponse
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+          description: Matching failed
+    errorResponse404B:
+      title: errorResponse
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+          description: Not found
     BenefitsAndCredits:
       title: BenefitsAndCredits
       type: object

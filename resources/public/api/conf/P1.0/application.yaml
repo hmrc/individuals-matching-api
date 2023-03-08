@@ -11,6 +11,15 @@ info:
       
       * search for an individual using their name, date of birth and National Insurance number
       * get links you can use to view the individual's income and employments
+    
+    # Testing
+    You can use the sandbox environment to [test this API](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing).
+    It does not support [stateful behaviour](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing/stateful-behaviour).
+
+    The Sandbox service for this API supports all the happy path responses and error scenarios described under Resources.
+
+    You can set up a test individual for this API using the [Create Test User API](https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/api-platform-test-user/1.0#_create-a-test-user-which-is-an-individual_post_accordion).
+
 servers:
 - url: https://api.service.hmrc.gov.uk/
   variables: {}
@@ -20,7 +29,18 @@ paths:
       tags:
       - individuals
       summary: Match an individual's details against HMRC data
-      description: "<p>This resource is used to match an individual's first name, last name, date of birth and National Insurance Number (NINO) against HMRC’s records. On a successful match, a matchId is returned.</p>\n<p>The following set of criteria must all be met for a successful match of the data provided, against HMRC’s records:</p>\n<table>\n  <thead>\n    <tr>\n      <th>Parameter</th>\n      <th>Match Criteria</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td><p>firstName</p></td>\n      <td><p>First character must be identical; all remaining characters are ignored</p></td>\n    </tr>    \n    <tr>\n      <td><p>lastName</p></td>\n      <td><p>First three characters must be identical; all remaining characters are ignored</p></td>\n    </tr>    \n    <tr>\n      <td><p>nino</p></td>\n      <td><p>All characters must be identical</p></td>\n    </tr>\n    <tr>\n      <td><p>dateOfBirth</p></td>\n      <td><p>All characters must be identical</p></td>\n    </tr>\n  </tbody>\n</table>\n"
+      description: |-
+        This resource is used to match an individual's first name, last name, date of birth and National Insurance Number (NINO) against HMRC’s records. On a successful match, a matchId is returned.
+        
+        The following set of criteria must all be met for a successful match of the data provided, against HMRC’s records:
+        
+        |Parameter|Match Criteria
+        |---|---
+        |firstName|First character must be identical; all remaining characters are ignored
+        |lastName|First three characters must be identical; all remaining characters are ignored
+        |nino|All characters must be identical
+        |dateOfBirth|All characters must be identical
+
       operationId: Matchanindividual'sdetailsagainstHMRCdata
       parameters:
       - name: Authorization
@@ -81,9 +101,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/errorResponse'
-                - example:
-                    code: INVALID_REQUEST
+                - $ref: '#/components/schemas/errorResponse400'
               examples:
                 BadRequest:
                   description: Invalid request
@@ -96,9 +114,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/errorResponse'
-                - example:
-                    code: MATCHING_FAILED
+                - $ref: '#/components/schemas/errorResponse403'
               examples:
                 Forbidden:
                   description: The individual's details provided did not match with HMRC’s records
@@ -112,10 +128,16 @@ paths:
       tags:
       - individuals
       summary: Retrieve matched individual's details
-      description: >
-        <p>Enables access to the functionality provided for matched individuals.</p>
+      description: |-
+        Enables access to the functionality provided for matched individuals.
 
-        <p>The matchId is a short-lived UUID, typically valid for several hours. If the matchId has expired, subsequent requests will return a 404 error.</p>
+        The matchId is a short-lived UUID, typically valid for several hours. If the matchId has expired, subsequent requests will return a 404 error.
+        #### Authorisation
+
+        This endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
+
+        See also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
+
       operationId: Retrievematchedindividual'sdetails
       parameters:
       - name: matchId
@@ -192,9 +214,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/errorResponse'
-                - example:
-                    code: NOT_FOUND
+                - $ref: '#/components/schemas/errorResponse404'
               examples:
                 NotFound:
                   description: Not found
@@ -207,7 +227,10 @@ components:
   securitySchemes:
     userRestricted:
       type: oauth2
-      description: HMRC supports OAuth 2.0 for authenticating User-restricted API requests
+      description: |
+        HMRC supports OAuth 2.0 for authenticating User-restricted API requests
+        
+        See also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
       flows:
         authorizationCode:
           authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
@@ -231,7 +254,7 @@ components:
             assigned: An OAuth 2.0 Bearer Token with the scopes you have been assigned
           }
   schemas:
-    errorResponse:
+    errorResponse404:
       title: errorResponse
       required:
       - code
@@ -239,6 +262,31 @@ components:
       properties:
         code:
           type: string
+          description: Code always has value of "NOT_FOUND"
+      example:
+        code: NOT_FOUND
+    errorResponse400:
+      title: errorResponse
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+          description: Code always has value of "INVALID_REQUEST"
+      example:
+        code: INVALID_REQUEST
+    errorResponse403:
+      title: errorResponse
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+          description: Code always has value of "MATCHING_FAILED"
+      example:
+        code: MATCHING_FAILED
     Employments:
       title: Employments
       required:
@@ -331,6 +379,7 @@ components:
           description: Individual's first name. Must only contain letters, `, -, and '
         dateOfBirth:
           type: string
+          description: The individual's date of birth
           format: date
         nino:
           type: string

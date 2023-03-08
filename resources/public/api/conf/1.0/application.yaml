@@ -11,6 +11,14 @@ info:
   
     * search for an individual using their name, date of birth and National Insurance number
     * get a link you can use to check if they're a Scottish resident for tax purposes
+    
+    # Testing
+    You can use the sandbox environment to [test this API](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing). It does not support [stateful behaviour](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing/stateful-behaviour).
+
+    The Sandbox service for this API supports all the happy path responses and error scenarios described under Resources.
+
+    You can set up a test individual for this API using the [Create Test User API](https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/api-platform-test-user/1.0#_create-a-test-user-which-is-an-individual_post_accordion).
+
 servers:
 - url: https://api.service.hmrc.gov.uk
   variables: {}
@@ -21,11 +29,18 @@ paths:
       tags:
       - individuals
       summary: Search HMRC’s records for a individual
-      description: >
+      description: |-
         Search HMRC’s records for an individual by their name, date of birth and National Insurance number.
 
 
         A successful search will return a link you can use to check an individual’s information.
+        
+        #### Authorisation
+
+        This endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
+
+        See also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
+
       operationId: SearchHMRC’srecordsforaindividual
       parameters:
       - name: Authorization
@@ -103,7 +118,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - $ref: '#/components/schemas/IndividualsMatchingresponse403'
                 - description: The individual details provided did not match with HMRC’s records.
                   example:
                     code: MATCHING_FAILED
@@ -118,7 +133,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - $ref: '#/components/schemas/IndividualsMatchingresponse404'
                 - example:
                     code: NOT_FOUND
                     message: Resource Not Found
@@ -135,7 +150,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - $ref: '#/components/schemas/IndividualsMatchingresponse406'
                 - example:
                     code: ACCEPT_HEADER_INVALID
                     message: Accept header invalid
@@ -152,7 +167,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - $ref: '#/components/schemas/IndividualsMatchingresponse500'
                 - example:
                     code: INTERNAL_SERVER_ERROR
                     message: Internal Server Error
@@ -170,13 +185,20 @@ paths:
       tags:
       - individuals
       summary: Check a individual’s information
-      description: >
+      description: |-
         Returns a URL you can use to check a individual’s information. Currently, the only check available is to
 
         check if the individual is a Scottish taxpayer.
 
 
         The URL is only valid for a limited period of time. After expiry a 404 will be returned if accessed.
+        
+        #### Authorisation
+
+        This endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
+
+        See also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
+
       operationId: Checkaindividual’sinformation
       parameters:
       - name: matchId
@@ -242,7 +264,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - $ref: '#/components/schemas/IndividualsMatchingresponse404'
                 - example:
                     code: NOT_FOUND
                     message: Resource Not Found
@@ -259,7 +281,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - $ref: '#/components/schemas/IndividualsMatchingresponse406'
                 - example:
                     code: ACCEPT_HEADER_INVALID
                     message: Accept header invalid
@@ -276,7 +298,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/IndividualsMatchingresponse400'
+                - $ref: '#/components/schemas/IndividualsMatchingresponse500'
                 - example:
                     code: INTERNAL_SERVER_ERROR
                     message: Internal Server Error
@@ -331,6 +353,7 @@ components:
         nino:
           pattern: ^((?!(BG|GB|KN|NK|NT|TN|ZZ)|(D|F|I|Q|U|V)[A-Z]|[A-Z](D|F|I|O|Q|U|V))[A-Z]{2})[0-9]{6}[A-D]?$
           type: string
+          description: The individual's national insurance number
           example: BC123456
         firstName:
           pattern: ^[a-zA-Z &`\-\'^]{1,35}$
@@ -345,6 +368,7 @@ components:
         dateOfBirth:
           pattern: ^\d{4}-\d{2}-\d{2}$
           type: string
+          description: The individual's date of birth
           example: 1989-04-22
     IndividualsMatchingresponse:
       title: IndividualsMatchingresponse
@@ -396,16 +420,6 @@ components:
           type: string
           example: /individuals/matching/
       description: The URI to this resource
-    error-codeType:
-      title: error-codeType
-      enum:
-      - INTERNAL_SERVER_ERROR
-      - ACCEPT_HEADER_INVALID
-      - NOT_FOUND
-      - BAD_REQUEST
-      - MATCHING_FAILED
-      - INVALID_UUID
-      type: string
     IndividualsMatchingresponse400:
       title: IndividualsMatchingresponse400
       required:
@@ -414,9 +428,63 @@ components:
       type: object
       properties:
         code:
-          $ref: '#/components/schemas/error-codeType'
+          type: string
+          description: BAD_REQUEST
         message:
           type: string
+          description: Bad Request
+    IndividualsMatchingresponse403:
+      title: IndividualsMatchingresponse403
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+          description: INVALID_UUID
+        message:
+          type: string
+          description: Invalid UUID
+    IndividualsMatchingresponse404:
+      title: IndividualsMatchingresponse404
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+          description: NOT_FOUND
+        message:
+          type: string
+          description: Resource Not Found
+    IndividualsMatchingresponse406:
+      title: IndividualsMatchingresponse406
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+          description: ACCEPT_HEADER_INVALID
+        message:
+          type: string
+          description: Accept header invalid
+    IndividualsMatchingresponse500:
+      title: IndividualsMatchingresponse500
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: string
+          description: INTERNAL_SERVER_ERROR
+        message:
+          type: string
+          description: Internal Server Error
     IndividualsMatchingresponse1:
       title: IndividualsMatchingresponse1
       required:
@@ -443,8 +511,10 @@ components:
       properties:
         name:
           type: string
+          description: "For example: \"GET\""
         href:
           type: string
+          description: "For example: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430"
       example:
         name: self
         href: /individuals/matching/633e0ee7-315b-49e6-baed-d79c3dffe467
