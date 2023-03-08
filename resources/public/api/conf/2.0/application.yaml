@@ -136,18 +136,18 @@ paths:
       tags:
       - individuals
       summary: Get matched individual's details
-      description: "
-        <p>This endpoint provides links you can use to get information about a matched individual. This includes the individual's details, as well as income, employment, and benefits and credits information.</p>
+      description: |-
+        This endpoint provides links you can use to get information about a matched individual. This includes the individual's details, as well as income, employment, and benefits and credits information.
 
-        <p>The matchId is a short-lived universally unique identifier (UUID), typically valid for several hours. If the matchId has expired, subsequent requests will return a 404 error.</p>
+        The matchId is a short-lived universally unique identifier (UUID), typically valid for several hours. If the matchId has expired, subsequent requests will return a 404 error.
 
-        <p>You will get a subset of the JSON response shown below based on your assigned scopes.</p>
+        You will get a subset of the JSON response shown below based on your assigned scopes.
         
-        \n#### Authorisation
+        #### Authorisation
 
-        \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
+        This endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
 
-        \nSee also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/)."
+        See also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
 
       operationId: Getmatchedindividual'sdetails
       parameters:

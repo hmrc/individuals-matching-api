@@ -29,17 +29,18 @@ paths:
       tags:
       - individuals
       summary: Search HMRC’s records for a individual
-      description: "
+      description: |-
         Search HMRC’s records for an individual by their name, date of birth and National Insurance number.
 
 
         A successful search will return a link you can use to check an individual’s information.
         
-        \n#### Authorisation
+        #### Authorisation
 
-        \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
+        This endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
 
-        \nSee also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/)."
+        See also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
+
       operationId: SearchHMRC’srecordsforaindividual
       parameters:
       - name: Authorization
@@ -184,7 +185,7 @@ paths:
       tags:
       - individuals
       summary: Check a individual’s information
-      description: "
+      description: |-
         Returns a URL you can use to check a individual’s information. Currently, the only check available is to
 
         check if the individual is a Scottish taxpayer.
@@ -192,11 +193,12 @@ paths:
 
         The URL is only valid for a limited period of time. After expiry a 404 will be returned if accessed.
         
-        \n#### Authorisation
+        #### Authorisation
 
-                \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
+        This endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
 
-                \nSee also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/)."
+        See also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
+
       operationId: Checkaindividual’sinformation
       parameters:
       - name: matchId

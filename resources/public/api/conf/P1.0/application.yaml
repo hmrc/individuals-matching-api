@@ -128,16 +128,16 @@ paths:
       tags:
       - individuals
       summary: Retrieve matched individual's details
-      description: "
-        <p>Enables access to the functionality provided for matched individuals.</p>
+      description: |-
+        Enables access to the functionality provided for matched individuals.
 
-        <p>The matchId is a short-lived UUID, typically valid for several hours. If the matchId has expired, subsequent requests will return a 404 error.</p>\n
-        \n#### Authorisation
+        The matchId is a short-lived UUID, typically valid for several hours. If the matchId has expired, subsequent requests will return a 404 error.
+        #### Authorisation
 
-        \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
+        This endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `read:individuals-matching` header containing an OAUTH 2.0 Bearer Token.
 
-        \nSee also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
-      "
+        See also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/).
+
       operationId: Retrievematchedindividual'sdetails
       parameters:
       - name: matchId
