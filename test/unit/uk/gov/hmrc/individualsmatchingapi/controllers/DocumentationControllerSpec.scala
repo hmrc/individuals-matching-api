@@ -30,13 +30,19 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.individualsmatchingapi.controllers.DocumentationController
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSugar {
+import scala.concurrent.ExecutionContext
+import scala.io.BufferedSource
+
+class DocumentationControllerSpec
+    extends SpecBase with Matchers with MockitoSugar {
 
   implicit lazy val materializer: Materializer = fakeApplication.materializer
 
   trait Setup {
     val configuration: Configuration = mock[Configuration]
     val HttpErrorHandler: HttpErrorHandler = mock[HttpErrorHandler]
+
+    implicit val ec: ExecutionContext = ExecutionContext.global
 
     val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val controllerComponents: ControllerComponents =
@@ -141,6 +147,20 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
         .as[Seq[String]] shouldBe Seq("appVP1")
       (apiVersion(result, "2.0") \ "access" \ "whitelistedApplicationIds")
         .as[Seq[String]] shouldBe Seq("appV2")
+    }
+  }
+
+  "/api/documentation/version?/individuals/matching" should {
+    "should return 200 and return file contents" in new Setup {
+      val versions = List("1.0", "2.0", "P1.0")
+      for (version <- versions) {
+        val doc: BufferedSource = scala.io.Source.fromFile(s"resources/public/api/conf/${version}/application.yaml")
+        val docString: String = doc.mkString
+        doc.close()
+        val result: Result = await(underTest.specification(version, "application.yaml")(request))
+        result.header.status shouldBe 200
+        bodyOf(result) shouldBe docString
+      }
     }
   }
 
