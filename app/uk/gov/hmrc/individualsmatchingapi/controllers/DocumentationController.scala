@@ -25,13 +25,23 @@ import play.api.http.HttpErrorHandler
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.individualsmatchingapi.views._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import play.filters.cors.CORSActionBuilder
+import akka.stream.Materializer
+import scala.concurrent.ExecutionContext
 @Singleton
 class DocumentationController @Inject()(
   cc: ControllerComponents,
   assets: Assets,
   errorHandler: HttpErrorHandler,
-  config: Configuration)
-    extends BackendController(cc) {
+  config: Configuration)(
+  implicit materializer: Materializer,
+  executionContext: ExecutionContext
+) extends BackendController(cc) {
+
+  def specification(version: String, file: String): Action[AnyContent] =
+    CORSActionBuilder(config).async { request =>
+      assets.at(s"/public/api/conf/$version", file)(request)
+    }
 
   private lazy val whitelistedApplicationIdsVP1 = config
     .getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds")
@@ -75,9 +85,6 @@ class DocumentationController @Inject()(
     endpointName: String
   ): Action[AnyContent] =
     assets.at(s"/public/api/documentation/$version", s"${endpointName.replaceAll(" ", "-")}.xml")
-
-  def raml(version: String, file: String): Action[AnyContent] =
-    assets.at(s"/public/api/conf/$version", file)
 
 }
 
