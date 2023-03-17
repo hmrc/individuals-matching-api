@@ -1,20 +1,20 @@
 openapi: 3.0.3
 info:
   title: Individuals Matching
-  description: "\n####Overview
+  description: "\n#### Overview
     
                 \nUse this API to check HMRC records to find out information about an individual.\n\nThe current version of the API lets you:\n\n* search for an individual using their name, date of birth and National Insurance number\n* get links you can use to view the individual's income and employments
                 
-                \n####Versioning
+                \n#### Versioning
                 \nWhen an API changes in a way that is backwards-incompatible, we increase the version number of the API. \nSee our [reference guide](/api-documentation/docs/reference-guide#versioning) for more on\nversioning.
                 
-                \n####Errors
+                \n#### Errors
                 \nWe use standard HTTP status codes to show whether an API request succeeded or not. They are usually in the range:\n* 200 to 299 if it succeeded, including code 202 if it was accepted by an API that needs to wait for further action\n* 400 to 499 if it failed because of a client error by your application\n* 500 to 599 if it failed because of an error on our server\n\nErrors specific to each API are shown in the Endpoints section, under Response. \nSee our [reference guide](/api-documentation/docs/reference-guide#errors) for more on errors.
                 
-                \n####Testing
+                \n#### Testing
                 \nYou can use the sandbox environment to [test this API](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing). It does not support [stateful behaviour](https://developer.service.hmrc.gov.uk/api-documentation/docs/testing/stateful-behaviour).\n\nThe Sandbox service for this API supports all the happy path responses and error scenarios described under Resources.\n\nYou can set up a test individual for this API using the [Create Test User API](https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/api-platform-test-user/1.0#_create-a-test-user-which-is-an-individual_post_accordion).
                 
-                \n####Endpoints"
+                \n#### Endpoints"
   contact: {}
   version: 'P1.0'
 servers:
@@ -77,7 +77,7 @@ paths:
                 allOf:
                 - $ref: '#/components/schemas/IndividualsMatchingresponse'
                 - example:
-                    _links:
+                    links:
                       individual:
                         href: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
                         name: GET
@@ -85,7 +85,7 @@ paths:
                       self:
                         href: /individuals/matching/
               example:
-                _links:
+                links:
                   individual:
                     href: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
                     name: GET
@@ -173,7 +173,7 @@ paths:
                 allOf:
                 - $ref: '#/components/schemas/IndividualsMatchingresponse1'
                 - example:
-                    _links:
+                    links:
                       income:
                         href: /individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
                         name: GET
@@ -190,7 +190,7 @@ paths:
                       nino: NA000799C
                       dateOfBirth: 1960-01-15
               example:
-                _links:
+                links:
                   income:
                     href: /individuals/income/?matchId=57072660-1df9-4aeb-b4ea-cd2d7f96e430
                     name: GET
@@ -255,7 +255,7 @@ components:
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
           scopes:
-            "read:individuals-matching": "read:individuals-matching"
+            "read:individuals-matching": "Grants read access"
   schemas:
     errorResponse400:
       title: errorResponse400
@@ -324,12 +324,15 @@ components:
       properties:
         href:
           type: string
+          description: The URL of the endpoint.
           example: /individuals/matching/57072660-1df9-4aeb-b4ea-cd2d7f96e430
         name:
           type: string
+          description: The HTTP Action to use on this endpoint.
           example: GET
         title:
           type: string
+          description: Get matched individual's details.
           example: Individual Details
       description: The URI for the resource to get the individual's information.
     Individual1:
@@ -384,20 +387,20 @@ components:
     IndividualsMatchingresponse:
       title: IndividualsMatchingresponse
       required:
-      - _links
+      - links
       type: object
       properties:
-        _links:
+        links:
           $ref: '#/components/schemas/Links'
       description: Matched Individual
     IndividualsMatchingresponse1:
       title: IndividualsMatchingresponse1
       required:
-      - _links
+      - links
       - individual
       type: object
       properties:
-        _links:
+        links:
           $ref: '#/components/schemas/Links1'
         individual:
           allOf:
@@ -447,8 +450,8 @@ components:
       properties:
         href:
           type: string
+          description: The URI to this resource
           example: /individuals/matching/
-      description: The URI to this resource
 tags:
 - name: individuals
   description: ''
