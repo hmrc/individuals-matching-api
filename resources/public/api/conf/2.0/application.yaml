@@ -31,7 +31,7 @@ paths:
       description: "<p>Use this endpoint to match an individual's first name, last name, date of birth and National Insurance number (nino) against HMRC’s records. On a successful match, a matchId is returned.</p>\n<h3>Match Criteria</h3>\n<p>For a successful match, the following set of criteria must be met. </p>\n<table>\n  <thead>\n    <tr>\n      <th>Parameter</th>\n      <th>Match criteria</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td><p>firstName</p></td>\n      <td><p>First character must be identical; all remaining characters are ignored.</p></td>\n    </tr>    \n    <tr>\n      <td><p>lastName</p></td>\n      <td><p>First three characters must be identical; all remaining characters are ignored.</p></td>\n    </tr>    \n    <tr>\n      <td><p>nino</p></td>\n      <td><p>All characters must be identical.</p></td>\n    </tr>\n    <tr>\n      <td><p>dateOfBirth</p></td>\n      <td><p>All characters must be identical.</p></td>\n    </tr>\n  </tbody>\n</table>\n
                    \n#### Authorisation
         
-                    \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `Authorization` header containing an OAUTH 2.0 Bearer Token with the `read:help-to-save` scope.
+                    \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `Authorization` header containing an OAUTH 2.0 Bearer Token with the `assigned` scope.
                     
                     \nSee also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/)."
       operationId: Matchanindividual'sdetailsagainstHMRCdata
@@ -139,7 +139,7 @@ paths:
         
                     \n#### Authorisation
         
-                    \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `Authorization` header containing an OAUTH 2.0 Bearer Token with the `read:help-to-save` scope.
+                    \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `Authorization` header containing an OAUTH 2.0 Bearer Token with the `assigned` scope.
                     
                     \nSee also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/)."
       operationId: Getmatchedindividual'sdetails

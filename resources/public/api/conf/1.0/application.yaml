@@ -32,7 +32,7 @@ paths:
       description: "Search HMRC’s records for an individual by their name, date of birth and National Insurance number. \nA successful search will return a link you can use to check an individual’s information.
                                     \n#### Authorisation
 
-                                    \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `Authorization` header containing an OAUTH 2.0 Bearer Token with the `read:help-to-save` scope.
+                                    \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `Authorization` header containing an OAUTH 2.0 Bearer Token with the `read:individuals-matching` scope.
 
                                     \nSee also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/)."
       operationId: SearchHMRC’srecordsforaindividual
@@ -186,7 +186,7 @@ paths:
         
                     \n#### Authorisation
         
-                    \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `Authorization` header containing an OAUTH 2.0 Bearer Token with the `read:help-to-save` scope.
+                    \nThis endpoint is [user-restricted](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints) and requires `Authorization` header containing an OAUTH 2.0 Bearer Token with the `read:individuals-matching` scope.
                     
                     \nSee also [fraud prevention](https://developer.service.hmrc.gov.uk/guides/fraud-prevention/)."
 
@@ -339,7 +339,7 @@ components:
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
           scopes:
-            "read:individuals-matching": : "Grants read access"
+            "read:individuals-matching": : "read:individuals-matching"
   schemas:
     IndividualsMatchingrequest:
       title: IndividualsMatchingrequest
