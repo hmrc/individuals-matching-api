@@ -33,8 +33,7 @@ import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import scala.concurrent.ExecutionContext
 import scala.io.BufferedSource
 
-class DocumentationControllerSpec
-    extends SpecBase with Matchers with MockitoSugar {
+class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSugar {
 
   implicit lazy val materializer: Materializer = fakeApplication.materializer
 
@@ -154,7 +153,7 @@ class DocumentationControllerSpec
     "should return 200 and return file contents" in new Setup {
       val versions = List("1.0", "2.0", "P1.0")
       for (version <- versions) {
-        val doc: BufferedSource = scala.io.Source.fromFile(s"resources/public/api/conf/${version}/application.yaml")
+        val doc: BufferedSource = scala.io.Source.fromFile(s"resources/public/api/conf/$version/application.yaml")
         val docString: String = doc.mkString
         doc.close()
         val result: Result = await(underTest.specification(version, "application.yaml")(request))
