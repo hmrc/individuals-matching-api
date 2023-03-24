@@ -48,7 +48,6 @@ lazy val microservice =
     .settings(defaultSettings(): _*)
     .settings(scalafmtOnCompile := true)
     .settings(
-      dependencyOverrides ++= AppDependencies.overrides,
       libraryDependencies ++= appDependencies,
       Test / testOptions := Seq(Tests.Filter(unitFilter)),
       retrieveManaged := true,
