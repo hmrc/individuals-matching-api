@@ -4,27 +4,13 @@ import sbt._
 object AppDependencies {
 
   val hmrc = "uk.gov.hmrc"
-  val akka = "com.typesafe.akka"
-
-  val akkaVersion = "2.6.15"
-  val akkaHttpVersion = "10.2.6"
 
   val hmrcMongo = "uk.gov.hmrc.mongo"
   val hmrcMongoVersion = "0.70.0"
 
-  val overrides = Seq(
-    akka %% "akka-stream" % akkaVersion,
-    akka %% "akka-protobuf" % akkaVersion,
-    akka %% "akka-slf4j" % akkaVersion,
-    akka %% "akka-actor" % akkaVersion,
-    akka %% "akka-actor-typed" % akkaVersion,
-    akka %% "akka-serialization-jackson" % akkaVersion,
-    akka %% "akka-http-core" % akkaHttpVersion
-  )
-
   val compile = Seq(
     ws,
-    hmrc                %% "bootstrap-backend-play-28"  % "5.12.0",
+    hmrc                %% "bootstrap-backend-play-28"  % "5.25.0",
     hmrc                %% "domain"                     % "6.2.0-play-28",
     hmrc                %% "play-hal"                   % "2.1.0-play-27",
     hmrc                %% "play-hmrc-api"              % "6.4.0-play-28",
