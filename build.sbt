@@ -1,7 +1,6 @@
 import sbt.Keys.compile
 import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import play.sbt.routes.RoutesKeys
 
 val appName = "individuals-matching-api"
@@ -43,7 +42,6 @@ lazy val microservice =
     .settings(playSettings: _*)
     .settings(scalaSettings: _*)
     .settings(scoverageSettings: _*)
-    .settings(publishingSettings: _*)
     .settings(scalaVersion := "2.12.11")
     .settings(defaultSettings(): _*)
     .settings(scalafmtOnCompile := true)
@@ -51,7 +49,6 @@ lazy val microservice =
       libraryDependencies ++= appDependencies,
       Test / testOptions := Seq(Tests.Filter(unitFilter)),
       retrieveManaged := true,
-      update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
     )
     .settings(Compile / unmanagedResourceDirectories += baseDirectory.value / "resources")
     .configs(IntegrationTest)
