@@ -23,7 +23,7 @@ TwirlKeys.templateImports := Seq.empty
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(
-    // Semicolon-separated list of regexs matching classes to exclude
+    // Semicolon-separated list of regexes matching classes to exclude
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;" +
       ".*BuildInfo.;uk.gov.hmrc.BuildInfo;.*Routes;.*RoutesPrefix*;",
     ScoverageKeys.coverageMinimum := 80,
