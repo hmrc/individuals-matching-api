@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
-import java.util.UUID
+import play.api.Logging
 
+import java.util.UUID
 import javax.inject.Inject
 import play.api.libs.json._
 import play.api.mvc.{ControllerComponents, Request, RequestHeader, Result}
@@ -30,8 +31,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
 import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import java.util.UUID
 
+import java.util.UUID
 import javax.inject.Inject
 import uk.gov.hmrc.individualsmatchingapi.utils.UuidValidator
 
@@ -40,7 +41,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import scala.util.{Failure, Success, Try}
 
-abstract class CommonController @Inject()(cc: ControllerComponents) extends BackendController(cc) {
+abstract class CommonController @Inject()(cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   override protected def withJsonBody[T](
     f: T => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
@@ -120,10 +121,8 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
     case e: IllegalArgumentException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)
       ErrorInvalidRequest(e.getMessage).toHttpResponse
-    case e: InternalServerException =>
-      auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)
-      ErrorInternalServer("Something went wrong.").toHttpResponse
     case e =>
+      logger.error("Unexpected exception", e)
       auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)
       ErrorInternalServer("Something went wrong.").toHttpResponse
   }
