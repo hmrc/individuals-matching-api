@@ -17,7 +17,6 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
 import javax.inject.{Inject, Singleton}
-import org.slf4j.{Logger, LoggerFactory}
 import play.api.hal.Hal.links
 import play.api.hal.HalLink
 import play.api.libs.json.JsValue
@@ -37,8 +36,6 @@ abstract class PrivilegedCitizenMatchingController(
   bodyParser: PlayBodyParsers,
   cc: ControllerComponents)
     extends CommonController(cc) with PrivilegedAuthentication {
-
-  val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   def matchCitizen: Action[JsValue] = Action.async(bodyParser.json) { implicit request =>
     requiresPrivilegedAuthentication {
