@@ -17,16 +17,14 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
 import akka.stream.Materializer
-
-import java.util.UUID
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.when
+import org.mockito.IdiomaticMockito
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
 import play.api.test.FakeRequest
+import play.api.test.Helpers.{contentAsJson, defaultAwaitTimeout, status}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.MatchedCitizenController
@@ -34,9 +32,10 @@ import uk.gov.hmrc.individualsmatchingapi.domain.{MatchNotFoundException, Matche
 import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
+import java.util.UUID
 import scala.concurrent.Future
 
-class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSugar {
+class MatchedCitizenControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
   implicit lazy val materializer: Materializer = fakeApplication.materializer
 
   trait Setup {
@@ -57,25 +56,27 @@ class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSu
   "matched citizen controller" should {
 
     "return 200 (OK) for a valid matchId" in new Setup {
-      when(mockCitizenMatchingService.fetchMatchedCitizenRecord(refEq(matchId))(any[HeaderCarrier]))
-        .thenReturn(matchedCitizenRecord)
+      mockCitizenMatchingService
+        .fetchMatchedCitizenRecord(refEq(matchId))(any[HeaderCarrier])
+        .returns(Future.successful(matchedCitizenRecord))
 
-      val result: Result = await(matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest))
+      val result: Future[Result] = matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest)
 
       status(result) shouldBe OK
-      jsonBodyOf(result) shouldBe Json.parse(
+      contentAsJson(result) shouldBe Json.parse(
         s"""{"matchId": "$matchId", "nino": "$ninoString"}"""
       )
     }
 
     "return 404 (Not Found) for an invalid matchId" in new Setup {
-      when(mockCitizenMatchingService.fetchMatchedCitizenRecord(refEq(matchId))(any[HeaderCarrier]))
-        .thenReturn(Future.failed(new MatchNotFoundException))
+      mockCitizenMatchingService
+        .fetchMatchedCitizenRecord(refEq(matchId))(any[HeaderCarrier])
+        .returns(Future.failed(new MatchNotFoundException))
 
-      val result: Result = await(matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest))
+      val result: Future[Result] = matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest)
 
       status(result) shouldBe NOT_FOUND
-      jsonBodyOf(result) shouldBe Json.parse(
+      contentAsJson(result) shouldBe Json.parse(
         s"""{"code":"NOT_FOUND","message":"The resource can not be found"}"""
       )
     }

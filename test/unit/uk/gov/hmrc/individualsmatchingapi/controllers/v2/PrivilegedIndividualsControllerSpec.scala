@@ -16,16 +16,13 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
-import java.util.UUID
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
+import org.mockito.IdiomaticMockito
+import org.mockito.Mockito.{times, verify, verifyNoInteractions}
 import org.scalatest.matchers.must.Matchers
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.BeforeAndAfterEach
 import play.api.http.Status.OK
 import play.api.libs.json.Json
-import play.api.mvc.{ControllerComponents, Result, Results}
+import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
@@ -38,11 +35,11 @@ import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, 
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.util.UUID
 import scala.concurrent.Future.{failed, successful}
+import scala.concurrent.{ExecutionContext, Future}
 
-class PrivilegedIndividualsControllerSpec
-    extends SpecBase with Matchers with Results with MockitoSugar with BeforeAndAfterEach with Individuals {
+class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with IdiomaticMockito with Individuals {
 
   implicit val headerCarrier: HeaderCarrier = new HeaderCarrier()
   val uuid: UUID = UUID.randomUUID()
@@ -70,14 +67,16 @@ class PrivilegedIndividualsControllerSpec
       mockAuthConnector,
       controllerComponents)
 
-    given(mockAuthConnector.authorise(any(), refEq(Retrievals.allEnrolments))(any(), any()))
-      .willReturn(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
+    mockAuthConnector
+      .authorise(any(), refEq(Retrievals.allEnrolments))(any(), any())
+      .returns(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
   }
 
   "The live matched individual function" should {
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
-      when(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
-        .thenReturn(failed(new MatchNotFoundException))
+      mockCitizenMatchingService
+        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .returns(failed(new MatchNotFoundException))
 
       val eventualResult: Future[Result] = liveController
         .matchedIndividual(uuid.toString)
@@ -87,12 +86,13 @@ class PrivilegedIndividualsControllerSpec
       contentAsJson(eventualResult) mustBe Json.parse(
         """{"code":"NOT_FOUND","message":"The resource can not be found"}""")
 
-      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
+      mockAuditHelper.auditApiFailure(any(), any(), any(), any(), any())(any()) was called
     }
 
     "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
-      given(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
-        .willReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
+      mockCitizenMatchingService
+        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .returns(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult: Future[Result] =
         liveController
           .matchedIndividual(uuid.toString)
@@ -100,17 +100,18 @@ class PrivilegedIndividualsControllerSpec
       status(eventualResult) mustBe OK
       contentAsJson(eventualResult) mustBe Json.parse(response(uuid, "Joe", "Bloggs", "AB123456C", "1969-01-15"))
 
-      verify(liveController.auditHelper, times(1)).auditApiResponse(any(), any(), any(), any(), any(), any())(any())
+      mockAuditHelper.auditApiResponse(any(), any(), any(), any(), any(), any())(any()) was called
     }
 
     "fail with AuthorizedException when the bearer token does not have a valid enrolment" in new Setup {
-      given(
-        mockAuthConnector
-          .authorise(any(), refEq(Retrievals.allEnrolments))(any(), any()))
-        .willReturn(failed(InsufficientEnrolments()))
 
-      when(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
-        .thenReturn(failed(new MatchNotFoundException))
+      mockAuthConnector
+        .authorise(any(), refEq(Retrievals.allEnrolments))(any(), any())
+        .returns(failed(InsufficientEnrolments()))
+
+      mockCitizenMatchingService
+        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .returns(failed(new MatchNotFoundException))
 
       val res: Future[Result] = liveController
         .matchedIndividual(uuid.toString)
@@ -120,12 +121,13 @@ class PrivilegedIndividualsControllerSpec
       contentAsJson(res) mustBe Json.parse("""{"code":"UNAUTHORIZED","message":"Insufficient Enrolments"}""")
 
       verifyNoInteractions(mockCitizenMatchingService)
-      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
+      mockAuditHelper.auditApiFailure(any(), any(), any(), any(), any())(any()) was called
     }
 
     "respond with http 400 (Bad Request) for a malformed CorrelationId" in new Setup {
-      when(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
-        .thenReturn(failed(new MatchNotFoundException))
+      mockCitizenMatchingService
+        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .returns(failed(new MatchNotFoundException))
 
       val res: Future[Result] = liveController
         .matchedIndividual(uuid.toString)
@@ -141,12 +143,13 @@ class PrivilegedIndividualsControllerSpec
           |""".stripMargin
       )
 
-      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
+      mockAuditHelper.auditApiFailure(any(), any(), any(), any(), any())(any()) was called
     }
 
     "respond with http 400 (Bad Request) for a missing CorrelationId" in new Setup {
-      when(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
-        .thenReturn(failed(new MatchNotFoundException))
+      mockCitizenMatchingService
+        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .returns(failed(new MatchNotFoundException))
 
       val res: Future[Result] = liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
 
@@ -160,7 +163,7 @@ class PrivilegedIndividualsControllerSpec
           |""".stripMargin
       )
 
-      verify(liveController.auditHelper, times(1)).auditApiFailure(any(), any(), any(), any(), any())(any())
+      mockAuditHelper.auditApiFailure(any(), any(), any(), any(), any())(any()) was called
     }
   }
 

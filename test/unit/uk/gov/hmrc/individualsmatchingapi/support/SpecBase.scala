@@ -17,13 +17,13 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.support
 
 import com.typesafe.config.ConfigFactory
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, Configuration}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.PlayBodyParsers
-import unit.uk.gov.hmrc.individualsmatchingapi.util.UnitSpec
+import play.api.{Application, Configuration}
 
-trait SpecBase extends UnitSpec with GuiceOneAppPerSuite {
+trait SpecBase extends AnyWordSpec with GuiceOneAppPerSuite {
 
   lazy val additionalConfig: Configuration = Configuration()
 

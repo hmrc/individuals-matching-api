@@ -16,16 +16,12 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
-import java.util.UUID
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.{verifyNoInteractions, when}
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.BeforeAndAfterEach
+import org.mockito.IdiomaticMockito
 import org.scalatest.matchers.must.Matchers
 import play.api.http.Status.OK
 import play.api.libs.json.Json
-import play.api.mvc.{ControllerComponents, Result, Results}
+import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
@@ -38,11 +34,11 @@ import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, 
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
+import java.util.UUID
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 
-class PrivilegedIndividualsControllerSpec
-    extends SpecBase with Matchers with Results with MockitoSugar with BeforeAndAfterEach with Individuals {
+class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with IdiomaticMockito with Individuals {
 
   implicit val headerCarrier: HeaderCarrier = new HeaderCarrier()
   val uuid: UUID = UUID.randomUUID()
@@ -61,14 +57,14 @@ class PrivilegedIndividualsControllerSpec
       mockAuthConnector,
       controllerComponents)
 
-    given(mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any(), any()))
-      .willReturn(successful(()))
+    mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any(), any()).returns(successful(()))
   }
 
   "The live matched individual function" should {
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
-      when(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
-        .thenReturn(failed(new MatchNotFoundException))
+      mockCitizenMatchingService
+        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .returns(failed(new MatchNotFoundException))
 
       val eventualResult: Future[Result] =
         liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
@@ -78,8 +74,9 @@ class PrivilegedIndividualsControllerSpec
     }
 
     "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
-      given(mockCitizenMatchingService.fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier]))
-        .willReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
+      mockCitizenMatchingService
+        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .returns(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult: Future[Result] =
         liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
       status(eventualResult) mustBe OK
@@ -87,15 +84,16 @@ class PrivilegedIndividualsControllerSpec
     }
 
     "fail with AuthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
-      given(
-        mockAuthConnector.authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any(), any()))
-        .willReturn(failed(InsufficientEnrolments()))
+
+      mockAuthConnector
+        .authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any(), any())
+        .returns(failed(InsufficientEnrolments()))
 
       intercept[InsufficientEnrolments] {
         await(liveController.matchedIndividual(uuid.toString).apply(FakeRequest()))
       }
 
-      verifyNoInteractions(mockCitizenMatchingService)
+      mockCitizenMatchingService wasNever called
     }
   }
 
@@ -122,7 +120,7 @@ class PrivilegedIndividualsControllerSpec
         .matchedIndividual(sandboxMatchId.toString)
         .apply(FakeRequest())
       status(eventualResult) mustBe OK
-      verifyNoInteractions(mockAuthConnector)
+      mockAuthConnector wasNever called
     }
   }
 

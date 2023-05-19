@@ -18,22 +18,21 @@ package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
 import akka.stream.Materializer
 import controllers.Assets
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.when
+import org.mockito.IdiomaticMockito
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.Configuration
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.JsValue
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
 import play.api.test.FakeRequest
+import play.api.test.Helpers.{contentAsJson, contentAsString, defaultAwaitTimeout, status}
 import uk.gov.hmrc.individualsmatchingapi.controllers.DocumentationController
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.io.BufferedSource
 
-class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSugar {
+class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
 
   implicit lazy val materializer: Materializer = fakeApplication.materializer
 
@@ -52,42 +51,37 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
     val underTest =
       new DocumentationController(controllerComponents, assets, HttpErrorHandler, configuration)
 
-    when(configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds")).thenReturn(None)
-    when(configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds")).thenReturn(None)
-    when(configuration.getOptional[String]("api.access.version-1.0.accessType"))
-      .thenReturn(None)
-    when(configuration.getOptional[Seq[String]]("api.access.version-2.0.whitelistedApplicationIds"))
-      .thenReturn(None)
-    when(configuration.getOptional[String]("api.access.version-2.0.status")).thenReturn(None)
-    when(configuration.getOptional[Boolean]("api.access.version-2.0.endpointsEnabled")).thenReturn(None)
+    configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds").returns(None)
+    configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds").returns(None)
+    configuration.getOptional[String]("api.access.version-1.0.accessType").returns(None)
+    configuration.getOptional[Seq[String]]("api.access.version-2.0.whitelistedApplicationIds").returns(None)
+    configuration.getOptional[String]("api.access.version-2.0.status").returns(None)
+    configuration.getOptional[Boolean]("api.access.version-2.0.endpointsEnabled").returns(None)
   }
 
   "/api/definition" should {
     "return 1.0 as PRIVATE when api.access.version-1.0.accessType is not set" in new Setup {
-      given(configuration.getOptional[String]("api.access.version-1.0.accessType"))
-        .willReturn(None)
+      configuration.getOptional[String]("api.access.version-1.0.accessType").returns(None)
 
-      val result: Result = await(underTest.definition()(request))
+      val result: Future[Result] = underTest.definition()(request)
 
       (apiVersion(result, "1.0") \ "access" \ "type")
         .as[String] shouldBe "PRIVATE"
     }
 
     "return 1.0 as PRIVATE when api.access.version-1.0.accessType is set to PRIVATE" in new Setup {
-      given(configuration.getOptional[String]("api.access.version-1.0.accessType"))
-        .willReturn(Some("PRIVATE"))
+      configuration.getOptional[String]("api.access.version-1.0.accessType").returns(Some("PRIVATE"))
 
-      val result: Result = await(underTest.definition()(request))
+      val result: Future[Result] = underTest.definition()(request)
 
       (apiVersion(result, "1.0") \ "access" \ "type")
         .as[String] shouldBe "PRIVATE"
     }
 
     "return 1.0 as PUBLIC when api.access.version-1.0.accessType is set to PUBLIC" in new Setup {
-      given(configuration.getOptional[String]("api.access.version-1.0.accessType"))
-        .willReturn(Some("PUBLIC"))
+      configuration.getOptional[String]("api.access.version-1.0.accessType").returns(Some("PUBLIC"))
 
-      val result: Result = await(underTest.definition()(request))
+      val result: Future[Result] = underTest.definition()(request)
 
       (apiVersion(result, "1.0") \ "access" \ "type")
         .as[String] shouldBe "PUBLIC"
@@ -95,17 +89,16 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
 
     "return 2.0 as BETA when api.access.version-2.0.status is not set" in new Setup {
 
-      val result: Result = await(underTest.definition()(request))
+      val result: Future[Result] = underTest.definition()(request)
 
       (apiVersion(result, "2.0") \ "status")
         .as[String] shouldBe "BETA"
     }
 
     "return 2.0 as ALPHA when api.access.version-2.0.status is set" in new Setup {
-      given(configuration.getOptional[String]("api.access.version-2.0.status"))
-        .willReturn(Some("ALPHA"))
+      configuration.getOptional[String]("api.access.version-2.0.status").returns(Some("ALPHA"))
 
-      val result: Result = await(underTest.definition()(request))
+      val result: Future[Result] = underTest.definition()(request)
 
       (apiVersion(result, "2.0") \ "status")
         .as[String] shouldBe "ALPHA"
@@ -113,7 +106,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
 
     "return endpoints enabled true when api.access.version-2.0.endpointsEnabled is not set" in new Setup {
 
-      val result: Result = await(underTest.definition()(request))
+      val result: Future[Result] = underTest.definition()(request)
 
       (apiVersion(result, "2.0") \ "endpointsEnabled")
         .as[Boolean] shouldBe true
@@ -121,24 +114,26 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
 
     "return endpoints enabled false when api.access.version-2.0.endpointsEnabled is set" in new Setup {
 
-      given(configuration.getOptional[Boolean]("api.access.version-2.0.endpointsEnabled"))
-        .willReturn(Some(false))
+      configuration.getOptional[Boolean]("api.access.version-2.0.endpointsEnabled").returns(Some(false))
 
-      val result: Result = await(underTest.definition()(request))
+      val result: Future[Result] = underTest.definition()(request)
 
       (apiVersion(result, "2.0") \ "endpointsEnabled")
         .as[Boolean] shouldBe false
     }
 
     "return whitelisted applications from the configuration" in new Setup {
-      when(configuration.getOptional[Seq[String]]("api.access.version-2.0.whitelistedApplicationIds"))
-        .thenReturn(Some(Seq("appV2")))
-      when(configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds"))
-        .thenReturn(Some(Seq("appVP1")))
-      when(configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds"))
-        .thenReturn(Some(Seq("appV1")))
+      configuration
+        .getOptional[Seq[String]]("api.access.version-2.0.whitelistedApplicationIds")
+        .returns(Some(Seq("appV2")))
+      configuration
+        .getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds")
+        .returns(Some(Seq("appVP1")))
+      configuration
+        .getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds")
+        .returns(Some(Seq("appV1")))
 
-      val result: Result = await(underTest.definition()(request))
+      val result: Future[Result] = underTest.definition()(request)
 
       (apiVersion(result, "1.0") \ "access" \ "whitelistedApplicationIds")
         .as[Seq[String]] shouldBe Seq("appV1")
@@ -151,20 +146,20 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
 
   "/api/documentation/version?/individuals/matching" should {
     "should return 200 and return file contents" in new Setup {
-      val versions = List("1.0", "2.0", "P1.0")
+      private val versions = List("1.0", "2.0", "P1.0")
       for (version <- versions) {
         val doc: BufferedSource = scala.io.Source.fromFile(s"resources/public/api/conf/$version/application.yaml")
         val docString: String = doc.mkString
         doc.close()
-        val result: Result = await(underTest.specification(version, "application.yaml")(request))
-        result.header.status shouldBe 200
-        bodyOf(result) shouldBe docString
+        val result = underTest.specification(version, "application.yaml")(request)
+        status(result) shouldBe 200
+        contentAsString(result) shouldBe docString
       }
     }
   }
 
-  private def apiVersion(result: Result, version: String) =
-    (jsonBodyOf(result) \ "api" \ "versions")
+  private def apiVersion(result: Future[Result], version: String) =
+    (contentAsJson(result) \ "api" \ "versions")
       .as[Seq[JsValue]]
       .find { v =>
         (v \ "version").as[String] == version

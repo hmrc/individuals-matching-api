@@ -16,13 +16,12 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
-import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 import uk.gov.hmrc.individualsmatchingapi.services.{ScopesHelper, ScopesService}
-import unit.uk.gov.hmrc.individualsmatchingapi.util.UnitSpec
 
-class ScopesHelperSpec extends UnitSpec with ScopesConfig with BeforeAndAfterEach with Matchers {
+class ScopesHelperSpec extends AnyWordSpec with ScopesConfig with Matchers {
 
   "Scopes helper" should {
 

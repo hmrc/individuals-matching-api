@@ -17,10 +17,10 @@
 package component.uk.gov.hmrc.individualsmatchingapi.controllers
 
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.BaseSpec
-import play.api.test.Helpers.{await, _}
 import play.api.libs.json.Json
-import uk.gov.hmrc.domain.Nino
+import play.api.test.Helpers.{await, _}
 import scalaj.http.Http
+import uk.gov.hmrc.domain.Nino
 
 class MatchedCitizenControllerSpec extends BaseSpec {
 

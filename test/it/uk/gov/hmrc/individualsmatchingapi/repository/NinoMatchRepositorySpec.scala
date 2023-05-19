@@ -17,15 +17,16 @@
 package it.uk.gov.hmrc.individualsmatchingapi.repository
 
 import org.mongodb.scala.model.IndexModel
-
-import java.util.UUID
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
-import play.api.{Application, Configuration}
 import play.api.inject.guice.GuiceableModule
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
+import play.api.{Application, Configuration}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
+
+import java.util.UUID
 
 class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfterEach {
 
@@ -43,14 +44,13 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
   val nino: Nino = Nino("AB123456A")
   val ninoMatchRepository: NinoMatchRepository = fakeApplication.injector.instanceOf[NinoMatchRepository]
 
-  override def beforeEach() {
-    await(ninoMatchRepository.collection.drop)
+  override def beforeEach(): Unit = {
+    ninoMatchRepository.collection.drop
     await(ninoMatchRepository.ensureIndexes)
   }
 
-  override def afterEach() {
-    await(ninoMatchRepository.collection.drop)
-  }
+  override def afterEach(): Unit =
+    ninoMatchRepository.collection.drop
 
   "collection" should {
     val indices = await(

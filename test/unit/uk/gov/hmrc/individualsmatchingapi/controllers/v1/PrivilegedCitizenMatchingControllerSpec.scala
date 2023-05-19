@@ -16,16 +16,12 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
-import java.util.UUID
-import org.mockito.BDDMockito.given
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.{verifyNoInteractions, when}
+import org.mockito.IdiomaticMockito
 import org.scalatest.matchers.must.Matchers
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.BeforeAndAfter
-import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.libs.json.Json.parse
-import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result, Results}
+import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
@@ -37,12 +33,12 @@ import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
+import java.util.UUID
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 import scala.util.Random
 
-class PrivilegedCitizenMatchingControllerSpec
-    extends SpecBase with Matchers with MockitoSugar with Results with BeforeAndAfter {
+class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
 
   //noinspection ForwardReference
   trait Setup {
@@ -66,9 +62,7 @@ class PrivilegedCitizenMatchingControllerSpec
       bodyParsers,
       controllerComponents)
 
-    given(mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any(), any()))
-      .willReturn(successful(()))
-
+    mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any(), any()).returns(successful(()))
   }
 
   "live matching citizen controller" should {
@@ -76,8 +70,9 @@ class PrivilegedCitizenMatchingControllerSpec
     val matchId = UUID.randomUUID()
 
     "return 200 (Ok) for a matched citizen" in new Setup {
-      when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(matchId))
+      mockLiveCitizenMatchingService
+        .matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier])
+        .returns(Future.successful(matchId))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
 
@@ -100,8 +95,7 @@ class PrivilegedCitizenMatchingControllerSpec
     }
 
     "return 200 Ok when matching a user with a '.' in their name" in new Setup {
-      when(mockLiveCitizenMatchingService.matchCitizen(any())(any()))
-        .thenReturn(Future.successful(matchId))
+      mockLiveCitizenMatchingService.matchCitizen(any())(any()).returns(Future.successful(matchId))
 
       val payload: JsObject = Json.obj(
         "firstName"   -> "Mr.",
@@ -115,8 +109,9 @@ class PrivilegedCitizenMatchingControllerSpec
     }
 
     "return 403 (Forbidden) for a citizen not found" in new Setup {
-      when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
-        .thenReturn(Future.failed(new CitizenNotFoundException))
+      mockLiveCitizenMatchingService
+        .matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier])
+        .returns(Future.failed(new CitizenNotFoundException))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
 
@@ -128,8 +123,9 @@ class PrivilegedCitizenMatchingControllerSpec
     }
 
     "return 403 (Forbidden) when a matching exception is thrown" in new Setup {
-      when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
-        .thenReturn(Future.failed(new MatchingException))
+      mockLiveCitizenMatchingService
+        .matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier])
+        .returns(Future.failed(new MatchingException))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
 
@@ -141,8 +137,9 @@ class PrivilegedCitizenMatchingControllerSpec
     }
 
     "return 403 (Forbidden) when an invalid nino exception is thrown" in new Setup {
-      when(mockLiveCitizenMatchingService.matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier]))
-        .thenReturn(Future.failed(new InvalidNinoException()))
+      mockLiveCitizenMatchingService
+        .matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier])
+        .returns(Future.failed(new InvalidNinoException()))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
 
@@ -286,15 +283,15 @@ class PrivilegedCitizenMatchingControllerSpec
       val requestBody: JsValue =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
 
-      given(
-        mockAuthConnector.authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any(), any()))
-        .willReturn(failed(new InsufficientEnrolments()))
+      mockAuthConnector
+        .authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any(), any())
+        .returns(failed(InsufficientEnrolments()))
 
       intercept[InsufficientEnrolments] {
         await(liveController.matchCitizen()(fakeRequest.withBody(requestBody)))
       }
 
-      verifyNoInteractions(mockLiveCitizenMatchingService)
+      mockLiveCitizenMatchingService wasNever called
     }
   }
 
@@ -395,7 +392,7 @@ class PrivilegedCitizenMatchingControllerSpec
         sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
 
       status(eventualResult) mustBe OK
-      verifyNoInteractions(mockAuthConnector)
+      mockAuthConnector wasNever called
     }
   }
 

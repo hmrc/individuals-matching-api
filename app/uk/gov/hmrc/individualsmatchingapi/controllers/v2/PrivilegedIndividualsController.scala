@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
-import javax.inject.Inject
 import play.api.hal.Hal.state
 import play.api.hal.HalLink
 import play.api.libs.json.Json
 import play.api.libs.json.Json.{obj, toJson}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import play.api.mvc.hal._
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
@@ -31,15 +30,16 @@ import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFo
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.{maybeCorrelationId, validateCorrelationId}
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesHelper, ScopesService}
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class PrivilegedIndividualsController @Inject()(
   citizenMatchingService: LiveCitizenMatchingService,
   scopeService: ScopesService,
   scopesHelper: ScopesHelper,
-  implicit val auditHelper: AuditHelper,
+  implicit private val auditHelper: AuditHelper,
   val authConnector: AuthConnector,
-  cc: ControllerComponents)(implicit val ec: ExecutionContext)
+  cc: ControllerComponents)(implicit ec: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
   def matchedIndividual(matchId: String): Action[AnyContent] = Action.async { implicit request =>
