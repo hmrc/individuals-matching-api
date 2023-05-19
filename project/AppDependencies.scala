@@ -30,7 +30,4 @@ object AppDependencies {
     hmrc                     %% "service-integration-test" % "1.1.0-play-28"     % scope,
     hmrcMongo                %% "hmrc-mongo-test-play-28"  % hmrcMongoVersion    % scope
   )
-
-
-
 }
