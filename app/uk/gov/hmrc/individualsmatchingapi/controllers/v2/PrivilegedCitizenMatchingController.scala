@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
-import javax.inject.Inject
-import org.slf4j.{Logger, LoggerFactory}
 import play.api.hal.Hal.links
 import play.api.hal.HalLink
 import play.api.libs.json.{JsValue, Json}
@@ -32,6 +30,7 @@ import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.{maybeCorrelationId, validateCorrelationId}
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class PrivilegedCitizenMatchingController @Inject()(
@@ -40,10 +39,8 @@ class PrivilegedCitizenMatchingController @Inject()(
   val authConnector: AuthConnector,
   cc: ControllerComponents,
   bodyParsers: PlayBodyParsers,
-  implicit val auditHelper: AuditHelper)(implicit val ec: ExecutionContext)
+  implicit private val auditHelper: AuditHelper)(implicit ec: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
-
-  val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   def matchCitizen: Action[JsValue] = Action.async(bodyParsers.json) { implicit request =>
     authenticate(scopeService.getAllScopes, request.body.toString()) { authScopes =>

@@ -23,6 +23,7 @@ import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.CitizenDetailsConnector
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenNotFoundException, InvalidNinoException}
@@ -47,14 +48,13 @@ class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndA
     }
   }
 
-  override def beforeEach() {
+  override def beforeEach(): Unit = {
     wireMockServer.start()
     configureFor(stubHost, stubPort)
   }
 
-  override def afterEach() {
+  override def afterEach(): Unit =
     wireMockServer.stop()
-  }
 
   "citizen details" should {
     val nino = "A123456AA"

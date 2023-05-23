@@ -23,6 +23,7 @@ import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.MatchingConnector
 import uk.gov.hmrc.individualsmatchingapi.domain._
@@ -49,14 +50,13 @@ class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEa
     }
   }
 
-  override def beforeEach() {
+  override def beforeEach(): Unit = {
     wireMockServer.start()
     configureFor(stubHost, stubPort)
   }
 
-  override def afterEach() {
+  override def afterEach(): Unit =
     wireMockServer.stop()
-  }
 
   "isMatch" should {
 

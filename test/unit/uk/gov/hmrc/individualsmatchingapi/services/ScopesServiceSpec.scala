@@ -17,10 +17,10 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.individualsmatchingapi.services.ScopesService
-import unit.uk.gov.hmrc.individualsmatchingapi.util.UnitSpec
 
-class ScopesServiceSpec extends UnitSpec with Matchers with ScopesConfig {
+class ScopesServiceSpec extends AnyWordSpec with Matchers with ScopesConfig {
 
   val scopesService = new ScopesService(mockConfig)
 

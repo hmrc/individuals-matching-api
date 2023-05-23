@@ -16,13 +16,13 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
-import org.scalatest.wordspec.AnyWordSpec
+import org.mockito.IdiomaticMockito
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.individualsmatchingapi.services.PathTree
 
-class PathTreeSpec extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
+class PathTreeSpec extends AnyWordSpec with Matchers with IdiomaticMockito with BeforeAndAfterEach {
 
   "PathTree" should {
 
