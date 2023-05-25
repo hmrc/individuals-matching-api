@@ -16,31 +16,27 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
-import java.util.UUID
-
-import javax.inject.Inject
+import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{ControllerComponents, Request, RequestHeader, Result}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrolment, InsufficientEnrolments}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, InternalServerException, TooManyRequestException}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, TooManyRequestException}
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
 import uk.gov.hmrc.individualsmatchingapi.domain._
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import java.util.UUID
-
-import javax.inject.Inject
 import uk.gov.hmrc.individualsmatchingapi.utils.UuidValidator
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import java.util.UUID
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import scala.util.{Failure, Success, Try}
 
-abstract class CommonController @Inject()(cc: ControllerComponents) extends BackendController(cc) {
+abstract class CommonController @Inject()(cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   override protected def withJsonBody[T](
     f: T => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
@@ -76,7 +72,7 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
       successful(ErrorNotFound.toHttpResponse)
     }
 
-  private def fieldName[T](errs: Seq[(JsPath, Seq[JsonValidationError])]) =
+  private def fieldName(errs: Seq[(JsPath, Seq[JsonValidationError])]) =
     errs.head._1.toString().substring(1)
 
   private[controllers] def recovery: PartialFunction[Throwable, Result] = {
@@ -120,10 +116,8 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
     case e: IllegalArgumentException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)
       ErrorInvalidRequest(e.getMessage).toHttpResponse
-    case e: InternalServerException =>
-      auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)
-      ErrorInternalServer("Something went wrong.").toHttpResponse
     case e =>
+      logger.error("Unexpected exception", e)
       auditHelper.auditApiFailure(correlationId, matchId, request, url, e.getMessage)
       ErrorInternalServer("Something went wrong.").toHttpResponse
   }
@@ -147,10 +141,10 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
       f(endpointScopes.toList)
     else {
       authorised(authPredicate(endpointScopes)).retrieve(Retrievals.allEnrolments) {
-        case scopes =>
-          auditHelper.auditAuthScopes(matchId, scopes.enrolments.map(e => e.key).mkString(","), request)
+        scopes =>
+          auditHelper.auditAuthScopes(matchId, scopes.enrolments.map(_.key).mkString(","), request)
 
-          f(scopes.enrolments.map(e => e.key))
+          f(scopes.enrolments.map(_.key))
       }
     }
   }
