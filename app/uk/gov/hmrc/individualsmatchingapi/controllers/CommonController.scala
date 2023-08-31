@@ -72,7 +72,7 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
       successful(ErrorNotFound.toHttpResponse)
     }
 
-  private def fieldName(errs: Seq[(JsPath, Seq[JsonValidationError])]) =
+  private def fieldName(errs: scala.collection.Seq[(JsPath, scala.collection.Seq[JsonValidationError])]) =
     errs.head._1.toString().substring(1)
 
   private[controllers] def recovery: PartialFunction[Throwable, Result] = {
@@ -140,11 +140,10 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
     if (environment == Environment.SANDBOX)
       f(endpointScopes.toList)
     else {
-      authorised(authPredicate(endpointScopes)).retrieve(Retrievals.allEnrolments) {
-        scopes =>
-          auditHelper.auditAuthScopes(matchId, scopes.enrolments.map(_.key).mkString(","), request)
+      authorised(authPredicate(endpointScopes)).retrieve(Retrievals.allEnrolments) { scopes =>
+        auditHelper.auditAuthScopes(matchId, scopes.enrolments.map(_.key).mkString(","), request)
 
-          f(scopes.enrolments.map(_.key))
+        f(scopes.enrolments.map(_.key))
       }
     }
   }

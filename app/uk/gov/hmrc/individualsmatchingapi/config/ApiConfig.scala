@@ -72,7 +72,7 @@ object ApiConfig {
           .getConfig(path)
           .entrySet()
           .asScala
-          .map(x => x.getKey.replaceAllLiterally("\"", ""))
+          .map(x => x.getKey.replace("\"", ""))
           .toList
         Some(PathTree(keys, "\\."))
       } else None

@@ -91,7 +91,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
 
       Then("a single ninoMatch record is stored in mongo with its corresponding NINO and generated matchId")
       val ninoMatchRecords =
-        Await.result(mongoRepository.collection.find(Filters.equal("nino", toBson(nino))).headOption(), 3 second)
+        Await.result(mongoRepository.collection.find(Filters.equal("nino", toBson(nino))).headOption(), 3.second)
       ninoMatchRecords.size shouldBe 1
 
       And("The response status should be 200 (Ok)")

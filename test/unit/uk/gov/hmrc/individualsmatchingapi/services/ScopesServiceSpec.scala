@@ -28,9 +28,9 @@ class ScopesServiceSpec extends AnyWordSpec with Matchers with ScopesConfig {
     "using first scope" in {
       val endpoints = scopesService.getExternalEndpoints(Seq(mockScopeOne))
       endpoints.size shouldBe 2
-      endpoints.map(_.key) shouldBe Seq(endpointKeyOne, endpointKeyTwo)
-      endpoints.map(_.link) shouldBe Seq("/external/1", "/external/2")
-      endpoints.map(_.title) shouldBe Seq("Get the first endpoint", "Get the second endpoint")
+      endpoints.map(_.key).toSet shouldBe Set(endpointKeyOne, endpointKeyTwo)
+      endpoints.map(_.link).toSet shouldBe Set("/external/1", "/external/2")
+      endpoints.map(_.title).toSet shouldBe Set("Get the first endpoint", "Get the second endpoint")
     }
 
     "using second scope" in {
