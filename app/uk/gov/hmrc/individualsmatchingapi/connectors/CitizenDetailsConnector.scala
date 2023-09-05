@@ -16,26 +16,25 @@
 
 package uk.gov.hmrc.individualsmatchingapi.connectors
 
-import javax.inject.{Inject, Singleton}
 import play.api.Configuration
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, Upstream4xxResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenNotFoundException, InvalidNinoException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.http.HttpReads.Implicits._
-
-import scala.concurrent.Future
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CitizenDetailsConnector @Inject()(config: Configuration, http: HttpClient, serviceConfig: ServicesConfig) {
+class CitizenDetailsConnector @Inject()(config: Configuration, http: HttpClient, serviceConfig: ServicesConfig)(
+  implicit executionContext: ExecutionContext) {
 
   val serviceUrl: String = serviceConfig.baseUrl("citizen-details")
 
   def citizenDetails(nino: String)(implicit hc: HeaderCarrier): Future[CitizenDetails] =
     http.GET[CitizenDetails](s"$serviceUrl/citizen-details/nino/$nino") recover {
-      case Upstream4xxResponse(_, 404, _, _) => throw new CitizenNotFoundException
-      case Upstream4xxResponse(_, 400, _, _) => throw new InvalidNinoException
+      case UpstreamErrorResponse(_, 404, _, _) => throw new CitizenNotFoundException
+      case UpstreamErrorResponse(_, 400, _, _) => throw new InvalidNinoException
     }
 }

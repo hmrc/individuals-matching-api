@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.individualsmatchingapi.config
 
-import com.typesafe.config.Config
+import com.typesafe.config.{Config, ConfigValue}
 import play.api.ConfigLoader
+import play.twirl.api.TwirlHelperImports.twirlJavaCollectionToScala
 import uk.gov.hmrc.individualsmatchingapi.services.PathTree
 
-import scala.collection.JavaConverters._
-
+import java.util.Map.Entry
 case class ApiConfig(
   scopes: List[ScopeConfig],
   internalEndpoints: List[InternalEndpointConfig],
@@ -71,15 +71,15 @@ object ApiConfig {
         val keys: List[String] = config
           .getConfig(path)
           .entrySet()
-          .asScala
-          .map(x => x.getKey.replace("\"", ""))
+          .toSet
+          .map((x: Entry[String, ConfigValue]) => x.getKey.replace("\"", ""))
           .toList
         Some(PathTree(keys, "\\."))
       } else None
 
     def getStringList(key: String): List[String] =
       if (config.hasPath(key))
-        config.getStringList(key).asScala.toList
+        config.getStringList(key).toList
       else List()
 
     val intEndpointsOpt = parseConfig("endpoints.internal")

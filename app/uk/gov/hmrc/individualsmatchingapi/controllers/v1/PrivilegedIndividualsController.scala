@@ -28,9 +28,10 @@ import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, Privile
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
-abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMatchingService, cc: ControllerComponents)
+abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMatchingService, cc: ControllerComponents)(
+  implicit executionContext: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
   def matchedIndividual(matchId: String): Action[AnyContent] = Action.async { implicit request =>
@@ -60,7 +61,7 @@ abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMa
 class LivePrivilegedIndividualsController @Inject()(
   liveCitizenMatchingService: LiveCitizenMatchingService,
   val authConnector: AuthConnector,
-  cc: ControllerComponents)
+  cc: ControllerComponents)(implicit executionContext: ExecutionContext)
     extends PrivilegedIndividualsController(liveCitizenMatchingService, cc) {
   override val environment: String = PRODUCTION
 }
@@ -69,7 +70,7 @@ class LivePrivilegedIndividualsController @Inject()(
 class SandboxPrivilegedIndividualsController @Inject()(
   sandboxCitizenMatchingService: SandboxCitizenMatchingService,
   val authConnector: AuthConnector,
-  cc: ControllerComponents)
+  cc: ControllerComponents)(implicit executionContext: ExecutionContext)
     extends PrivilegedIndividualsController(sandboxCitizenMatchingService, cc) {
   override val environment: String = SANDBOX
 }

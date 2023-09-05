@@ -35,10 +35,11 @@ import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
 import java.util.UUID
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.{failed, successful}
 
-class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with IdiomaticMockito with Individuals {
+class PrivilegedIndividualsControllerSpec(implicit executionContext: ExecutionContext)
+    extends SpecBase with Matchers with IdiomaticMockito with Individuals {
 
   implicit val headerCarrier: HeaderCarrier = new HeaderCarrier()
   val uuid: UUID = UUID.randomUUID()

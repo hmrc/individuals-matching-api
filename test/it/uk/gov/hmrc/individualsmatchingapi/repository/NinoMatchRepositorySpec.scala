@@ -45,12 +45,12 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
   val ninoMatchRepository: NinoMatchRepository = fakeApplication.injector.instanceOf[NinoMatchRepository]
 
   override def beforeEach(): Unit = {
-    ninoMatchRepository.collection.drop
+    ninoMatchRepository.collection.drop()
     await(ninoMatchRepository.ensureIndexes)
   }
 
   override def afterEach(): Unit =
-    ninoMatchRepository.collection.drop
+    ninoMatchRepository.collection.drop()
 
   "collection" should {
     val indices = await(
