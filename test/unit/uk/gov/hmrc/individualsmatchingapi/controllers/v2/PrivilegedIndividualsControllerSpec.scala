@@ -18,7 +18,7 @@ package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.IdiomaticMockito
-import org.mockito.Mockito.{times, verify, verifyNoInteractions}
+import org.mockito.Mockito.verifyNoInteractions
 import org.scalatest.matchers.must.Matchers
 import play.api.http.Status.OK
 import play.api.libs.json.Json

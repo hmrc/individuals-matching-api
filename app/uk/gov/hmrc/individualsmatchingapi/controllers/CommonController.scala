@@ -31,12 +31,12 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.util.UUID
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-abstract class CommonController @Inject()(cc: ControllerComponents) extends BackendController(cc) with Logging {
+abstract class CommonController @Inject()(cc: ControllerComponents)(implicit executionContext: ExecutionContext)
+    extends BackendController(cc) with Logging {
 
   override protected def withJsonBody[T](
     f: T => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
@@ -72,7 +72,7 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
       successful(ErrorNotFound.toHttpResponse)
     }
 
-  private def fieldName(errs: Seq[(JsPath, Seq[JsonValidationError])]) =
+  private def fieldName(errs: scala.collection.Seq[(JsPath, scala.collection.Seq[JsonValidationError])]) =
     errs.head._1.toString().substring(1)
 
   private[controllers] def recovery: PartialFunction[Throwable, Result] = {
@@ -133,23 +133,25 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
   def authenticate(endpointScopes: Iterable[String], matchId: String)(f: Iterable[String] => Future[Result])(
     implicit hc: HeaderCarrier,
     request: RequestHeader,
-    auditHelper: AuditHelper): Future[Result] = {
+    auditHelper: AuditHelper,
+    executionContext: ExecutionContext
+  ): Future[Result] = {
 
     if (endpointScopes.isEmpty) throw new Exception("No scopes defined")
 
     if (environment == Environment.SANDBOX)
       f(endpointScopes.toList)
     else {
-      authorised(authPredicate(endpointScopes)).retrieve(Retrievals.allEnrolments) {
-        scopes =>
-          auditHelper.auditAuthScopes(matchId, scopes.enrolments.map(_.key).mkString(","), request)
+      authorised(authPredicate(endpointScopes)).retrieve(Retrievals.allEnrolments) { scopes =>
+        auditHelper.auditAuthScopes(matchId, scopes.enrolments.map(_.key).mkString(","), request)
 
-          f(scopes.enrolments.map(_.key))
+        f(scopes.enrolments.map(_.key))
       }
     }
   }
 
-  def requiresPrivilegedAuthentication(body: => Future[Result])(implicit hc: HeaderCarrier): Future[Result] =
+  def requiresPrivilegedAuthentication(
+    body: => Future[Result])(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
     if (environment == SANDBOX) body
     else authorised(Enrolment("read:individuals-matching"))(body)
 }

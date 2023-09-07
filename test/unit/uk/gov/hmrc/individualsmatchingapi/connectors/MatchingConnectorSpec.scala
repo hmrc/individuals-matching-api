@@ -31,9 +31,10 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEach {
+class MatchingConnectorSpec(implicit executionContext: ExecutionContext)
+    extends SpecBase with Matchers with BeforeAndAfterEach {
   val stubPort: Int = sys.env.getOrElse("WIREMOCK", "11122").toInt
   val stubHost = "localhost"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))

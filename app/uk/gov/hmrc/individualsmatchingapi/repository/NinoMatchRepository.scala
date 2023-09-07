@@ -58,7 +58,7 @@ class NinoMatchRepository @Inject()(mongo: MongoComponent, configuration: Config
 
     collection
       .insertOne(ninoMatch)
-      .toFuture
+      .toFuture()
       .map(_ => ninoMatch)
       .recover {
         case Duplicate(_) => throw new RuntimeException(s"failed to persist nino match $ninoMatch")

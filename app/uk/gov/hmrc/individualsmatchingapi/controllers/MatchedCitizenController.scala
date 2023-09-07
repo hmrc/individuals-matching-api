@@ -22,10 +22,11 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.matchedCitizenRecordJsonFormat
 import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class MatchedCitizenController @Inject()(cc: ControllerComponents, citizenMatchingService: LiveCitizenMatchingService)
+class MatchedCitizenController @Inject()(cc: ControllerComponents, citizenMatchingService: LiveCitizenMatchingService)(
+  implicit executionContext: ExecutionContext)
     extends CommonController(cc) {
 
   def matchedCitizen(matchId: String): Action[AnyContent] = Action.async { implicit request =>

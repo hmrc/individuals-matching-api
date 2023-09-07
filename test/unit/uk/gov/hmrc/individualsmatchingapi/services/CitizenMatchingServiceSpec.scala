@@ -33,9 +33,10 @@ import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, 
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import java.util.UUID
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class CitizenMatchingServiceSpec extends SpecBase with Matchers with IdiomaticMockito with ScalaFutures {
+class CitizenMatchingServiceSpec(implicit executionContext: ExecutionContext)
+    extends SpecBase with Matchers with IdiomaticMockito with ScalaFutures {
 
   val authBearerToken = "AUTH_BEARER_TOKEN"
   val matchId: UUID = UUID.randomUUID()

@@ -33,9 +33,10 @@ import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import java.util.UUID
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class MatchedCitizenControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
+class MatchedCitizenControllerSpec(implicit executionContext: ExecutionContext)
+    extends SpecBase with Matchers with IdiomaticMockito {
   implicit lazy val materializer: Materializer = fakeApplication.materializer
 
   trait Setup {

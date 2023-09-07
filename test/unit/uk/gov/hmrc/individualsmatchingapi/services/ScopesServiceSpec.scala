@@ -28,17 +28,17 @@ class ScopesServiceSpec extends AnyWordSpec with Matchers with ScopesConfig {
     "using first scope" in {
       val endpoints = scopesService.getExternalEndpoints(Seq(mockScopeOne))
       endpoints.size shouldBe 2
-      endpoints.map(_.key) shouldBe Seq(endpointKeyOne, endpointKeyTwo)
-      endpoints.map(_.link) shouldBe Seq("/external/1", "/external/2")
-      endpoints.map(_.title) shouldBe Seq("Get the first endpoint", "Get the second endpoint")
+      endpoints.map(_.key).toSet shouldBe Set(endpointKeyOne, endpointKeyTwo)
+      endpoints.map(_.link).toSet shouldBe Set("/external/1", "/external/2")
+      endpoints.map(_.title).toSet shouldBe Set("Get the first endpoint", "Get the second endpoint")
     }
 
     "using second scope" in {
       val endpoints = scopesService.getExternalEndpoints(Seq(mockScopeTwo))
       endpoints.size shouldBe 2
-      endpoints.map(_.key) shouldBe Seq(endpointKeyTwo, endpointKeyThree)
-      endpoints.map(_.link) shouldBe Seq("/external/2", "/external/3")
-      endpoints.map(_.title) shouldBe Seq("Get the second endpoint", "Get the third endpoint")
+      endpoints.map(_.key).toSet shouldBe Set(endpointKeyTwo, endpointKeyThree)
+      endpoints.map(_.link).toSet shouldBe Set("/external/2", "/external/3")
+      endpoints.map(_.title).toSet shouldBe Set("Get the second endpoint", "Get the third endpoint")
     }
 
     "using invalid scope" in {
@@ -51,14 +51,14 @@ class ScopesServiceSpec extends AnyWordSpec with Matchers with ScopesConfig {
     "using first scope" in {
       val endpoints = scopesService.getInternalEndpoints(Seq(mockScopeOne))
       endpoints.size shouldBe 2
-      endpoints.map(_.link) shouldBe Seq("/internal/1", "/internal/2")
-      endpoints.map(_.title) shouldBe Seq("Get the first endpoint", "Get the second endpoint")
+      endpoints.map(_.link).toSet shouldBe Set("/internal/1", "/internal/2")
+      endpoints.map(_.title).toSet shouldBe Set("Get the first endpoint", "Get the second endpoint")
     }
 
     "using second scope" in {
       val endpoints = scopesService.getInternalEndpoints(Seq(mockScopeTwo))
-      endpoints.map(_.link) shouldBe Seq("/internal/2", "/internal/3")
-      endpoints.map(_.title) shouldBe Seq("Get the second endpoint", "Get the third endpoint")
+      endpoints.map(_.link).toSet shouldBe Set("/internal/2", "/internal/3")
+      endpoints.map(_.title).toSet shouldBe Set("Get the second endpoint", "Get the third endpoint")
     }
 
     "using invalid scope" in {

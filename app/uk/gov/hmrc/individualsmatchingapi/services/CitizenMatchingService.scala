@@ -18,15 +18,13 @@ package uk.gov.hmrc.individualsmatchingapi.services
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
-
 import org.joda.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.connectors.{CitizenDetailsConnector, MatchingConnector}
 import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -42,7 +40,8 @@ trait CitizenMatchingService {
 class LiveCitizenMatchingService @Inject()(
   liveNinoMatchRepository: NinoMatchRepository,
   citizenDetailsConnector: CitizenDetailsConnector,
-  matchingConnector: MatchingConnector)
+  matchingConnector: MatchingConnector,
+)(implicit executionContext: ExecutionContext)
     extends CitizenMatchingService {
 
   override def matchCitizen(citizenMatchingRequest: CitizenMatchingRequest)(implicit hc: HeaderCarrier): Future[UUID] =
