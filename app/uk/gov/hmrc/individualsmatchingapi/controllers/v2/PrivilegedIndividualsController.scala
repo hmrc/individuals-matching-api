@@ -63,7 +63,10 @@ class PrivilegedIndividualsController @Inject()(
           Ok(response)
         }
       }
-    } recover recoveryWithAudit(maybeCorrelationId(request), request.body.toString, s"/individuals/matching/$matchId")
+    } recover recoveryWithLogging(
+      maybeCorrelationId(request),
+      auditHelper.redactBody(request.body.toString),
+      s"/individuals/matching/$matchId")
   }
 
   val environment: String = PRODUCTION

@@ -19,14 +19,18 @@ package uk.gov.hmrc.individualsmatchingapi.audit
 import play.api.libs.json.JsValue
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import javax.inject.Inject
 import uk.gov.hmrc.individualsmatchingapi.audit.models.{ApiFailureResponseEventModel, ApiResponseEventModel, ScopesAuditEventModel}
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class AuditHelper @Inject()(auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
-
+  def redactBody(requestBodyString: String): String =
+    requestBodyString match {
+      case "" => requestBodyString
+      case _  => "[Redacted Request Body]"
+    }
   def auditApiResponse(
     correlationId: String,
     matchId: String,

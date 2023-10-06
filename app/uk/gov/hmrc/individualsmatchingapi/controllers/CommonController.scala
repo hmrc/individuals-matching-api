@@ -83,7 +83,7 @@ abstract class CommonController @Inject()(cc: ControllerComponents)(implicit exe
       ErrorInvalidRequest(e.getMessage).toHttpResponse
   }
 
-  private[controllers] def recoveryWithAudit(correlationId: Option[String], matchId: String, url: String)(
+  private[controllers] def recoveryWithLogging(correlationId: Option[String], matchId: String, url: String)(
     implicit request: RequestHeader,
     auditHelper: AuditHelper): PartialFunction[Throwable, Result] = {
     case _: MatchNotFoundException =>

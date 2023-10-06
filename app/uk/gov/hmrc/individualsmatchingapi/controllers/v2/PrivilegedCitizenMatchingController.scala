@@ -66,7 +66,10 @@ class PrivilegedCitizenMatchingController @Inject()(
           Ok(response)
         }
       }
-    } recover recoveryWithAudit(maybeCorrelationId(request), request.body.toString, "/individuals/matching/")
+    } recover recoveryWithLogging(
+      maybeCorrelationId(request),
+      auditHelper.redactBody(request.body.toString),
+      "/individuals/matching/")
   }
   val environment: String = PRODUCTION
 }
