@@ -19,18 +19,6 @@ lazy val ComponentTest = config("component") extend Test
 RoutesKeys.routesImport := Seq.empty
 TwirlKeys.templateImports := Seq.empty
 
-lazy val scoverageSettings = {
-  import scoverage.ScoverageKeys
-  Seq(
-    // Semicolon-separated list of regexes matching classes to exclude
-    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;" +
-      ".*BuildInfo.;uk.gov.hmrc.BuildInfo;.*Routes;.*RoutesPrefix*;",
-    ScoverageKeys.coverageMinimum := 80,
-    ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true
-  )
-}
-
 lazy val microservice =
   Project(appName, file("."))
     .enablePlugins(Seq(
@@ -41,7 +29,7 @@ lazy val microservice =
       ) ++ plugins: _*)
     .settings(playSettings: _*)
     .settings(scalaSettings: _*)
-    .settings(scoverageSettings: _*)
+    .settings(CodeCoverageSettings.settings *)
     .settings(scalaVersion := "2.13.8")
     .settings(defaultSettings(): _*)
     .settings(scalafmtOnCompile := true)
