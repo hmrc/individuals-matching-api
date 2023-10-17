@@ -22,16 +22,10 @@ import play.twirl.api.TwirlHelperImports.twirlJavaCollectionToScala
 import uk.gov.hmrc.individualsmatchingapi.services.PathTree
 
 import java.util.Map.Entry
-case class ApiConfig(
-  scopes: List[ScopeConfig],
-  internalEndpoints: List[InternalEndpointConfig],
-  externalEndpoints: List[ExternalEndpointConfig]) {
+case class ApiConfig(scopes: List[ScopeConfig], externalEndpoints: List[ExternalEndpointConfig]) {
 
   def getScope(scope: String): Option[ScopeConfig] =
     scopes.find(c => c.name == scope)
-
-  def getInternalEndpoint(endpoint: String): Option[InternalEndpointConfig] =
-    internalEndpoints.find(e => e.name == endpoint)
 
   def getExternalEndpoint(endpoint: String): Option[ExternalEndpointConfig] =
     externalEndpoints.find(e => e.name == endpoint)
@@ -44,14 +38,6 @@ trait EndpointConfig {
   val link: String
   val title: String
 }
-
-case class InternalEndpointConfig(
-  override val name: String,
-  override val link: String,
-  override val title: String,
-  fields: Map[String, String],
-  filters: Map[String, String])
-    extends EndpointConfig
 
 case class ExternalEndpointConfig(
   override val name: String,
@@ -81,27 +67,6 @@ object ApiConfig {
       if (config.hasPath(key))
         config.getStringList(key).toList
       else List()
-
-    val intEndpointsOpt = parseConfig("endpoints.internal")
-    val internalEndpointConfig: List[InternalEndpointConfig] =
-      intEndpointsOpt
-        .map(
-          intEndpoints =>
-            intEndpoints.listChildren
-              .map(endpointName =>
-                InternalEndpointConfig(
-                  name = endpointName,
-                  link = config.getString(s"endpoints.internal.$endpointName.endpoint"),
-                  title = config.getString(s"endpoints.internal.$endpointName.title"),
-                  fields = getStringList(s"endpoints.internal.$endpointName.fields")
-                    .map(field => (field, config.getString(s"fields.$field")))
-                    .toMap,
-                  filters = getStringList(s"endpoints.internal.$endpointName.filters")
-                    .map(filter => (filter, config.getString(s"filters.$filter")))
-                    .toMap,
-              ))
-              .toList)
-        .getOrElse(List())
 
     val extEndpointsOpt = parseConfig("endpoints.external")
     val externalEndpointConfig: List[ExternalEndpointConfig] =
@@ -136,7 +101,6 @@ object ApiConfig {
 
     ApiConfig(
       scopes = scopeConfig,
-      internalEndpoints = internalEndpointConfig,
       externalEndpoints = externalEndpointConfig
     )
   }
