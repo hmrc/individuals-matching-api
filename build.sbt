@@ -1,17 +1,11 @@
-import sbt.Keys.compile
-import sbt.Tests.{Group, SubProcess}
-import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
 import play.sbt.routes.RoutesKeys
+import sbt.Tests.{Group, SubProcess}
+import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 
 val appName = "individuals-matching-api"
-val hmrc = "uk.gov.hmrc"
 
 lazy val appDependencies: Seq[ModuleID] = AppDependencies.compile ++ AppDependencies.test()
-lazy val plugins: Seq[Plugins] = Seq.empty
-lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-def intTestFilter(name: String): Boolean = name startsWith "it"
-def unitFilter(name: String): Boolean = name startsWith "unit"
 def componentFilter(name: String): Boolean = name startsWith "component"
 
 lazy val ComponentTest = config("component") extend Test
@@ -21,45 +15,24 @@ TwirlKeys.templateImports := Seq.empty
 
 lazy val microservice =
   Project(appName, file("."))
-    .enablePlugins(Seq(
-      play.sbt.PlayScala,
-      SbtAutoBuildPlugin,
-      SbtGitVersioning,
-      SbtDistributablesPlugin,
-      ) ++ plugins: _*)
-    .settings(playSettings: _*)
-    .settings(scalaSettings: _*)
+    .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
     .settings(CodeCoverageSettings.settings *)
     .settings(scalaVersion := "2.13.8")
-    .settings(defaultSettings(): _*)
     .settings(scalafmtOnCompile := true)
     .settings(
-      libraryDependencies ++= appDependencies,
-      Test / testOptions := Seq(Tests.Filter(unitFilter)),
-      retrieveManaged := true,
+      libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test()
     )
     .settings(Compile / unmanagedResourceDirectories += baseDirectory.value / "resources")
     .configs(IntegrationTest)
-    .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
-    .settings(
-      IntegrationTest / Keys.fork := false,
-      IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory)(base => Seq(base / "test")).value,
-      IntegrationTest / testOptions := Seq(Tests.Filter(intTestFilter)),
-      addTestReportOption(IntegrationTest, "int-test-reports"),
-      IntegrationTest / testGrouping := oneForkedJvmPerTest((IntegrationTest / definedTests).value),
-      IntegrationTest / parallelExecution := false
-    )
+    .settings(integrationTestSettings() *)
     .configs(ComponentTest)
-    .settings(inConfig(ComponentTest)(Defaults.testSettings): _*)
+    .settings(inConfig(ComponentTest)(Defaults.testSettings) *)
     .settings(
       ComponentTest / testOptions := Seq(Tests.Filter(componentFilter)),
       ComponentTest / unmanagedSourceDirectories := (ComponentTest / baseDirectory)(base => Seq(base / "test")).value,
       ComponentTest / testGrouping := oneForkedJvmPerTest((ComponentTest / definedTests).value),
       ComponentTest / parallelExecution := false
     )
-    .settings(resolvers ++= Seq(
-      Resolver.jcenterRepo
-    ))
     .settings(majorVersion := 0)
     .settings(PlayKeys.playDefaultPort := 9653)
 
@@ -67,11 +40,3 @@ def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
   tests.map { test =>
     Group(test.name, Seq(test), SubProcess(ForkOptions().withRunJVMOptions(Vector(s"-Dtest.name=${test.name}"))))
   }
-
-lazy val compileAll = taskKey[Unit]("Compiles sources in all configurations.")
-
-compileAll := {
-  val a = (Test / compile).value
-  val b = (IntegrationTest / compile).value
-  ()
-}
