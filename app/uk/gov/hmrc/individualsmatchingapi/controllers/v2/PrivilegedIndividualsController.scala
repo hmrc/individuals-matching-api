@@ -49,7 +49,7 @@ class PrivilegedIndividualsController @Inject()(
         citizenMatchingService.fetchCitizenDetailsByMatchId(matchUuid) map { citizenDetails =>
           val selfLink = HalLink("self", s"/individuals/matching/$matchId")
           val data = obj("individual" -> toJson(citizenDetails))
-          val links = scopesHelper.getHalLinks(matchUuid, None, authScopes, None, excludeInternal = true) ++ selfLink
+          val links = scopesHelper.getHalLinks(matchUuid, None, authScopes, None) ++ selfLink
           val response = state(data) ++ links
 
           auditHelper.auditApiResponse(
