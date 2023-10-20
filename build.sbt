@@ -14,6 +14,7 @@ TwirlKeys.templateImports := Seq.empty
 lazy val microservice =
   Project(appName, file("."))
     .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
+    .settings(onLoadMessage := "")
     .settings(CodeCoverageSettings.settings *)
     .settings(scalaVersion := "2.13.8")
     .settings(scalafmtOnCompile := true)
