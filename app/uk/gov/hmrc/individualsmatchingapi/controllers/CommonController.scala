@@ -35,8 +35,7 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-abstract class CommonController @Inject()(cc: ControllerComponents)(implicit executionContext: ExecutionContext)
-    extends BackendController(cc) with Logging {
+abstract class CommonController @Inject()(cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   override protected def withJsonBody[T](
     f: T => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =

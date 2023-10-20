@@ -46,7 +46,7 @@ class CitizenDetailsConnectorSpec(implicit executionContext: ExecutionContext)
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest: CitizenDetailsConnector = new CitizenDetailsConnector(config, http, servicesConfig) {
+    val underTest: CitizenDetailsConnector = new CitizenDetailsConnector(http, servicesConfig) {
       override val serviceUrl = "http://127.0.0.1:11121"
     }
   }
