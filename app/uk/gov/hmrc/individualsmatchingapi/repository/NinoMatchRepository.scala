@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.individualsmatchingapi.repository
 
-import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
 import org.mongodb.scala.model.Indexes.ascending
+import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
 import play.api.Configuration
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.domain.NinoMatch
 import uk.gov.hmrc.individualsmatchingapi.repository.MongoErrors.Duplicate
-import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import java.util.UUID

@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.individualsmatchingapi.config
 
-import javax.inject.Inject
-import play.api.{Configuration, OptionalDevContext}
 import play.api.http.{HttpConfiguration, HttpErrorHandler, HttpFilters}
 import play.api.mvc.{Handler, RequestHeader}
 import play.api.routing.Router
+import play.api.{Configuration, OptionalDevContext}
 import play.core.WebCommands
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils._
 import uk.gov.hmrc.play.bootstrap.http.RequestHandler
+
+import javax.inject.Inject
 
 class IndividualMatchingApiRequestHandler @Inject()(
   config: Configuration,

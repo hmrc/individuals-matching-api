@@ -16,7 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.audit
 
-import org.mockito.ArgumentMatchersSugar.eqTo
+import org.mockito.ArgumentMatchersSugar.{*, eqTo}
 import org.mockito.Mockito.{times, verify}
 import org.mockito.{ArgumentCaptor, IdiomaticMockito, Mockito}
 import org.scalatest.matchers.should.Matchers
@@ -28,7 +28,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.audit.models.{ApiFailureResponseEventModel, ApiResponseEventModel, ScopesAuditEventModel}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import org.mockito.ArgumentMatchersSugar.*
 
 class AuditHelperSpec extends AsyncWordSpec with Matchers with IdiomaticMockito {
 

@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.individualsmatchingapi.connectors
 
-import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.libs.json.JsValue
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.detailsMatchRequestFormat
 import uk.gov.hmrc.individualsmatchingapi.domain.{DetailsMatchRequest, MatchingException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpReads.Implicits._
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

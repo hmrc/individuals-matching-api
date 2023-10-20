@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
-import javax.inject.{Inject, Singleton}
 import play.api.hal.Hal.links
 import play.api.hal.HalLink
 import play.api.libs.json.JsValue
@@ -29,6 +28,7 @@ import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenMatchingFormat
 import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 abstract class PrivilegedCitizenMatchingController(
