@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
-import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json.toJson
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.matchedCitizenRecordJsonFormat
 import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton

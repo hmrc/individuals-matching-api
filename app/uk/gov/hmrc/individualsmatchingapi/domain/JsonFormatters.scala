@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.individualsmatchingapi.domain
 
-import java.util.UUID
-
 import org.joda.time.LocalDate
-import play.api.libs.json.JodaWrites._
 import play.api.libs.json.JodaReads._
+import play.api.libs.json.JodaWrites._
 import play.api.libs.json._
+
+import java.util.UUID
 
 object JsonFormatters {
 

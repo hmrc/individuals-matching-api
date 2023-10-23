@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.individualsmatchingapi.domain
 
-import java.util.UUID
-
 import org.joda.time.LocalDate
 import org.joda.time.LocalDate._
 import uk.gov.hmrc.domain.Nino
+
+import java.util.UUID
 
 case class Individual(matchId: UUID, nino: String, firstName: String, lastName: String, dateOfBirth: LocalDate)
 

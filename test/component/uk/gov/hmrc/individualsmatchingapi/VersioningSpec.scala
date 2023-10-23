@@ -22,8 +22,8 @@ import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.{ACCEPT, AUTHORIZATION}
-import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import scalaj.http.{Http, HttpResponse}
+import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 
 class VersioningSpec extends BaseSpec {
 

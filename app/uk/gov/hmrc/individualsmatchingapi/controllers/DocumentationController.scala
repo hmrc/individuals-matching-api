@@ -18,15 +18,16 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
+import akka.stream.Materializer
 import controllers.Assets
-import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.http.HttpErrorHandler
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.filters.cors.CORSActionBuilder
 import uk.gov.hmrc.individualsmatchingapi.views._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import play.filters.cors.CORSActionBuilder
-import akka.stream.Materializer
+
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 @Singleton
 class DocumentationController @Inject()(

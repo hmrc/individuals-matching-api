@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.individualsmatchingapi.domain
 
-import java.util.UUID
-
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import uk.gov.hmrc.domain.Nino
 
+import java.util.UUID
 import scala.util.Try
 
 case class CitizenMatchingRequest(firstName: String, lastName: String, nino: String, dateOfBirth: String) {
