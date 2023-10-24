@@ -1,15 +1,9 @@
-import play.sbt.routes.RoutesKeys
 import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.DefaultBuildSettings.addTestReportOption
 
 val appName = "individuals-matching-api"
 
-lazy val appDependencies: Seq[ModuleID] = AppDependencies.compile ++ AppDependencies.test()
-
 lazy val ComponentTest = config("component") extend Test
-
-RoutesKeys.routesImport := Seq.empty
-TwirlKeys.templateImports := Seq.empty
 
 lazy val microservice =
   Project(appName, file("."))
@@ -61,20 +55,21 @@ lazy val microservice =
         "target/component-test-reports/html-report")
     )
     .settings(majorVersion := 0)
+    .settings(scalacOptions += "-Wconf:src=routes/.*:s")
     .settings(PlayKeys.playDefaultPort := 9653)
+    .settings(Test / testOptions := Seq(Tests.Filter((name: String) => name.startsWith("unit"))))
     // Disable default sbt Test options (might change with new versions of bootstrap)
     .settings(Test / testOptions -= Tests
       .Argument("-o", "-u", "target/test-reports", "-h", "target/test-reports/html-report"))
     // Suppress successful events in Scalatest in standard output (-o)
     // Options described here: https://www.scalatest.org/user_guide/using_scalatest_with_sbt
-    .settings(
-      Test / testOptions += Tests.Argument(
-        TestFrameworks.ScalaTest,
-        "-oNCHPQR",
-        "-u",
-        "target/test-reports",
-        "-h",
-        "target/test-reports/html-report"))
+    .settings(Test / testOptions += Tests.Argument(
+      TestFrameworks.ScalaTest,
+      "-oNCHPQR",
+      "-u",
+      "target/test-reports",
+      "-h",
+      "target/test-reports/html-report"))
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
   tests.map { test =>
