@@ -63,14 +63,13 @@ lazy val microservice =
       .Argument("-o", "-u", "target/test-reports", "-h", "target/test-reports/html-report"))
     // Suppress successful events in Scalatest in standard output (-o)
     // Options described here: https://www.scalatest.org/user_guide/using_scalatest_with_sbt
-    .settings(
-      Test / testOptions += Tests.Argument(
-        TestFrameworks.ScalaTest,
-        "-oNCHPQR",
-        "-u",
-        "target/test-reports",
-        "-h",
-        "target/test-reports/html-report"))
+    .settings(Test / testOptions += Tests.Argument(
+      TestFrameworks.ScalaTest,
+      "-oNCHPQR",
+      "-u",
+      "target/test-reports",
+      "-h",
+      "target/test-reports/html-report"))
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
   tests.map { test =>
