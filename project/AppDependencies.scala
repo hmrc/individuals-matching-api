@@ -5,7 +5,7 @@ object AppDependencies {
 
   val hmrc = "uk.gov.hmrc"
 
-  val hmrcMongo = "uk.gov.hmrc.mongo"
+  val hmrcMongo = s"$hmrc.mongo"
   val hmrcMongoVersion = "1.3.0"
   val hmrcBootstrapVersion = "7.21.0"
 
@@ -24,6 +24,5 @@ object AppDependencies {
     "org.scalatestplus"      %% "scalacheck-1-17"         % "3.2.16.0"           % scope,
     "com.vladsch.flexmark"   % "flexmark-all"             % "0.64.0"             % scope,
     "org.scalaj"             %% "scalaj-http"             % "2.4.2"              % scope,
-    hmrcMongo                %% "hmrc-mongo-test-play-28" % hmrcMongoVersion     % scope
   )
 }
