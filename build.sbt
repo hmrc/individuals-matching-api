@@ -8,6 +8,7 @@ lazy val ComponentTest = config("component") extend Test
 lazy val microservice =
   Project(appName, file("."))
     .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
+    .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
     .settings(onLoadMessage := "")
     .settings(CodeCoverageSettings.settings *)
     .settings(scalaVersion := "2.13.8")
@@ -55,7 +56,10 @@ lazy val microservice =
         "target/component-test-reports/html-report")
     )
     .settings(majorVersion := 0)
-    .settings(scalacOptions += "-Wconf:src=routes/.*:s")
+    .settings(
+      scalacOptions += "-Wconf:src=routes/.*:s",
+      scalacOptions += "-Wconf:cat=unused-imports&src=txt/.*:s"
+    )
     .settings(PlayKeys.playDefaultPort := 9653)
     .settings(Test / testOptions := Seq(Tests.Filter((name: String) => name.startsWith("unit"))))
     // Disable default sbt Test options (might change with new versions of bootstrap)
