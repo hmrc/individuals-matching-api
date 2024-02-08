@@ -25,6 +25,7 @@ import uk.gov.hmrc.individualsmatchingapi.repository.MongoErrors.Duplicate
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import uk.gov.hmrc.play.http.logging.Mdc.preservingMdc
 
 import java.util.UUID
 import java.util.UUID.randomUUID
@@ -56,17 +57,21 @@ class NinoMatchRepository @Inject()(mongo: MongoComponent, configuration: Config
   def create(nino: Nino): Future[NinoMatch] = {
     val ninoMatch = NinoMatch(nino, generateUuid)
 
-    collection
-      .insertOne(ninoMatch)
-      .toFuture()
-      .map(_ => ninoMatch)
-      .recover {
-        case Duplicate(_) => throw new RuntimeException(s"failed to persist nino match $ninoMatch")
-      }
+    preservingMdc {
+      collection
+        .insertOne(ninoMatch)
+        .toFuture()
+        .map(_ => ninoMatch)
+        .recover {
+          case Duplicate(_) => throw new RuntimeException(s"failed to persist nino match $ninoMatch")
+        }
+    }
   }
 
   def read(id: UUID): Future[Option[NinoMatch]] =
-    collection.find(Filters.equal("id", toBson(id))).headOption()
+    preservingMdc {
+      collection.find(Filters.equal("id", toBson(id))).headOption()
+    }
 
   private def generateUuid = randomUUID()
 }
