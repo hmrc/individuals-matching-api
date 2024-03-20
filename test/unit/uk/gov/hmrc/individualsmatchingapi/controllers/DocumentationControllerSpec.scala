@@ -29,6 +29,7 @@ import play.api.test.Helpers.{contentAsJson, contentAsString, defaultAwaitTimeou
 import uk.gov.hmrc.individualsmatchingapi.controllers.DocumentationController
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
+import java.nio.file.{Files, Paths}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.BufferedSource
 
@@ -148,9 +149,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticM
     "should return 200 and return file contents" in new Setup {
       private val versions = List("1.0", "2.0", "P1.0")
       for (version <- versions) {
-        val doc: BufferedSource = scala.io.Source.fromFile(s"resources/public/api/conf/$version/application.yaml")
-        val docString: String = doc.mkString
-        doc.close()
+        val docString = Files.readString(Paths.get(s"resources/public/api/conf/$version/application.yaml"))
         val result = underTest.specification(version, "application.yaml")(request)
         status(result) shouldBe 200
         contentAsString(result) shouldBe docString
