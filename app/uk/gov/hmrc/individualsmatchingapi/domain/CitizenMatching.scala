@@ -16,22 +16,21 @@
 
 package uk.gov.hmrc.individualsmatchingapi.domain
 
-import org.joda.time.LocalDate
-import org.joda.time.format.DateTimeFormat
+import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import scala.util.Try
 
 case class CitizenMatchingRequest(firstName: String, lastName: String, nino: String, dateOfBirth: String) {
+  private val format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
   validateName("firstName", firstName)
   validateName("lastName", lastName)
   validate(nino.nonEmpty, "nino is required")
   validate(Nino.isValid(nino), "Malformed nino submitted")
   validate(dateOfBirth.nonEmpty, "dateOfBirth is required")
-  validate(
-    Try(LocalDate.parse(dateOfBirth, DateTimeFormat.forPattern("yyyy-MM-dd"))).isSuccess,
-    "dateOfBirth: invalid date format")
+  validate(Try(LocalDate.parse(dateOfBirth, format)).isSuccess, "dateOfBirth: invalid date format")
 
   private def validateName(fieldName: String, value: String): Unit = {
     lazy val nameRegex = """^[\p{L} `\-\'^.]{1,35}$"""

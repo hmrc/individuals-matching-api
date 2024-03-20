@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.individualsmatchingapi.domain
 
-import org.joda.time.LocalDate
-import play.api.libs.json.JodaReads._
-import play.api.libs.json.JodaWrites._
+import java.time.LocalDate
 import play.api.libs.json._
 
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 object JsonFormatters {
+
+  private val format = DateTimeFormatter.ofPattern("ddMMyyyy")
 
   implicit val citizenMatchingFormat: OFormat[CitizenMatchingRequest] = Json.format[CitizenMatchingRequest]
 
@@ -34,8 +35,7 @@ object JsonFormatters {
           (json \ "name" \ "current" \ "firstName").asOpt[String],
           (json \ "name" \ "current" \ "lastName").asOpt[String],
           (json \ "ids" \ "nino").asOpt[String],
-          (json \ "dateOfBirth")
-            .asOpt[LocalDate](jodaLocalDateReads("ddMMyyyy"))
+          (json \ "dateOfBirth").asOpt[String].map(LocalDate.parse(_, format))
         ))
 
     override def writes(citizenDetails: CitizenDetails): JsValue =
