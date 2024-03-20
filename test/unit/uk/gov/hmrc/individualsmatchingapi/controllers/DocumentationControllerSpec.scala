@@ -16,7 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import controllers.Assets
 import org.mockito.IdiomaticMockito
 import org.scalatest.matchers.should.Matchers
@@ -31,7 +31,6 @@ import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import java.nio.file.{Files, Paths}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.io.BufferedSource
 
 class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
 
