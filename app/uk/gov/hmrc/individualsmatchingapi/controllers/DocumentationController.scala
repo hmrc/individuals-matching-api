@@ -18,7 +18,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import controllers.Assets
 import play.api.Configuration
 import play.api.http.HttpErrorHandler

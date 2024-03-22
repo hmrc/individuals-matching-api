@@ -17,7 +17,7 @@
 package component.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.{AuthStub, BaseSpec, CitizenDetailsStub, MatchingStub}
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import org.mongodb.scala.model.Filters
 import play.api.http.Status._
 import play.api.libs.json.Json

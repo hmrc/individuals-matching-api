@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.individualsmatchingapi.domain
 
-import org.joda.time.LocalDate
-import org.joda.time.LocalDate._
+import java.time.LocalDate
+import java.time.LocalDate._
 import uk.gov.hmrc.domain.Nino
 
 import java.util.UUID

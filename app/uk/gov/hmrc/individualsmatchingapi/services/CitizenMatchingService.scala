@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.services
 
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.{CitizenDetailsConnector, MatchingConnector}
