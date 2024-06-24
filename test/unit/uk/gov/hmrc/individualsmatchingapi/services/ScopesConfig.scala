@@ -76,6 +76,6 @@ trait ScopesConfig {
     (s"api-config.fields.H", "path/to/h"),
     (s"api-config.fields.I", "path/to/i"),
     (s"api-config.filters.A", "contains(path/to/g,'FILTERED_VALUE_1')"),
-    (s"api-config.filters.B", "contains(path/to/g,'FILTERED_VALUE_2')"),
+    (s"api-config.filters.B", "contains(path/to/g,'FILTERED_VALUE_2')")
   )
 }

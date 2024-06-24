@@ -34,7 +34,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NinoMatchRepository @Inject()(mongo: MongoComponent, configuration: Configuration)(implicit ec: ExecutionContext)
+class NinoMatchRepository @Inject() (mongo: MongoComponent, configuration: Configuration)(implicit ec: ExecutionContext)
     extends PlayMongoRepository[NinoMatch](
       mongoComponent = mongo,
       collectionName = "ninoMatch",
@@ -48,7 +48,8 @@ class NinoMatchRepository @Inject()(mongo: MongoComponent, configuration: Config
             .name("createdAtIndex")
             .expireAfter(
               configuration.getOptional[Int]("mongodb.ninoMatchTtlInSeconds").getOrElse(60 * 60 * 5).toLong,
-              TimeUnit.SECONDS)
+              TimeUnit.SECONDS
+            )
             .background(true)
         )
       )
@@ -62,8 +63,8 @@ class NinoMatchRepository @Inject()(mongo: MongoComponent, configuration: Config
         .insertOne(ninoMatch)
         .toFuture()
         .map(_ => ninoMatch)
-        .recover {
-          case Duplicate(_) => throw new RuntimeException(s"failed to persist nino match $ninoMatch")
+        .recover { case Duplicate(_) =>
+          throw new RuntimeException(s"failed to persist nino match $ninoMatch")
         }
     }
   }

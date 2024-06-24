@@ -25,9 +25,9 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class MatchedCitizenController @Inject()(cc: ControllerComponents, citizenMatchingService: LiveCitizenMatchingService)(
-  implicit executionContext: ExecutionContext)
-    extends CommonController(cc) {
+class MatchedCitizenController @Inject() (cc: ControllerComponents, citizenMatchingService: LiveCitizenMatchingService)(
+  implicit executionContext: ExecutionContext
+) extends CommonController(cc) {
 
   def matchedCitizen(matchId: String): Action[AnyContent] = Action.async { implicit request =>
     withUuid(matchId) { matchUuid =>

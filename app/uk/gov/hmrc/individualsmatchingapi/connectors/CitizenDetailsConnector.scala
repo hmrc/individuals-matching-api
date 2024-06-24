@@ -27,8 +27,9 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CitizenDetailsConnector @Inject()(http: HttpClient, serviceConfig: ServicesConfig)(
-  implicit executionContext: ExecutionContext) {
+class CitizenDetailsConnector @Inject() (http: HttpClient, serviceConfig: ServicesConfig)(implicit
+  executionContext: ExecutionContext
+) {
 
   val serviceUrl: String = serviceConfig.baseUrl("citizen-details")
 
@@ -40,10 +41,12 @@ class CitizenDetailsConnector @Inject()(http: HttpClient, serviceConfig: Service
         if (response.message.contains("Response body: ''"))
           throw UpstreamErrorResponse(
             s"GET of $serviceUrl/citizen-details/nino/$nino returned ${response.statusCode} and an empty body.",
-            response.statusCode)
+            response.statusCode
+          )
         else
           throw UpstreamErrorResponse(
             s"GET of $serviceUrl/citizen-details/nino/$nino returned ${response.statusCode}",
-            response.statusCode)
+            response.statusCode
+          )
     }
 }

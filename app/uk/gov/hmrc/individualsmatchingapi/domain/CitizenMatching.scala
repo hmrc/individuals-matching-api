@@ -49,7 +49,8 @@ case class CitizenDetails(
   firstName: Option[String],
   lastName: Option[String],
   nino: Option[String],
-  dateOfBirth: Option[LocalDate])
+  dateOfBirth: Option[LocalDate]
+)
 
 case class DetailsMatchRequest(verifyPerson: CitizenMatchingRequest, cidPersons: Seq[CitizenDetails])
 

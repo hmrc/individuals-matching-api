@@ -36,14 +36,16 @@ object JsonFormatters {
           (json \ "name" \ "current" \ "lastName").asOpt[String],
           (json \ "ids" \ "nino").asOpt[String],
           (json \ "dateOfBirth").asOpt[String].map(LocalDate.parse(_, format))
-        ))
+        )
+      )
 
     override def writes(citizenDetails: CitizenDetails): JsValue =
       Json.obj(
         "firstName"   -> citizenDetails.firstName,
         "lastName"    -> citizenDetails.lastName,
         "nino"        -> citizenDetails.nino,
-        "dateOfBirth" -> citizenDetails.dateOfBirth)
+        "dateOfBirth" -> citizenDetails.dateOfBirth
+      )
   }
 
   implicit val detailsMatchRequestFormat: Format[DetailsMatchRequest] = new Format[DetailsMatchRequest] {
@@ -51,7 +53,9 @@ object JsonFormatters {
       JsSuccess(
         DetailsMatchRequest(
           (json \ "verifyPerson").as[CitizenMatchingRequest],
-          (json \ "cidPersons").as[List[CitizenDetails]]))
+          (json \ "cidPersons").as[List[CitizenDetails]]
+        )
+      )
 
     def writes(matchingRequest: DetailsMatchRequest): JsValue =
       Json.obj("verifyPerson" -> matchingRequest.verifyPerson, "cidPersons" -> matchingRequest.cidPersons)

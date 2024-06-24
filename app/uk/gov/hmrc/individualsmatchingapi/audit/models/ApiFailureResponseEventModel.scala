@@ -28,7 +28,8 @@ case class ApiFailureResponseEventModel(
   correlationId: Option[String],
   applicationId: String,
   requestUrl: String,
-  response: String)
+  response: String
+)
 
 object ApiFailureResponseEventModel {
   implicit val formatApiFailureResponseEventModel: OFormat[ApiFailureResponseEventModel] =

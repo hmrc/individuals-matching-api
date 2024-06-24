@@ -23,13 +23,14 @@ import uk.gov.hmrc.individualsmatchingapi.config.EndpointConfig
 import java.util.UUID
 import javax.inject.Inject
 
-class ScopesHelper @Inject()(scopesService: ScopesService) {
+class ScopesHelper @Inject() (scopesService: ScopesService) {
 
   def getHalLinks(
     matchId: UUID,
     excludeList: Option[List[String]],
     scopes: Iterable[String],
-    allowedList: Option[List[String]]): HalResource = {
+    allowedList: Option[List[String]]
+  ): HalResource = {
 
     val links = getAllHalLinks(matchId, excludeList, allowedList, () => scopesService.getExternalEndpoints(scopes))
 
@@ -40,17 +41,19 @@ class ScopesHelper @Inject()(scopesService: ScopesService) {
     matchId: UUID,
     excludeList: Option[List[String]],
     allowedList: Option[List[String]],
-    getEndpoints: () => Iterable[EndpointConfig]): Seq[HalLink] =
+    getEndpoints: () => Iterable[EndpointConfig]
+  ): Seq[HalLink] =
     getEndpoints()
-      .filter(
-        c =>
-          !excludeList.getOrElse(List()).contains(c.name) &&
-            allowedList.getOrElse(getEndpoints().map(e => e.name).toList).contains(c.name))
-      .map(
-        endpoint =>
-          HalLink(
-            rel = endpoint.name,
-            href = endpoint.link.replace("<matchId>", s"$matchId"),
-            title = Some(endpoint.title)))
+      .filter(c =>
+        !excludeList.getOrElse(List()).contains(c.name) &&
+          allowedList.getOrElse(getEndpoints().map(e => e.name).toList).contains(c.name)
+      )
+      .map(endpoint =>
+        HalLink(
+          rel = endpoint.name,
+          href = endpoint.link.replace("<matchId>", s"$matchId"),
+          title = Some(endpoint.title)
+        )
+      )
       .toSeq
 }

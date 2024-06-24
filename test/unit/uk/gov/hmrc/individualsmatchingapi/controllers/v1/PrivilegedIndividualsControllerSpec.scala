@@ -56,7 +56,8 @@ class PrivilegedIndividualsControllerSpec(implicit executionContext: ExecutionCo
     val sandboxController = new SandboxPrivilegedIndividualsController(
       new SandboxCitizenMatchingService(),
       mockAuthConnector,
-      controllerComponents)
+      controllerComponents
+    )
 
     mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any(), any()).returns(successful(()))
   }
@@ -71,7 +72,8 @@ class PrivilegedIndividualsControllerSpec(implicit executionContext: ExecutionCo
         liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
       status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.parse(
-        """{"code":"NOT_FOUND","message":"The resource can not be found"}""")
+        """{"code":"NOT_FOUND","message":"The resource can not be found"}"""
+      )
     }
 
     "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
@@ -105,7 +107,8 @@ class PrivilegedIndividualsControllerSpec(implicit executionContext: ExecutionCo
         sandboxController.matchedIndividual(uuid.toString).apply(FakeRequest())
       status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.parse(
-        """{"code":"NOT_FOUND","message":"The resource can not be found"}""")
+        """{"code":"NOT_FOUND","message":"The resource can not be found"}"""
+      )
     }
 
     "respond with http 200 (ok) for sandbox valid matchId and citizen details exist" in new Setup {
@@ -130,7 +133,8 @@ class PrivilegedIndividualsControllerSpec(implicit executionContext: ExecutionCo
     firstName: String = "Amanda",
     lastName: String = "Joseph",
     nino: String = "NA000799C",
-    dateOfBirth: String = "1960-01-15") =
+    dateOfBirth: String = "1960-01-15"
+  ) =
     s"""
         {
            "_links": {

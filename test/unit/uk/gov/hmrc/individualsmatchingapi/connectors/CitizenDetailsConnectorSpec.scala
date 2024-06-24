@@ -72,7 +72,8 @@ class CitizenDetailsConnectorSpec(implicit executionContext: ExecutionContext)
                 },
                 "ids":{"sautr":"2432552635","nino":"$nino"},
                 "dateOfBirth":"13101972"
-              }""")))
+              }"""))
+      )
 
       val result: CitizenDetails = await(underTest.citizenDetails(nino))
 
@@ -88,7 +89,8 @@ class CitizenDetailsConnectorSpec(implicit executionContext: ExecutionContext)
                   "previous":[]
                 },
                 "ids":{"sautr":"2432552635","nino":"$nino"}
-              }""")))
+              }"""))
+      )
 
       val result: CitizenDetails = await(underTest.citizenDetails(nino))
 
@@ -98,7 +100,8 @@ class CitizenDetailsConnectorSpec(implicit executionContext: ExecutionContext)
     "throw citizen not found exception if nino is not found" in new Setup {
       stubFor(
         get(urlEqualTo(s"/citizen-details/nino/$nino"))
-          .willReturn(aResponse().withStatus(404)))
+          .willReturn(aResponse().withStatus(404))
+      )
 
       intercept[CitizenNotFoundException](await(underTest.citizenDetails(nino)))
     }
@@ -107,7 +110,8 @@ class CitizenDetailsConnectorSpec(implicit executionContext: ExecutionContext)
       val invalidNino = "A123456A"
       stubFor(
         get(urlEqualTo(s"/citizen-details/nino/$invalidNino"))
-          .willReturn(aResponse().withStatus(400).withBody(s"Invalid Nino: $invalidNino")))
+          .willReturn(aResponse().withStatus(400).withBody(s"Invalid Nino: $invalidNino"))
+      )
 
       intercept[InvalidNinoException](await(underTest.citizenDetails(invalidNino)))
     }

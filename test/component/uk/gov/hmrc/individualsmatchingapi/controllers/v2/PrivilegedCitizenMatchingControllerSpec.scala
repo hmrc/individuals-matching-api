@@ -74,7 +74,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       And("Citizen details match the individual's details provided")
       MatchingStub.performMatchReturnsNoErrorCodes(
         citizenMatchingRequest(firstName, lastName, nino, dateOfBirthSensibleformat),
-        citizenDetails(firstName, lastName, nino, dateOfBirthSensibleformat))
+        citizenDetails(firstName, lastName, nino, dateOfBirthSensibleformat)
+      )
 
       When("I request a citizen's details match")
       val response = requestMatch(matchingRequest)
@@ -117,7 +118,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
       And("Citizen details match the individual's details provided")
       MatchingStub.performMatchReturnsErrorCodes(
         citizenMatchingRequest(firstName, lastName, nino, dateOfBirthSensibleformat),
-        citizenDetails(firstName, lastName, "CS700100A", "1972-09-13"))
+        citizenDetails(firstName, lastName, "CS700100A", "1972-09-13")
+      )
 
       When("I request a citizen's details match")
       val response = requestMatch(matchingRequest)
@@ -127,7 +129,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
 
       And("The correct error message is returned")
       Json.parse(response.body) shouldBe Json.parse(
-        s"""{"code":"MATCHING_FAILED","message":"There is no match for the information provided"}""")
+        s"""{"code":"MATCHING_FAILED","message":"There is no match for the information provided"}"""
+      )
     }
 
     Scenario("Citizen does not exist for the given NINO") {
@@ -146,7 +149,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
 
       And("The correct error message is returned")
       Json.parse(response.body) shouldBe Json.parse(
-        s"""{"code":"MATCHING_FAILED","message":"There is no match for the information provided"}""")
+        s"""{"code":"MATCHING_FAILED","message":"There is no match for the information provided"}"""
+      )
     }
 
     Scenario("Invalid NINO provided") {
@@ -165,7 +169,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
 
       And("The correct error message is returned")
       Json.parse(response.body) shouldBe Json.parse(
-        s"""{"code":"MATCHING_FAILED","message":"There is no match for the information provided"}""")
+        s"""{"code":"MATCHING_FAILED","message":"There is no match for the information provided"}"""
+      )
     }
   }
 
@@ -191,7 +196,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
 
   def requestMatch(
     matchingRequest: CitizenMatchingRequest,
-    f: String => String = s => s.replace("", "")): HttpResponse[String] =
+    f: String => String = s => s.replace("", "")
+  ): HttpResponse[String] =
     Http(s"$serviceUrl/")
       .postData(f(Json.toJson(matchingRequest).toString()))
       .headers(requestHeaders(acceptHeaderP2))
@@ -201,7 +207,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     firstName: String,
     lastName: String,
     nino: String,
-    dateOfBirth: String): CitizenMatchingRequest =
+    dateOfBirth: String
+  ): CitizenMatchingRequest =
     CitizenMatchingRequest(firstName, lastName, nino, dateOfBirth)
 
   def citizenDetails(firstName: String, lastName: String, nino: String, dateOfBirth: String): CitizenDetails =

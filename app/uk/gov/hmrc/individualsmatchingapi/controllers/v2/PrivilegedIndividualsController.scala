@@ -33,13 +33,14 @@ import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class PrivilegedIndividualsController @Inject()(
+class PrivilegedIndividualsController @Inject() (
   citizenMatchingService: LiveCitizenMatchingService,
   scopeService: ScopesService,
   scopesHelper: ScopesHelper,
   implicit private val auditHelper: AuditHelper,
   val authConnector: AuthConnector,
-  cc: ControllerComponents)(implicit ec: ExecutionContext)
+  cc: ControllerComponents
+)(implicit ec: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
   def matchedIndividual(matchId: String): Action[AnyContent] = Action.async { implicit request =>
@@ -58,7 +59,8 @@ class PrivilegedIndividualsController @Inject()(
             authScopes.mkString(","),
             request,
             selfLink.toString,
-            Some(Json.toJson(response)))
+            Some(Json.toJson(response))
+          )
 
           Ok(response)
         }

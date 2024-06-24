@@ -33,13 +33,14 @@ import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class PrivilegedCitizenMatchingController @Inject()(
+class PrivilegedCitizenMatchingController @Inject() (
   citizenMatchingService: LiveCitizenMatchingService,
   scopeService: ScopesService,
   val authConnector: AuthConnector,
   cc: ControllerComponents,
   bodyParsers: PlayBodyParsers,
-  implicit private val auditHelper: AuditHelper)(implicit ec: ExecutionContext)
+  implicit private val auditHelper: AuditHelper
+)(implicit ec: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
   def matchCitizen: Action[JsValue] = Action.async(bodyParsers.json) { implicit request =>
@@ -51,7 +52,8 @@ class PrivilegedCitizenMatchingController @Inject()(
           val individualLink = HalLink(
             "individual",
             s"/individuals/matching/$matchId",
-            title = Option("Get a matched individual’s information"))
+            title = Option("Get a matched individual’s information")
+          )
 
           val response = links(selfLink, individualLink)
 
@@ -61,7 +63,8 @@ class PrivilegedCitizenMatchingController @Inject()(
             authScopes.mkString(","),
             request,
             selfLink.toString,
-            Some(Json.toJson(response)))
+            Some(Json.toJson(response))
+          )
 
           Ok(response)
         }

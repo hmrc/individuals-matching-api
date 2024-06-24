@@ -26,15 +26,15 @@ import uk.gov.hmrc.play.bootstrap.http.RequestHandler
 
 import javax.inject.Inject
 
-class IndividualMatchingApiRequestHandler @Inject()(
+class IndividualMatchingApiRequestHandler @Inject() (
   config: Configuration,
   webCommands: WebCommands,
   optDevContext: OptionalDevContext,
   router: Router,
   errorHandler: HttpErrorHandler,
   httpConfiguration: HttpConfiguration,
-  filters: HttpFilters)
-    extends RequestHandler(webCommands, optDevContext, router, errorHandler, httpConfiguration, filters) {
+  filters: HttpFilters
+) extends RequestHandler(webCommands, optDevContext, router, errorHandler, httpConfiguration, filters) {
 
   private lazy val unversionedContexts = config
     .getOptional[Seq[String]]("versioning.unversionedContexts")

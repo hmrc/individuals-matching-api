@@ -41,7 +41,7 @@ import scala.util.Random
 class PrivilegedCitizenMatchingControllerSpec(implicit executionContext: ExecutionContext)
     extends SpecBase with Matchers with IdiomaticMockito {
 
-  //noinspection ForwardReference
+  // noinspection ForwardReference
   trait Setup {
     val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val controllerComponents: ControllerComponents =
@@ -52,7 +52,8 @@ class PrivilegedCitizenMatchingControllerSpec(implicit executionContext: Executi
       sandboxCitizenMatchingService,
       mockAuthConnector,
       bodyParsers,
-      controllerComponents)
+      controllerComponents
+    )
 
     val mockLiveCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
     val mockAuthConnector: AuthConnector = mock[AuthConnector]
@@ -61,7 +62,8 @@ class PrivilegedCitizenMatchingControllerSpec(implicit executionContext: Executi
       mockLiveCitizenMatchingService,
       mockAuthConnector,
       bodyParsers,
-      controllerComponents)
+      controllerComponents
+    )
 
     mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any(), any()).returns(successful(()))
   }
@@ -400,7 +402,8 @@ class PrivilegedCitizenMatchingControllerSpec(implicit executionContext: Executi
   private def matchingRequest(
     firstName: String = "Amanda",
     dateOfBirth: String = "1960-01-15",
-    nino: String = "NA000799C") =
+    nino: String = "NA000799C"
+  ) =
     s"""{
           "firstName":"$firstName",
           "lastName":"Joseph",

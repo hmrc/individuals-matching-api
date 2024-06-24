@@ -21,7 +21,7 @@ import uk.gov.hmrc.individualsmatchingapi.config.{ApiConfig, ExternalEndpointCon
 
 import javax.inject.Inject
 
-class ScopesService @Inject()(configuration: Configuration) {
+class ScopesService @Inject() (configuration: Configuration) {
 
   private lazy val apiConfig =
     configuration.get[ApiConfig]("api-config")

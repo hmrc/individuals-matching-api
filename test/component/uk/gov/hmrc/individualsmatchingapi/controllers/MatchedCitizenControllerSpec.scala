@@ -55,7 +55,8 @@ class MatchedCitizenControllerSpec extends BaseSpec {
       Then("The response status should be 404 (Not Found)")
       response.code shouldBe NOT_FOUND
       Json.parse(response.body) shouldBe Json.parse(
-        s"""{"code":"NOT_FOUND", "message":"The resource can not be found"}""")
+        s"""{"code":"NOT_FOUND", "message":"The resource can not be found"}"""
+      )
     }
   }
 }
