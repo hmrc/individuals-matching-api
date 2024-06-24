@@ -66,7 +66,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       mockAuthConnector,
       controllerComponents,
       bodyParsers,
-      mockAuditHelper)
+      mockAuditHelper
+    )
 
     mockAuthConnector
       .authorise(any(), refEq(Retrievals.allEnrolments))(any(), any())
@@ -83,7 +84,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         .returns(Future.successful(matchId))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(
-        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId)))
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       status(eventualResult) mustBe OK
       contentAsJson(eventualResult) mustBe parse(
@@ -145,7 +147,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         .returns(Future.failed(new MatchingException))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(
-        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId)))
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -162,7 +165,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         .returns(Future.failed(new InvalidNinoException()))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(
-        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId)))
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -178,7 +182,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
       var eventualResult: Future[Result] =
         liveController.matchCitizen()(
-          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
+          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId))
+        )
 
       status(eventualResult) mustBe BAD_REQUEST
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -190,7 +195,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
       requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
       eventualResult = liveController.matchCitizen()(
-        fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
+        fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       status(eventualResult) mustBe BAD_REQUEST
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -204,7 +210,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"AB1234567","dateOfBirth":"2020-01-31"}""")
       val eventualResult: Future[Result] =
         liveController.matchCitizen()(
-          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
+          fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId))
+        )
 
       status(eventualResult) mustBe BAD_REQUEST
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -225,7 +232,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
       val res: Future[Result] =
         liveController.matchCitizen()(
-          fakeRequest.withBody(emptyFirstName).withHeaders(("CorrelationId", sampleCorrelationId)))
+          fakeRequest.withBody(emptyFirstName).withHeaders(("CorrelationId", sampleCorrelationId))
+        )
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "firstName is required")
@@ -242,7 +250,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
 
       val res: Future[Result] = liveController.matchCitizen()(
-        fakeRequest.withBody(emptyLastName).withHeaders(("CorrelationId", sampleCorrelationId)))
+        fakeRequest.withBody(emptyLastName).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "lastName is required")
@@ -260,7 +269,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
       val res: Future[Result] =
         liveController.matchCitizen()(
-          fakeRequest.withBody(firstNameTooLong).withHeaders(("CorrelationId", sampleCorrelationId)))
+          fakeRequest.withBody(firstNameTooLong).withHeaders(("CorrelationId", sampleCorrelationId))
+        )
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json
@@ -279,7 +289,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
       val res: Future[Result] =
         liveController.matchCitizen()(
-          fakeRequest.withBody(lastNameTooLong).withHeaders(("CorrelationId", sampleCorrelationId)))
+          fakeRequest.withBody(lastNameTooLong).withHeaders(("CorrelationId", sampleCorrelationId))
+        )
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json
@@ -297,7 +308,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
 
       val res: Future[Result] = liveController.matchCitizen()(
-        fakeRequest.withBody(invalidFirstName).withHeaders(("CorrelationId", sampleCorrelationId)))
+        fakeRequest.withBody(invalidFirstName).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json
@@ -315,7 +327,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
 
       val res: Future[Result] = liveController.matchCitizen()(
-        fakeRequest.withBody(invalidFirstName).withHeaders(("CorrelationId", sampleCorrelationId)))
+        fakeRequest.withBody(invalidFirstName).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json
@@ -333,7 +346,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         .returns(failed(InsufficientEnrolments()))
 
       val res: Future[Result] = liveController.matchCitizen()(
-        fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId)))
+        fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       contentAsJson(res) mustBe Json
         .obj("code" -> "UNAUTHORIZED", "message" -> "Insufficient Enrolments")
@@ -346,7 +360,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
   private def matchingRequest(
     firstName: String = "Amanda",
     dateOfBirth: String = "1960-01-15",
-    nino: String = "NA000799C") =
+    nino: String = "NA000799C"
+  ) =
     s"""{
             "firstName":"$firstName",
             "lastName":"Joseph",

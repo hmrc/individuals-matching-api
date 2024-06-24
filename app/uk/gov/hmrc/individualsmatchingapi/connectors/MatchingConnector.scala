@@ -28,8 +28,9 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MatchingConnector @Inject()(config: Configuration, http: HttpClient, servicesConfig: ServicesConfig)(
-  implicit executionContext: ExecutionContext) {
+class MatchingConnector @Inject() (config: Configuration, http: HttpClient, servicesConfig: ServicesConfig)(implicit
+  executionContext: ExecutionContext
+) {
 
   val serviceUrl: String = servicesConfig.baseUrl("matching")
 

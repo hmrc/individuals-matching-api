@@ -25,7 +25,8 @@ trait ScopesConfigHelper {
     (s"api-config.endpoints.external.benefits-and-credits.key", "A"),
     (
       s"api-config.endpoints.external.benefits-and-credits.endpoint",
-      "/individuals/benefits-and-credits/?matchId=<matchId>"),
+      "/individuals/benefits-and-credits/?matchId=<matchId>"
+    ),
     (s"api-config.endpoints.external.benefits-and-credits.title", "View individual's benefits and credits"),
     (s"api-config.endpoints.external.details.key", "B"),
     (s"api-config.endpoints.external.details.endpoint", "/individuals/details/?matchId=<matchId>"),

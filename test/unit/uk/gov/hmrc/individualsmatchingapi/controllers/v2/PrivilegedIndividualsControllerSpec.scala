@@ -65,7 +65,8 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
       scopesHelper,
       mockAuditHelper,
       mockAuthConnector,
-      controllerComponents)
+      controllerComponents
+    )
 
     mockAuthConnector
       .authorise(any(), refEq(Retrievals.allEnrolments))(any(), any())
@@ -84,7 +85,8 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
 
       status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.parse(
-        """{"code":"NOT_FOUND","message":"The resource can not be found"}""")
+        """{"code":"NOT_FOUND","message":"The resource can not be found"}"""
+      )
 
       mockAuditHelper.auditApiFailure(any(), any(), any(), any(), any())(any()) was called
     }

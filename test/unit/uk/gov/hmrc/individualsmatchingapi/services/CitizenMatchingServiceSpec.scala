@@ -189,7 +189,8 @@ class CitizenMatchingServiceSpec(implicit executionContext: ExecutionContext)
 
     "throw matching exception for an invalid dateOfBirth" in new Setup {
       intercept[MatchingException](
-        await(sandboxService.matchCitizen(aCitizenMatchingRequest(dateOfBirth = "1971-01-15"))))
+        await(sandboxService.matchCitizen(aCitizenMatchingRequest(dateOfBirth = "1971-01-15")))
+      )
     }
   }
 
@@ -216,18 +217,21 @@ class CitizenMatchingServiceSpec(implicit executionContext: ExecutionContext)
     firstName: String = "Amanda",
     lastName: String = "Joseph",
     nino: String = ninoString,
-    dateOfBirth: String = "1960-01-15"): CitizenMatchingRequest =
+    dateOfBirth: String = "1960-01-15"
+  ): CitizenMatchingRequest =
     CitizenMatchingRequest(firstName, lastName, nino, dateOfBirth)
 
   def aDetailsMatchRequest(
     citizenMatchingRequest: CitizenMatchingRequest,
-    citizenDetails: CitizenDetails): DetailsMatchRequest =
+    citizenDetails: CitizenDetails
+  ): DetailsMatchRequest =
     DetailsMatchRequest(citizenMatchingRequest, Seq(citizenDetails))
 
   def citizenDetails(
     firstName: Option[String] = Some("Amanda"),
     lastName: Option[String] = Some("Joseph"),
     nino: Option[String] = Some(ninoString),
-    dateOfBirth: Option[String] = Some("1960-01-15")): CitizenDetails =
+    dateOfBirth: Option[String] = Some("1960-01-15")
+  ): CitizenDetails =
     CitizenDetails(firstName, lastName, nino, dateOfBirth.map(LocalDate.parse))
 }

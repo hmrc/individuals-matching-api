@@ -64,8 +64,9 @@ class MatchingConnectorSpec(implicit executionContext: ExecutionContext)
     "succeed for a citizen with matching details" in new Setup {
       stubFor(
         post(urlMatching(s"/matching/perform-match/cycle3"))
-          .withRequestBody(equalToJson(
-            s"""{
+          .withRequestBody(
+            equalToJson(
+              s"""{
                 "verifyPerson": {
                 "firstName":"John",
                 "lastName":"Smith",
@@ -79,8 +80,10 @@ class MatchingConnectorSpec(implicit executionContext: ExecutionContext)
                 "dateOfBirth":"1972-10-15"}]
               }
             """
-          ))
-          .willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[]}""")))
+            )
+          )
+          .willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[]}"""))
+      )
 
       val f: Future[Unit] =
         underTest.validateMatch(DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))
@@ -90,8 +93,9 @@ class MatchingConnectorSpec(implicit executionContext: ExecutionContext)
     "throw matching exception for a citizen with non-matching details" in new Setup {
       stubFor(
         post(urlMatching(s"/matching/perform-match/cycle3"))
-          .withRequestBody(equalToJson(
-            s"""{
+          .withRequestBody(
+            equalToJson(
+              s"""{
                 "verifyPerson": {
                 "firstName":"John",
                 "lastName":"Smith",
@@ -105,21 +109,29 @@ class MatchingConnectorSpec(implicit executionContext: ExecutionContext)
                 "dateOfBirth":"1972-10-14"}]
               }
             """
-          ))
-          .willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[31,32]}""")))
+            )
+          )
+          .willReturn(aResponse().withStatus(200).withBody("""{"errorCodes":[31,32]}"""))
+      )
 
       intercept[MatchingException](
         await(
-          underTest.validateMatch(DetailsMatchRequest(
-            citizenMatchingRequest(),
-            Seq(citizenDetails(firstName = Some("Ana"), dateOfBirth = Some(LocalDate.parse("1972-10-14"))))))))
+          underTest.validateMatch(
+            DetailsMatchRequest(
+              citizenMatchingRequest(),
+              Seq(citizenDetails(firstName = Some("Ana"), dateOfBirth = Some(LocalDate.parse("1972-10-14"))))
+            )
+          )
+        )
+      )
     }
 
     "throw matching exception for an invalid json response" in new Setup {
       stubFor(
         post(urlMatching(s"/matching/perform-match/cycle3"))
-          .withRequestBody(equalToJson(
-            s"""{
+          .withRequestBody(
+            equalToJson(
+              s"""{
                 "verifyPerson": {
                   "firstName":"John",
                   "lastName":"Smith",
@@ -134,11 +146,14 @@ class MatchingConnectorSpec(implicit executionContext: ExecutionContext)
                 }]
               }
             """
-          ))
-          .willReturn(aResponse().withStatus(200).withBody("""{"invalid":"value"}""")))
+            )
+          )
+          .willReturn(aResponse().withStatus(200).withBody("""{"invalid":"value"}"""))
+      )
 
       intercept[MatchingException](
-        await(underTest.validateMatch(DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails())))))
+        await(underTest.validateMatch(DetailsMatchRequest(citizenMatchingRequest(), Seq(citizenDetails()))))
+      )
     }
   }
 
@@ -146,13 +161,15 @@ class MatchingConnectorSpec(implicit executionContext: ExecutionContext)
     firstName: String = "John",
     lastName: String = "Smith",
     nino: String = "NA000799C",
-    dateOfBirth: String = "1972-10-15") =
+    dateOfBirth: String = "1972-10-15"
+  ) =
     CitizenMatchingRequest(firstName, lastName, nino, dateOfBirth)
 
   private def citizenDetails(
     firstName: Option[String] = Some("John"),
     lastName: Option[String] = Option("Smith"),
     nino: Option[String] = Some("NA000799C"),
-    dateOfBirth: Option[LocalDate] = Some(LocalDate.parse("1972-10-15"))) =
+    dateOfBirth: Option[LocalDate] = Some(LocalDate.parse("1972-10-15"))
+  ) =
     CitizenDetails(firstName, lastName, nino, dateOfBirth)
 }

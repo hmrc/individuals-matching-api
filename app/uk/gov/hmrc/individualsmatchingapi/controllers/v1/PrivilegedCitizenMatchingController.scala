@@ -34,7 +34,8 @@ import scala.concurrent.ExecutionContext
 abstract class PrivilegedCitizenMatchingController(
   liveCitizenMatchingService: CitizenMatchingService,
   bodyParser: PlayBodyParsers,
-  cc: ControllerComponents)(implicit executionContext: ExecutionContext)
+  cc: ControllerComponents
+)(implicit executionContext: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
   def matchCitizen: Action[JsValue] = Action.async(bodyParser.json) { implicit request =>
@@ -46,7 +47,8 @@ abstract class PrivilegedCitizenMatchingController(
             "individual",
             s"/individuals/matching/$matchId",
             name = Option("GET"),
-            title = Option("Individual Details"))
+            title = Option("Individual Details")
+          )
           Ok(links(selfLink, individualLink))
         }
       } recover recovery
@@ -55,21 +57,23 @@ abstract class PrivilegedCitizenMatchingController(
 }
 
 @Singleton
-class LivePrivilegedCitizenMatchingController @Inject()(
+class LivePrivilegedCitizenMatchingController @Inject() (
   liveCitizenMatchingService: LiveCitizenMatchingService,
   val authConnector: AuthConnector,
   bodyParser: PlayBodyParsers,
-  cc: ControllerComponents)(implicit executionContext: ExecutionContext)
+  cc: ControllerComponents
+)(implicit executionContext: ExecutionContext)
     extends PrivilegedCitizenMatchingController(liveCitizenMatchingService, bodyParser, cc) {
   override val environment: String = PRODUCTION
 }
 
 @Singleton
-class SandboxPrivilegedCitizenMatchingController @Inject()(
+class SandboxPrivilegedCitizenMatchingController @Inject() (
   sandboxCitizenMatchingService: SandboxCitizenMatchingService,
   val authConnector: AuthConnector,
   bodyParser: PlayBodyParsers,
-  cc: ControllerComponents)(implicit executionContext: ExecutionContext)
+  cc: ControllerComponents
+)(implicit executionContext: ExecutionContext)
     extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService, bodyParser, cc) {
   override val environment: String = SANDBOX
 }

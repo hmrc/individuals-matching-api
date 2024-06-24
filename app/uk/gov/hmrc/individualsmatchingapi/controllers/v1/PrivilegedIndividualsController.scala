@@ -30,8 +30,10 @@ import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, Live
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
-abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMatchingService, cc: ControllerComponents)(
-  implicit executionContext: ExecutionContext)
+abstract class PrivilegedIndividualsController(
+  citizenMatchingService: CitizenMatchingService,
+  cc: ControllerComponents
+)(implicit executionContext: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
   def matchedIndividual(matchId: String): Action[AnyContent] = Action.async { implicit request =>
@@ -43,13 +45,15 @@ abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMa
             "income",
             s"/individuals/income/?matchId=$matchId",
             name = Option("GET"),
-            title = Option("View individual's income"))
+            title = Option("View individual's income")
+          )
           val employmentsLink =
             HalLink(
               "employments",
               s"/individuals/employments/?matchId=$matchId",
               name = Option("GET"),
-              title = Option("View individual's employments"))
+              title = Option("View individual's employments")
+            )
           Ok(state(obj("individual" -> toJson(citizenDetails))) ++ links(selfLink, incomeLink, employmentsLink))
         } recover recovery
       }
@@ -58,19 +62,21 @@ abstract class PrivilegedIndividualsController(citizenMatchingService: CitizenMa
 }
 
 @Singleton
-class LivePrivilegedIndividualsController @Inject()(
+class LivePrivilegedIndividualsController @Inject() (
   liveCitizenMatchingService: LiveCitizenMatchingService,
   val authConnector: AuthConnector,
-  cc: ControllerComponents)(implicit executionContext: ExecutionContext)
+  cc: ControllerComponents
+)(implicit executionContext: ExecutionContext)
     extends PrivilegedIndividualsController(liveCitizenMatchingService, cc) {
   override val environment: String = PRODUCTION
 }
 
 @Singleton
-class SandboxPrivilegedIndividualsController @Inject()(
+class SandboxPrivilegedIndividualsController @Inject() (
   sandboxCitizenMatchingService: SandboxCitizenMatchingService,
   val authConnector: AuthConnector,
-  cc: ControllerComponents)(implicit executionContext: ExecutionContext)
+  cc: ControllerComponents
+)(implicit executionContext: ExecutionContext)
     extends PrivilegedIndividualsController(sandboxCitizenMatchingService, cc) {
   override val environment: String = SANDBOX
 }

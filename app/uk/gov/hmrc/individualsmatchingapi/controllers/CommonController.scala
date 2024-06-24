@@ -35,10 +35,11 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-abstract class CommonController @Inject()(cc: ControllerComponents) extends BackendController(cc) with Logging {
+abstract class CommonController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   override protected def withJsonBody[T](
-    f: T => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
+    f: T => Future[Result]
+  )(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
       case Success(JsError(errs)) =>
@@ -50,12 +51,13 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
     }
 
   protected def withJsonBodyV2[T](
-    f: T => Future[Result])(implicit request: Request[JsValue], reads: Reads[T]): Future[Result] =
+    f: T => Future[Result]
+  )(implicit request: Request[JsValue], reads: Reads[T]): Future[Result] =
     Try(request.body.validate[T]) match {
-      case Success(JsSuccess(payload, _))                    => f(payload)
-      case Success(JsError(errs))                            => throw new InvalidBodyException(s"${fieldName(errs)} is required")
+      case Success(JsSuccess(payload, _)) => f(payload)
+      case Success(JsError(errs))         => throw new InvalidBodyException(s"${fieldName(errs)} is required")
       case Failure(e) if e.isInstanceOf[ValidationException] => throw new InvalidBodyException(e.getMessage)
-      case Failure(_)                                        => throw new InvalidBodyException("Unable to process request")
+      case Failure(_) => throw new InvalidBodyException("Unable to process request")
     }
 
   protected def withUuid(uuidString: String)(f: UUID => Future[Result]): Future[Result] =
@@ -82,9 +84,10 @@ abstract class CommonController @Inject()(cc: ControllerComponents) extends Back
       ErrorInvalidRequest(e.getMessage).toHttpResponse
   }
 
-  private[controllers] def recoveryWithAudit(correlationId: Option[String], matchId: String, url: String)(
-    implicit request: RequestHeader,
-    auditHelper: AuditHelper): PartialFunction[Throwable, Result] = {
+  private[controllers] def recoveryWithAudit(correlationId: Option[String], matchId: String, url: String)(implicit
+    request: RequestHeader,
+    auditHelper: AuditHelper
+  ): PartialFunction[Throwable, Result] = {
     case _: MatchNotFoundException =>
       auditHelper.auditApiFailure(correlationId, matchId, request, url, "Not Found")
       ErrorNotFound.toHttpResponse
@@ -129,8 +132,8 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
   def authPredicate(scopes: Iterable[String]): Predicate =
     scopes.map(Enrolment(_): Predicate).reduce(_ or _)
 
-  def authenticate(endpointScopes: Iterable[String], matchId: String)(f: Iterable[String] => Future[Result])(
-    implicit hc: HeaderCarrier,
+  def authenticate(endpointScopes: Iterable[String], matchId: String)(f: Iterable[String] => Future[Result])(implicit
+    hc: HeaderCarrier,
     request: RequestHeader,
     auditHelper: AuditHelper,
     executionContext: ExecutionContext
@@ -150,7 +153,8 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
   }
 
   def requiresPrivilegedAuthentication(
-    body: => Future[Result])(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
+    body: => Future[Result]
+  )(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
     if (environment == SANDBOX) body
     else authorised(Enrolment("read:individuals-matching"))(body)
 }

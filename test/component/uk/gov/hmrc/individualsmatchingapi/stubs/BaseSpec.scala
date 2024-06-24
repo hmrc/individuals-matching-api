@@ -64,7 +64,8 @@ trait BaseSpec
 
   protected def requestHeaders(
     acceptHeader: (String, String) = acceptHeaderV1,
-    correlationHeader: (String, String) = testCorrelationHeader) =
+    correlationHeader: (String, String) = testCorrelationHeader
+  ) =
     Map(CONTENT_TYPE -> JSON, AUTHORIZATION -> authToken, acceptHeader, correlationHeader)
 
   protected def errorResponse(message: String) =

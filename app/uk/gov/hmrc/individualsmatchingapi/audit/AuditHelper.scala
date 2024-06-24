@@ -25,7 +25,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class AuditHelper @Inject()(auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
+class AuditHelper @Inject() (auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
 
   def auditApiResponse(
     correlationId: String,
@@ -33,7 +33,8 @@ class AuditHelper @Inject()(auditConnector: AuditConnector)(implicit ec: Executi
     scopes: String,
     request: RequestHeader,
     selfLink: String,
-    response: Option[JsValue])(implicit hc: HeaderCarrier): Unit =
+    response: Option[JsValue]
+  )(implicit hc: HeaderCarrier): Unit =
     auditConnector.sendExplicitAudit(
       "ApiResponseEvent",
       ApiResponseEventModel(
@@ -56,7 +57,8 @@ class AuditHelper @Inject()(auditConnector: AuditConnector)(implicit ec: Executi
     matchId: String,
     request: RequestHeader,
     requestUrl: String,
-    msg: String)(implicit hc: HeaderCarrier): Unit =
+    msg: String
+  )(implicit hc: HeaderCarrier): Unit =
     auditConnector.sendExplicitAudit(
       "ApiFailureEvent",
       ApiFailureResponseEventModel(

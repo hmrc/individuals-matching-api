@@ -37,10 +37,10 @@ trait CitizenMatchingService {
 }
 
 @Singleton
-class LiveCitizenMatchingService @Inject()(
+class LiveCitizenMatchingService @Inject() (
   liveNinoMatchRepository: NinoMatchRepository,
   citizenDetailsConnector: CitizenDetailsConnector,
-  matchingConnector: MatchingConnector,
+  matchingConnector: MatchingConnector
 )(implicit executionContext: ExecutionContext)
     extends CitizenMatchingService {
 
@@ -69,8 +69,9 @@ class LiveCitizenMatchingService @Inject()(
 @Singleton
 class SandboxCitizenMatchingService extends CitizenMatchingService {
 
-  override def matchCitizen(citizenMatchingRequest: CitizenMatchingRequest)(
-    implicit hc: HeaderCarrier): Future[UUID] = {
+  override def matchCitizen(
+    citizenMatchingRequest: CitizenMatchingRequest
+  )(implicit hc: HeaderCarrier): Future[UUID] = {
 
     def firstNLetters(length: Int, value: String): String =
       value.trim.take(length)
@@ -101,7 +102,9 @@ class SandboxCitizenMatchingService extends CitizenMatchingService {
             Option(individual.firstName),
             Option(individual.lastName),
             Option(individual.nino),
-            Option(individual.dateOfBirth)))
+            Option(individual.dateOfBirth)
+          )
+        )
       case _ => failed(new MatchNotFoundException)
     }
 

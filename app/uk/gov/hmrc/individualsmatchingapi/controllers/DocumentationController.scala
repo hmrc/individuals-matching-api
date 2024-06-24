@@ -30,12 +30,13 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 @Singleton
-class DocumentationController @Inject()(
+class DocumentationController @Inject() (
   cc: ControllerComponents,
   assets: Assets,
   errorHandler: HttpErrorHandler,
-  config: Configuration)(
-  implicit materializer: Materializer,
+  config: Configuration
+)(implicit
+  materializer: Materializer,
   executionContext: ExecutionContext
 ) extends BackendController(cc) {
 
@@ -78,7 +79,9 @@ class DocumentationController @Inject()(
         accessTypeV1,
         whitelistedApplicationIdsV1,
         v2EndpointsEnabled,
-        v2Status))
+        v2Status
+      )
+    )
       .withHeaders(CONTENT_TYPE -> JSON)
   }
   def documentation(

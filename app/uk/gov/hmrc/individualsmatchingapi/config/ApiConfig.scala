@@ -43,8 +43,8 @@ case class ExternalEndpointConfig(
   override val name: String,
   override val link: String,
   override val title: String,
-  key: String)
-    extends EndpointConfig
+  key: String
+) extends EndpointConfig
 
 object ApiConfig {
 
@@ -71,32 +71,34 @@ object ApiConfig {
     val extEndpointsOpt = parseConfig("endpoints.external")
     val externalEndpointConfig: List[ExternalEndpointConfig] =
       extEndpointsOpt
-        .map(
-          extEndpoints =>
-            extEndpoints.listChildren
-              .map(key =>
-                ExternalEndpointConfig(
-                  name = key,
-                  key = config.getString(s"endpoints.external.$key.key"),
-                  link = config.getString(s"endpoints.external.$key.endpoint"),
-                  title = config.getString(s"endpoints.external.$key.title")
-              ))
-              .toList)
+        .map(extEndpoints =>
+          extEndpoints.listChildren
+            .map(key =>
+              ExternalEndpointConfig(
+                name = key,
+                key = config.getString(s"endpoints.external.$key.key"),
+                link = config.getString(s"endpoints.external.$key.endpoint"),
+                title = config.getString(s"endpoints.external.$key.title")
+              )
+            )
+            .toList
+        )
         .getOrElse(List())
 
     val scopesOpt = parseConfig("scopes")
     val scopeConfig = scopesOpt
-      .map(
-        scopes =>
-          scopes.listChildren
-            .map(key =>
-              ScopeConfig(
-                name = key,
-                fields = getStringList(s"""scopes."$key".fields"""),
-                endpoints = getStringList(s"""scopes."$key".endpoints"""),
-                filters = getStringList(s"""scopes."$key".filters""")
-            ))
-            .toList)
+      .map(scopes =>
+        scopes.listChildren
+          .map(key =>
+            ScopeConfig(
+              name = key,
+              fields = getStringList(s"""scopes."$key".fields"""),
+              endpoints = getStringList(s"""scopes."$key".endpoints"""),
+              filters = getStringList(s"""scopes."$key".filters""")
+            )
+          )
+          .toList
+      )
       .getOrElse(List())
 
     ApiConfig(

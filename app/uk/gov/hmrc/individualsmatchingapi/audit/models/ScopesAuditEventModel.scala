@@ -26,7 +26,8 @@ case class ScopesAuditEventModel(
   apiVersion: String,
   matchId: String,
   applicationId: String,
-  scopes: String)
+  scopes: String
+)
 
 object ScopesAuditEventModel {
   implicit val formatScopesAuditEventModel: OFormat[ScopesAuditEventModel] = Json.format[ScopesAuditEventModel]

@@ -29,7 +29,8 @@ case class ApiResponseEventModel(
   applicationId: String,
   scopes: String,
   returnLinks: String,
-  response: Option[JsValue])
+  response: Option[JsValue]
+)
 
 object ApiResponseEventModel {
   implicit val formatApiResponseEventModel: OFormat[ApiResponseEventModel] = Json.format[ApiResponseEventModel]
