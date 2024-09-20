@@ -35,16 +35,14 @@ import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, 
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.Future.failed
-import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
 class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
-
   trait Setup extends ScopesConfigHelper {
-
     val sampleCorrelationId = "188e9400-b636-4a3b-80ba-230a8c72b92a"
-    val sampleCorrelationIdHeader: (String, String) = "CorrelationId" -> sampleCorrelationId
 
     val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
@@ -57,8 +55,6 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     val mockAuditHelper: AuditHelper = mock[AuditHelper]
 
     val mockScopesService = new ScopesService(mockScopesConfig)
-
-    implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
     val liveController = new PrivilegedCitizenMatchingController(
       mockLiveCitizenMatchingService,

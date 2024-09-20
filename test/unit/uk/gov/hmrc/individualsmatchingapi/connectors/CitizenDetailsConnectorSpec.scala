@@ -19,10 +19,8 @@ package unit.uk.gov.hmrc.individualsmatchingapi.connectors
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import java.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
-import play.api.Configuration
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.CitizenDetailsConnector
@@ -31,16 +29,15 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-import scala.concurrent.ExecutionContext
+import java.time.LocalDate
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class CitizenDetailsConnectorSpec(implicit executionContext: ExecutionContext)
-    extends SpecBase with Matchers with BeforeAndAfterEach {
+class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEach {
   val stubPort: Int = sys.env.getOrElse("WIREMOCK", "11121").toInt
   val stubHost = "localhost"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
   val http: DefaultHttpClient = fakeApplication.injector.instanceOf[DefaultHttpClient]
-  val config: Configuration = fakeApplication.injector.instanceOf[Configuration]
   val servicesConfig: ServicesConfig = fakeApplication.injector.instanceOf[ServicesConfig]
 
   trait Setup {

@@ -34,12 +34,12 @@ import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, 
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
-import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
-class PrivilegedCitizenMatchingControllerSpec(implicit executionContext: ExecutionContext)
-    extends SpecBase with Matchers with IdiomaticMockito {
+class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
 
   // noinspection ForwardReference
   trait Setup {

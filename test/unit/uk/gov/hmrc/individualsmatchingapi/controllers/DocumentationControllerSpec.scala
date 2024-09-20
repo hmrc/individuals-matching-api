@@ -16,8 +16,8 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
-import org.apache.pekko.stream.Materializer
 import controllers.Assets
+import org.apache.pekko.stream.Materializer
 import org.mockito.IdiomaticMockito
 import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
@@ -30,7 +30,8 @@ import uk.gov.hmrc.individualsmatchingapi.controllers.DocumentationController
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import java.nio.file.{Files, Paths}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
 
@@ -39,8 +40,6 @@ class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticM
   trait Setup {
     val configuration: Configuration = mock[Configuration]
     val HttpErrorHandler: HttpErrorHandler = mock[HttpErrorHandler]
-
-    implicit val ec: ExecutionContext = ExecutionContext.global
 
     val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val controllerComponents: ControllerComponents =

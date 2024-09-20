@@ -19,7 +19,6 @@ package unit.uk.gov.hmrc.individualsmatchingapi.connectors
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import java.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
@@ -31,10 +30,11 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.time.LocalDate
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class MatchingConnectorSpec(implicit executionContext: ExecutionContext)
-    extends SpecBase with Matchers with BeforeAndAfterEach {
+class MatchingConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEach {
   val stubPort: Int = sys.env.getOrElse("WIREMOCK", "11122").toInt
   val stubHost = "localhost"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))

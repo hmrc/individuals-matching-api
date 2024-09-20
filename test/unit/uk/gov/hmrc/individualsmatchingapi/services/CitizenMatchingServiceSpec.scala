@@ -16,7 +16,6 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
-import java.time.LocalDate
 import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.IdiomaticMockito
 import org.mockito.Mockito.verifyNoInteractions
@@ -32,13 +31,13 @@ import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
+import java.time.LocalDate
 import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class CitizenMatchingServiceSpec(implicit executionContext: ExecutionContext)
-    extends SpecBase with Matchers with IdiomaticMockito with ScalaFutures {
+class CitizenMatchingServiceSpec extends SpecBase with Matchers with IdiomaticMockito with ScalaFutures {
 
-  val authBearerToken = "AUTH_BEARER_TOKEN"
   val matchId: UUID = UUID.randomUUID()
   val ninoString = "NA000799C"
   val nino: Nino = Nino(ninoString)
