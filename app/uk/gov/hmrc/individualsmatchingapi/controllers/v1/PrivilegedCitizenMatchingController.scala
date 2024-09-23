@@ -20,7 +20,7 @@ import play.api.hal.Hal.links
 import play.api.hal.HalLink
 import play.api.libs.json.JsValue
 import play.api.mvc.hal._
-import play.api.mvc.{Action, ControllerComponents, PlayBodyParsers}
+import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
@@ -33,12 +33,11 @@ import scala.concurrent.ExecutionContext
 
 abstract class PrivilegedCitizenMatchingController(
   liveCitizenMatchingService: CitizenMatchingService,
-  bodyParser: PlayBodyParsers,
   cc: ControllerComponents
 )(implicit executionContext: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
-  def matchCitizen: Action[JsValue] = Action.async(bodyParser.json) { implicit request =>
+  def matchCitizen: Action[JsValue] = Action.async(parse.json) { implicit request =>
     requiresPrivilegedAuthentication {
       withJsonBody[CitizenMatchingRequest] { matchCitizen =>
         liveCitizenMatchingService.matchCitizen(matchCitizen) map { matchId =>
@@ -60,10 +59,9 @@ abstract class PrivilegedCitizenMatchingController(
 class LivePrivilegedCitizenMatchingController @Inject() (
   liveCitizenMatchingService: LiveCitizenMatchingService,
   val authConnector: AuthConnector,
-  bodyParser: PlayBodyParsers,
   cc: ControllerComponents
 )(implicit executionContext: ExecutionContext)
-    extends PrivilegedCitizenMatchingController(liveCitizenMatchingService, bodyParser, cc) {
+    extends PrivilegedCitizenMatchingController(liveCitizenMatchingService, cc) {
   override val environment: String = PRODUCTION
 }
 
@@ -71,9 +69,8 @@ class LivePrivilegedCitizenMatchingController @Inject() (
 class SandboxPrivilegedCitizenMatchingController @Inject() (
   sandboxCitizenMatchingService: SandboxCitizenMatchingService,
   val authConnector: AuthConnector,
-  bodyParser: PlayBodyParsers,
   cc: ControllerComponents
 )(implicit executionContext: ExecutionContext)
-    extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService, bodyParser, cc) {
+    extends PrivilegedCitizenMatchingController(sandboxCitizenMatchingService, cc) {
   override val environment: String = SANDBOX
 }

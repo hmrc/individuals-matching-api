@@ -18,8 +18,5 @@ package unit.uk.gov.hmrc.individualsmatchingapi.support
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.mvc.PlayBodyParsers
 
-trait SpecBase extends AnyWordSpec with GuiceOneAppPerSuite {
-  lazy val bodyParsers: PlayBodyParsers = fakeApplication.injector.instanceOf[PlayBodyParsers]
-}
+trait SpecBase extends AnyWordSpec with GuiceOneAppPerSuite

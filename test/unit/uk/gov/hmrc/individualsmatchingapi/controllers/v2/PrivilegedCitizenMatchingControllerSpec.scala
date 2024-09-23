@@ -47,7 +47,6 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
     val controllerComponents: ControllerComponents = fakeApplication.injector.instanceOf[ControllerComponents]
-    val bodyParsers: PlayBodyParsers = fakeApplication.injector.instanceOf[PlayBodyParsers]
 
     val mockLiveCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
 
@@ -61,7 +60,6 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       mockScopesService,
       mockAuthConnector,
       controllerComponents,
-      bodyParsers,
       mockAuditHelper
     )
 

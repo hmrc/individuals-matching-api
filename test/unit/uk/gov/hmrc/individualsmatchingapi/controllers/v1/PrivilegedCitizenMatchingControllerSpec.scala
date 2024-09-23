@@ -51,7 +51,6 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     val sandboxController = new SandboxPrivilegedCitizenMatchingController(
       sandboxCitizenMatchingService,
       mockAuthConnector,
-      bodyParsers,
       controllerComponents
     )
 
@@ -61,7 +60,6 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     val liveController = new LivePrivilegedCitizenMatchingController(
       mockLiveCitizenMatchingService,
       mockAuthConnector,
-      bodyParsers,
       controllerComponents
     )
 

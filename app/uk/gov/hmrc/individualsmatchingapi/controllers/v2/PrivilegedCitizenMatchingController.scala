@@ -20,7 +20,7 @@ import play.api.hal.Hal.links
 import play.api.hal.HalLink
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.hal._
-import play.api.mvc.{Action, ControllerComponents, PlayBodyParsers}
+import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
@@ -38,12 +38,11 @@ class PrivilegedCitizenMatchingController @Inject() (
   scopeService: ScopesService,
   val authConnector: AuthConnector,
   cc: ControllerComponents,
-  bodyParsers: PlayBodyParsers,
   implicit private val auditHelper: AuditHelper
 )(implicit ec: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
 
-  def matchCitizen: Action[JsValue] = Action.async(bodyParsers.json) { implicit request =>
+  def matchCitizen: Action[JsValue] = Action.async(parse.json) { implicit request =>
     authenticate(scopeService.getAllScopes, request.body.toString()) { authScopes =>
       withJsonBodyV2[CitizenMatchingRequest] { matchCitizen =>
         val correlationId = validateCorrelationId(request)
