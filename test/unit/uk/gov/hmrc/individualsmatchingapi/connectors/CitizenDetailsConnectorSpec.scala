@@ -16,13 +16,11 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.connectors
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.test.WireMockSupport
 import uk.gov.hmrc.individualsmatchingapi.connectors.CitizenDetailsConnector
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenNotFoundException, InvalidNinoException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -32,11 +30,7 @@ import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndAfterEach {
-  val stubPort: Int = sys.env.getOrElse("WIREMOCK", "11121").toInt
-  val stubHost = "localhost"
-  val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
-
+class CitizenDetailsConnectorSpec extends SpecBase with Matchers with WireMockSupport {
   val http: DefaultHttpClient = fakeApplication.injector.instanceOf[DefaultHttpClient]
   val servicesConfig: ServicesConfig = fakeApplication.injector.instanceOf[ServicesConfig]
 
@@ -44,17 +38,9 @@ class CitizenDetailsConnectorSpec extends SpecBase with Matchers with BeforeAndA
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val underTest: CitizenDetailsConnector = new CitizenDetailsConnector(http, servicesConfig) {
-      override val serviceUrl = "http://127.0.0.1:11121"
+      override val serviceUrl = s"http://$wireMockHost:$wireMockPort"
     }
   }
-
-  override def beforeEach(): Unit = {
-    wireMockServer.start()
-    configureFor(stubHost, stubPort)
-  }
-
-  override def afterEach(): Unit =
-    wireMockServer.stop()
 
   "citizen details" should {
     val nino = "A123456AA"
