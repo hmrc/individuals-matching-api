@@ -34,7 +34,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
-
   implicit lazy val materializer: Materializer = fakeApplication.materializer
 
   trait Setup {
@@ -48,7 +47,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticM
       fakeApplication.injector.instanceOf[Assets]
 
     val underTest =
-      new DocumentationController(controllerComponents, assets, HttpErrorHandler, configuration)
+      new DocumentationController(controllerComponents, assets, configuration)
 
     configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds").returns(None)
     configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds").returns(None)
