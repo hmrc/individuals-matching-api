@@ -31,8 +31,8 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class CitizenDetailsConnectorSpec extends SpecBase with Matchers with WireMockSupport {
-  val http: DefaultHttpClient = fakeApplication.injector.instanceOf[DefaultHttpClient]
-  val servicesConfig: ServicesConfig = fakeApplication.injector.instanceOf[ServicesConfig]
+  val http: DefaultHttpClient = app.injector.instanceOf[DefaultHttpClient]
+  val servicesConfig: ServicesConfig = app.injector.instanceOf[ServicesConfig]
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()

@@ -37,7 +37,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class MatchedCitizenControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
-  implicit lazy val materializer: Materializer = fakeApplication.materializer
+  implicit lazy val materializer: Materializer = app.materializer
 
   trait Setup {
     val matchId: UUID = UUID.randomUUID()
@@ -48,7 +48,7 @@ class MatchedCitizenControllerSpec extends SpecBase with Matchers with Idiomatic
     val mockCitizenMatchingService: LiveCitizenMatchingService =
       mock[LiveCitizenMatchingService]
     val controllerComponents: ControllerComponents =
-      fakeApplication.injector.instanceOf[ControllerComponents]
+      app.injector.instanceOf[ControllerComponents]
 
     val matchedCitizenController = new MatchedCitizenController(controllerComponents, mockCitizenMatchingService)
   }

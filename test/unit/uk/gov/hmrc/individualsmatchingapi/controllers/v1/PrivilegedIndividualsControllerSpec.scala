@@ -48,7 +48,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
     val mockCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
     val mockAuthConnector: AuthConnector = mock[AuthConnector]
     val controllerComponents: ControllerComponents =
-      fakeApplication.injector.instanceOf[ControllerComponents]
+      app.injector.instanceOf[ControllerComponents]
 
     val liveController =
       new LivePrivilegedIndividualsController(mockCitizenMatchingService, mockAuthConnector, controllerComponents)

@@ -34,7 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
-  implicit lazy val materializer: Materializer = fakeApplication.materializer
+  implicit lazy val materializer: Materializer = app.materializer
 
   trait Setup {
     val configuration: Configuration = mock[Configuration]
@@ -42,9 +42,9 @@ class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticM
 
     val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val controllerComponents: ControllerComponents =
-      fakeApplication.injector.instanceOf[ControllerComponents]
+      app.injector.instanceOf[ControllerComponents]
     val assets: Assets =
-      fakeApplication.injector.instanceOf[Assets]
+      app.injector.instanceOf[Assets]
 
     val underTest =
       new DocumentationController(controllerComponents, assets, configuration)

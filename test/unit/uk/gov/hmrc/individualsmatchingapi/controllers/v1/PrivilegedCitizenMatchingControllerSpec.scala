@@ -45,7 +45,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
   trait Setup {
     val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val controllerComponents: ControllerComponents =
-      fakeApplication.injector.instanceOf[ControllerComponents]
+      app.injector.instanceOf[ControllerComponents]
 
     val sandboxCitizenMatchingService = new SandboxCitizenMatchingService
     val sandboxController = new SandboxPrivilegedCitizenMatchingController(

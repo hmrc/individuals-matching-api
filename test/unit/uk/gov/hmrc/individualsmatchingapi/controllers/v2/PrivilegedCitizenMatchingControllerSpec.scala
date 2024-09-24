@@ -46,7 +46,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-    val controllerComponents: ControllerComponents = fakeApplication.injector.instanceOf[ControllerComponents]
+    val controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
 
     val mockLiveCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
 

@@ -53,7 +53,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
     val mockScopesService = new ScopesService(mockScopesConfig)
     val scopesHelper = new ScopesHelper(mockScopesService)
 
-    val controllerComponents: ControllerComponents = fakeApplication.injector.instanceOf[ControllerComponents]
+    val controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
 
     val liveController = new PrivilegedIndividualsController(
       mockCitizenMatchingService,
