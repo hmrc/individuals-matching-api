@@ -18,10 +18,9 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
-import org.apache.pekko.stream.Materializer
 import controllers.Assets
+import org.apache.pekko.stream.Materializer
 import play.api.Configuration
-import play.api.http.HttpErrorHandler
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import play.filters.cors.CORSActionBuilder
 import uk.gov.hmrc.individualsmatchingapi.views._
@@ -30,12 +29,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 @Singleton
-class DocumentationController @Inject() (
-  cc: ControllerComponents,
-  assets: Assets,
-  errorHandler: HttpErrorHandler,
-  config: Configuration
-)(implicit
+class DocumentationController @Inject() (cc: ControllerComponents, assets: Assets, config: Configuration)(implicit
   materializer: Materializer,
   executionContext: ExecutionContext
 ) extends BackendController(cc) {
@@ -89,7 +83,6 @@ class DocumentationController @Inject() (
     endpointName: String
   ): Action[AnyContent] =
     assets.at(s"/public/api/documentation/$version", s"${endpointName.replaceAll(" ", "-")}.xml")
-
 }
 
 // $COVERAGE-ON$

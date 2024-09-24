@@ -16,51 +16,33 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.connectors
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import java.time.LocalDate
-import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
-import play.api.Configuration
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.test.WireMockSupport
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.individualsmatchingapi.connectors.MatchingConnector
 import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.time.LocalDate
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class MatchingConnectorSpec(implicit executionContext: ExecutionContext)
-    extends SpecBase with Matchers with BeforeAndAfterEach {
-  val stubPort: Int = sys.env.getOrElse("WIREMOCK", "11122").toInt
-  val stubHost = "localhost"
-  val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
-
-  val http: DefaultHttpClient = fakeApplication.injector.instanceOf[DefaultHttpClient]
-  val config: Configuration = fakeApplication.injector.instanceOf[Configuration]
-  val servicesConfig: ServicesConfig = fakeApplication.injector.instanceOf[ServicesConfig]
+class MatchingConnectorSpec extends SpecBase with Matchers with WireMockSupport {
+  private val http = app.injector.instanceOf[HttpClient]
+  private val servicesConfig = app.injector.instanceOf[ServicesConfig]
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest: MatchingConnector = new MatchingConnector(config, http, servicesConfig) {
-      override val serviceUrl = "http://127.0.0.1:11122"
+    val underTest: MatchingConnector = new MatchingConnector(http, servicesConfig) {
+      override val serviceUrl = s"http://$wireMockHost:$wireMockPort"
     }
   }
 
-  override def beforeEach(): Unit = {
-    wireMockServer.start()
-    configureFor(stubHost, stubPort)
-  }
-
-  override def afterEach(): Unit =
-    wireMockServer.stop()
-
   "isMatch" should {
-
     "succeed for a citizen with matching details" in new Setup {
       stubFor(
         post(urlMatching(s"/matching/perform-match/cycle3"))

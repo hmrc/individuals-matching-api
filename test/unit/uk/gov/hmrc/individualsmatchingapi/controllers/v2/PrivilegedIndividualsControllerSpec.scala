@@ -36,17 +36,15 @@ import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
 
 import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
-import scala.concurrent.{ExecutionContext, Future}
 
 class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with IdiomaticMockito with Individuals {
-
-  implicit val headerCarrier: HeaderCarrier = new HeaderCarrier()
   val uuid: UUID = UUID.randomUUID()
   val sampleCorrelationId = "188e9400-b636-4a3b-80ba-230a8c72b92a"
 
   trait Setup extends ScopesConfigHelper {
-
     val mockCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
 
     val mockAuthConnector: AuthConnector = mock[AuthConnector]
@@ -55,9 +53,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
     val mockScopesService = new ScopesService(mockScopesConfig)
     val scopesHelper = new ScopesHelper(mockScopesService)
 
-    val controllerComponents: ControllerComponents = fakeApplication.injector.instanceOf[ControllerComponents]
-
-    implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
+    val controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
 
     val liveController = new PrivilegedIndividualsController(
       mockCitizenMatchingService,

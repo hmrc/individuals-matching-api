@@ -20,7 +20,6 @@ import org.mockito.ArgumentMatchersSugar.{*, eqTo}
 import org.mockito.Mockito.{times, verify}
 import org.mockito.{ArgumentCaptor, IdiomaticMockito, Mockito}
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AsyncWordSpec
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -28,20 +27,19 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.audit.models.{ApiFailureResponseEventModel, ApiResponseEventModel, ScopesAuditEventModel}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
-class AuditHelperSpec extends AsyncWordSpec with Matchers with IdiomaticMockito {
+import scala.concurrent.ExecutionContext.Implicits.global
 
+class AuditHelperSpec extends SpecBase with Matchers with IdiomaticMockito {
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val nino = "CS700100A"
   val correlationId = "test"
   val scopes = "test"
   val matchId = "80a6bb14-d888-436e-a541-4000674c60aa"
   val applicationId = "80a6bb14-d888-436e-a541-4000674c60bb"
   val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders("X-Application-Id" -> applicationId)
   val response: Some[JsValue] = Some(Json.toJson("some" -> "json"))
-  val ifUrl =
-    s"host/individuals/employments/paye/nino/$nino?startDate=2019-01-01&endDate=2020-01-01&fields=some(vals(val1),val2)"
   val endpoint = "/test"
 
   val auditConnector: AuditConnector = mock[AuditConnector]

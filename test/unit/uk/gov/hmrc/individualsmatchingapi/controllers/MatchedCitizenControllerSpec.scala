@@ -33,14 +33,13 @@ import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class MatchedCitizenControllerSpec(implicit executionContext: ExecutionContext)
-    extends SpecBase with Matchers with IdiomaticMockito {
-  implicit lazy val materializer: Materializer = fakeApplication.materializer
+class MatchedCitizenControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
+  implicit lazy val materializer: Materializer = app.materializer
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
     val matchId: UUID = UUID.randomUUID()
     val ninoString: String = "AA100009B"
     val matchedCitizenRecord: MatchedCitizenRecord =
@@ -49,7 +48,7 @@ class MatchedCitizenControllerSpec(implicit executionContext: ExecutionContext)
     val mockCitizenMatchingService: LiveCitizenMatchingService =
       mock[LiveCitizenMatchingService]
     val controllerComponents: ControllerComponents =
-      fakeApplication.injector.instanceOf[ControllerComponents]
+      app.injector.instanceOf[ControllerComponents]
 
     val matchedCitizenController = new MatchedCitizenController(controllerComponents, mockCitizenMatchingService)
   }

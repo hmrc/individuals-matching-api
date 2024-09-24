@@ -16,31 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.support
 
-import com.typesafe.config.ConfigFactory
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.PlayBodyParsers
-import play.api.{Application, Configuration}
 
-trait SpecBase extends AnyWordSpec with GuiceOneAppPerSuite {
-
-  lazy val additionalConfig: Configuration = Configuration()
-
-  lazy val bodyParsers: PlayBodyParsers = fakeApplication.injector.instanceOf[PlayBodyParsers]
-
-  def buildFakeApplication(extraConfig: Configuration): Application =
-    new GuiceApplicationBuilder()
-      .configure(
-        Configuration(
-          ConfigFactory.parseString("""
-                                      | metrics.jvm = false
-                                      | metrics.enabled = true
-          """.stripMargin)
-        ) withFallback extraConfig
-      )
-      .build()
-
-  override lazy val fakeApplication: Application = buildFakeApplication(additionalConfig)
-
-}
+trait SpecBase extends AnyWordSpec with GuiceOneAppPerSuite

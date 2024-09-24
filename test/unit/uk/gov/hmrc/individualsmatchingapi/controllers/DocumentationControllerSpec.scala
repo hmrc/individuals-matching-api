@@ -16,8 +16,8 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
-import org.apache.pekko.stream.Materializer
 import controllers.Assets
+import org.apache.pekko.stream.Materializer
 import org.mockito.IdiomaticMockito
 import org.scalatest.matchers.should.Matchers
 import play.api.Configuration
@@ -30,26 +30,24 @@ import uk.gov.hmrc.individualsmatchingapi.controllers.DocumentationController
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import java.nio.file.{Files, Paths}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
-
-  implicit lazy val materializer: Materializer = fakeApplication.materializer
+  implicit lazy val materializer: Materializer = app.materializer
 
   trait Setup {
     val configuration: Configuration = mock[Configuration]
     val HttpErrorHandler: HttpErrorHandler = mock[HttpErrorHandler]
 
-    implicit val ec: ExecutionContext = ExecutionContext.global
-
     val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val controllerComponents: ControllerComponents =
-      fakeApplication.injector.instanceOf[ControllerComponents]
+      app.injector.instanceOf[ControllerComponents]
     val assets: Assets =
-      fakeApplication.injector.instanceOf[Assets]
+      app.injector.instanceOf[Assets]
 
     val underTest =
-      new DocumentationController(controllerComponents, assets, HttpErrorHandler, configuration)
+      new DocumentationController(controllerComponents, assets, configuration)
 
     configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds").returns(None)
     configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds").returns(None)

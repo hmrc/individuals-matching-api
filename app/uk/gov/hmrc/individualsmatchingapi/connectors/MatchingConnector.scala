@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.individualsmatchingapi.connectors
 
-import play.api.Configuration
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
@@ -28,10 +27,9 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MatchingConnector @Inject() (config: Configuration, http: HttpClient, servicesConfig: ServicesConfig)(implicit
+class MatchingConnector @Inject() (http: HttpClient, servicesConfig: ServicesConfig)(implicit
   executionContext: ExecutionContext
 ) {
-
   val serviceUrl: String = servicesConfig.baseUrl("matching")
 
   def validateMatch(matchingRequest: DetailsMatchRequest)(implicit hc: HeaderCarrier): Future[Unit] =
