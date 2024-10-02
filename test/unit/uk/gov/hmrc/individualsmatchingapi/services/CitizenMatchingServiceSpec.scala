@@ -16,7 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
-import org.mockito.ArgumentMatchers.{any, refEq}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.IdiomaticMockito
 import org.mockito.Mockito.verifyNoInteractions
 import org.scalatest.concurrent.ScalaFutures
@@ -66,10 +66,10 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with IdiomaticMo
     "return matchId for a matched citizen" in new Setup {
 
       mockCitizenDetailsConnector
-        .citizenDetails(refEq(ninoString))(any[HeaderCarrier])
+        .citizenDetails(ninoString)(any[HeaderCarrier])
         .returns(Future.successful(details))
-      mockMatchingConnector.validateMatch(refEq(detailsMatchRequest))(any[HeaderCarrier]).returns(Future.successful(()))
-      mockNinoMatchRepository.create(refEq(nino)).returns(Future.successful(ninoMatch))
+      mockMatchingConnector.validateMatch(detailsMatchRequest)(any[HeaderCarrier]).returns(Future.successful(()))
+      mockNinoMatchRepository.create(nino).returns(Future.successful(ninoMatch))
 
       val result: UUID = await(liveService.matchCitizen(citizenMatchingRequest))
 
@@ -78,7 +78,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with IdiomaticMo
 
     "propagate exception when citizen details are not found" in new Setup {
       mockCitizenDetailsConnector
-        .citizenDetails(refEq(ninoString))(any[HeaderCarrier])
+        .citizenDetails(ninoString)(any[HeaderCarrier])
         .returns(Future.failed(new CitizenNotFoundException))
 
       intercept[CitizenNotFoundException](await(liveService.matchCitizen(citizenMatchingRequest)))
@@ -87,7 +87,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with IdiomaticMo
 
     "propagate exception for an invalid nino" in new Setup {
       mockCitizenDetailsConnector
-        .citizenDetails(refEq(ninoString))(any[HeaderCarrier])
+        .citizenDetails(ninoString)(any[HeaderCarrier])
         .returns(Future.failed(new InvalidNinoException))
 
       intercept[InvalidNinoException](await(liveService.matchCitizen(citizenMatchingRequest)))
@@ -95,10 +95,10 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with IdiomaticMo
 
     "propagate exception for a non-match" in new Setup {
       mockCitizenDetailsConnector
-        .citizenDetails(refEq(ninoString))(any[HeaderCarrier])
+        .citizenDetails(ninoString)(any[HeaderCarrier])
         .returns(Future.successful(details))
       mockMatchingConnector
-        .validateMatch(refEq(detailsMatchRequest))(any[HeaderCarrier])
+        .validateMatch(detailsMatchRequest)(any[HeaderCarrier])
         .returns(Future.failed(new MatchingException))
 
       intercept[MatchingException](await(liveService.matchCitizen(citizenMatchingRequest)))
