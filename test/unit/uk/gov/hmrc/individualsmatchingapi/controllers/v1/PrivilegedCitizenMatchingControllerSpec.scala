@@ -16,7 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
-import org.mockito.ArgumentMatchers.{any, refEq}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.IdiomaticMockito
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.Json.parse
@@ -63,7 +63,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       controllerComponents
     )
 
-    mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any(), any()).returns(successful(()))
+    mockAuthConnector.authorise(any(), EmptyRetrieval)(any(), any()).returns(successful(()))
   }
 
   "live matching citizen controller" should {
@@ -285,7 +285,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
 
       mockAuthConnector
-        .authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any(), any())
+        .authorise(Enrolment("read:individuals-matching"), EmptyRetrieval)(any(), any())
         .returns(failed(InsufficientEnrolments()))
 
       intercept[InsufficientEnrolments] {

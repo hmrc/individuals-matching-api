@@ -16,7 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
-import org.mockito.ArgumentMatchers.{any, refEq}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.IdiomaticMockito
 import org.mockito.Mockito.verifyNoInteractions
 import org.scalatest.matchers.must.Matchers
@@ -65,14 +65,14 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
     )
 
     mockAuthConnector
-      .authorise(any(), refEq(Retrievals.allEnrolments))(any(), any())
+      .authorise(any(), Retrievals.allEnrolments)(any(), any())
       .returns(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
   }
 
   "The live matched individual function" should {
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
       mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
         .returns(failed(new MatchNotFoundException))
 
       val eventualResult: Future[Result] = liveController
@@ -89,7 +89,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
 
     "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
       mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
         .returns(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult: Future[Result] =
         liveController
@@ -104,11 +104,11 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
     "fail with AuthorizedException when the bearer token does not have a valid enrolment" in new Setup {
 
       mockAuthConnector
-        .authorise(any(), refEq(Retrievals.allEnrolments))(any(), any())
+        .authorise(any(), Retrievals.allEnrolments)(any(), any())
         .returns(failed(InsufficientEnrolments()))
 
       mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
         .returns(failed(new MatchNotFoundException))
 
       val res: Future[Result] = liveController
@@ -124,7 +124,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
 
     "respond with http 400 (Bad Request) for a malformed CorrelationId" in new Setup {
       mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
         .returns(failed(new MatchNotFoundException))
 
       val res: Future[Result] = liveController
@@ -146,7 +146,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
 
     "respond with http 400 (Bad Request) for a missing CorrelationId" in new Setup {
       mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
         .returns(failed(new MatchNotFoundException))
 
       val res: Future[Result] = liveController.matchedIndividual(uuid.toString).apply(FakeRequest())

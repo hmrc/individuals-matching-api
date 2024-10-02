@@ -16,7 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
-import org.mockito.ArgumentMatchers.{any, refEq}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.IdiomaticMockito
 import org.scalatest.matchers.must.Matchers
 import play.api.http.Status.OK
@@ -58,13 +58,13 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
       controllerComponents
     )
 
-    mockAuthConnector.authorise(any(), refEq(EmptyRetrieval))(any(), any()).returns(successful(()))
+    mockAuthConnector.authorise(any(), EmptyRetrieval)(any(), any()).returns(successful(()))
   }
 
   "The live matched individual function" should {
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
       mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
         .returns(failed(new MatchNotFoundException))
 
       val eventualResult: Future[Result] =
@@ -77,7 +77,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
 
     "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
       mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(refEq(uuid))(any[HeaderCarrier])
+        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
         .returns(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult: Future[Result] =
         liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
@@ -88,7 +88,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
     "fail with AuthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
 
       mockAuthConnector
-        .authorise(refEq(Enrolment("read:individuals-matching")), refEq(EmptyRetrieval))(any(), any())
+        .authorise(Enrolment("read:individuals-matching"), EmptyRetrieval)(any(), any())
         .returns(failed(InsufficientEnrolments()))
 
       intercept[InsufficientEnrolments] {
