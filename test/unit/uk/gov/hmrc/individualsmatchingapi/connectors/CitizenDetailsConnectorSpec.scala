@@ -20,18 +20,18 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.matchers.should.Matchers
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.test.WireMockSupport
 import uk.gov.hmrc.individualsmatchingapi.connectors.CitizenDetailsConnector
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenNotFoundException, InvalidNinoException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class CitizenDetailsConnectorSpec extends SpecBase with Matchers with WireMockSupport {
-  val http: DefaultHttpClient = app.injector.instanceOf[DefaultHttpClient]
+  val http: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
   val servicesConfig: ServicesConfig = app.injector.instanceOf[ServicesConfig]
 
   trait Setup {
