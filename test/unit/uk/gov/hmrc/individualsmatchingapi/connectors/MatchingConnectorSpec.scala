@@ -19,8 +19,9 @@ package unit.uk.gov.hmrc.individualsmatchingapi.connectors
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.matchers.should.Matchers
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.test.WireMockSupport
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.individualsmatchingapi.connectors.MatchingConnector
 import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -31,7 +32,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class MatchingConnectorSpec extends SpecBase with Matchers with WireMockSupport {
-  private val http = app.injector.instanceOf[HttpClient]
+  private val http = app.injector.instanceOf[HttpClientV2]
   private val servicesConfig = app.injector.instanceOf[ServicesConfig]
 
   trait Setup {
