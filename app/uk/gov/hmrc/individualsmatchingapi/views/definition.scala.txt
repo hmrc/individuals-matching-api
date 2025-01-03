@@ -15,19 +15,19 @@
     "versions": [
       {
         "version": "P1.0",
-        "status": "PUBLISHED",
-        "access" : {"type":"PRIVATE", "whitelistedApplicationIds": @Json.toJson(whitelistedApplicationIdsVP1)}
+        "status": "STABLE",
+        "access" : {"type":"PRIVATE"}
       },
       {
         "version": "1.0",
-        "status": "PUBLISHED",
-        "access" : {"type":"@accessTypeV1", "whitelistedApplicationIds": @Json.toJson(whitelistedApplicationIdsV1)}
+        "status": "STABLE",
+        "access" : {"type":"@accessTypeV1"}
       },
       {
         "version": "2.0",
         "status":@Json.toJson(v2Status),
         "endpointsEnabled":@Json.toJson(v2EndpointsEnabled),
-        "access" : {"type":"PRIVATE", "whitelistedApplicationIds": @Json.toJson(whitelistedApplicationIdsVP2)}
+        "access" : {"type":"PRIVATE"}
       }
     ]
   }
