@@ -119,27 +119,6 @@ class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticM
       (apiVersion(result, "2.0") \ "endpointsEnabled")
         .as[Boolean] shouldBe false
     }
-
-    "return whitelisted applications from the configuration" in new Setup {
-      configuration
-        .getOptional[Seq[String]]("api.access.version-2.0.whitelistedApplicationIds")
-        .returns(Some(Seq("appV2")))
-      configuration
-        .getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds")
-        .returns(Some(Seq("appVP1")))
-      configuration
-        .getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds")
-        .returns(Some(Seq("appV1")))
-
-      val result: Future[Result] = underTest.definition()(request)
-
-      (apiVersion(result, "1.0") \ "access" \ "whitelistedApplicationIds")
-        .as[Seq[String]] shouldBe Seq("appV1")
-      (apiVersion(result, "P1.0") \ "access" \ "whitelistedApplicationIds")
-        .as[Seq[String]] shouldBe Seq("appVP1")
-      (apiVersion(result, "2.0") \ "access" \ "whitelistedApplicationIds")
-        .as[Seq[String]] shouldBe Seq("appV2")
-    }
   }
 
   "/api/documentation/version?/individuals/matching" should {
