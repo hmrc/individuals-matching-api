@@ -16,10 +16,11 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.audit
 
-import org.mockito.ArgumentMatchersSugar.{*, eqTo}
-import org.mockito.Mockito.{times, verify}
-import org.mockito.{ArgumentCaptor, IdiomaticMockito, Mockito}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.{reset, times, verify}
+import org.mockito.{ArgumentCaptor, Mockito}
 import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -31,7 +32,7 @@ import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuditHelperSpec extends SpecBase with Matchers with IdiomaticMockito {
+class AuditHelperSpec extends SpecBase with Matchers with MockitoSugar {
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   val correlationId = "test"
@@ -56,7 +57,7 @@ class AuditHelperSpec extends SpecBase with Matchers with IdiomaticMockito {
       auditHelper.auditAuthScopes(matchId, scopes, request)
 
       verify(auditConnector, times(1))
-        .sendExplicitAudit(eqTo("AuthScopesAuditEvent"), captor.capture())(*, *, *)
+        .sendExplicitAudit(eqTo("AuthScopesAuditEvent"), captor.capture())(any, any, any)
 
       val capturedEvent = captor.getValue
       capturedEvent.apiVersion shouldEqual "2.0"
@@ -75,7 +76,7 @@ class AuditHelperSpec extends SpecBase with Matchers with IdiomaticMockito {
       auditHelper.auditApiResponse(correlationId, matchId, scopes, request, endpoint, response)
 
       verify(auditConnector, times(1))
-        .sendExplicitAudit(eqTo("ApiResponseEvent"), captor.capture())(*, *, *)
+        .sendExplicitAudit(eqTo("ApiResponseEvent"), captor.capture())(any, any, any)
 
       val capturedEvent = captor.getValue
       capturedEvent.matchId shouldEqual matchId
@@ -97,7 +98,7 @@ class AuditHelperSpec extends SpecBase with Matchers with IdiomaticMockito {
 
       auditHelper.auditApiFailure(Some(correlationId), matchId, request, "/test", msg)
 
-      verify(auditConnector, times(1)).sendExplicitAudit(eqTo("ApiFailureEvent"), captor.capture())(*, *, *)
+      verify(auditConnector, times(1)).sendExplicitAudit(eqTo("ApiFailureEvent"), captor.capture())(any, any, any)
 
       val capturedEvent = captor.getValue
       capturedEvent.matchId shouldEqual matchId

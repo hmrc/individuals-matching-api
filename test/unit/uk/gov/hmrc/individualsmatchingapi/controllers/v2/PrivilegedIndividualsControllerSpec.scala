@@ -17,9 +17,9 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import org.mockito.ArgumentMatchers.any
-import org.mockito.IdiomaticMockito
-import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.Mockito.{verify, verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 import play.api.mvc.{ControllerComponents, Result}
@@ -40,7 +40,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 
-class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with IdiomaticMockito with Individuals {
+class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with MockitoSugar with Individuals {
   val uuid: UUID = UUID.randomUUID()
   val sampleCorrelationId = "188e9400-b636-4a3b-80ba-230a8c72b92a"
 
@@ -64,16 +64,20 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
       controllerComponents
     )
 
-    mockAuthConnector
-      .authorise(any(), Retrievals.allEnrolments)(any(), any())
-      .returns(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
+    when(
+      mockAuthConnector
+        .authorise(any(), Retrievals.allEnrolments)(any(), any())
+    )
+      .thenReturn(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
   }
 
   "The live matched individual function" should {
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
-      mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
-        .returns(failed(new MatchNotFoundException))
+      when(
+        mockCitizenMatchingService
+          .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
+      )
+        .thenReturn(failed(new MatchNotFoundException))
 
       val eventualResult: Future[Result] = liveController
         .matchedIndividual(uuid.toString)
@@ -84,13 +88,15 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
         """{"code":"NOT_FOUND","message":"The resource can not be found"}"""
       )
 
-      mockAuditHelper.auditApiFailure(any(), any(), any(), any(), any())(any()) was called
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
-      mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
-        .returns(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
+      when(
+        mockCitizenMatchingService
+          .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
+      )
+        .thenReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult: Future[Result] =
         liveController
           .matchedIndividual(uuid.toString)
@@ -98,18 +104,22 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
       status(eventualResult) mustBe OK
       contentAsJson(eventualResult) mustBe Json.parse(response(uuid, "Joe", "Bloggs", "AB123456C", "1969-01-15"))
 
-      mockAuditHelper.auditApiResponse(any(), any(), any(), any(), any(), any())(any()) was called
+      verify(mockAuditHelper).auditApiResponse(any(), any(), any(), any(), any(), any())(any())
     }
 
     "fail with AuthorizedException when the bearer token does not have a valid enrolment" in new Setup {
 
-      mockAuthConnector
-        .authorise(any(), Retrievals.allEnrolments)(any(), any())
-        .returns(failed(InsufficientEnrolments()))
+      when(
+        mockAuthConnector
+          .authorise(any(), Retrievals.allEnrolments)(any(), any())
+      )
+        .thenReturn(failed(InsufficientEnrolments()))
 
-      mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
-        .returns(failed(new MatchNotFoundException))
+      when(
+        mockCitizenMatchingService
+          .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
+      )
+        .thenReturn(failed(new MatchNotFoundException))
 
       val res: Future[Result] = liveController
         .matchedIndividual(uuid.toString)
@@ -119,13 +129,15 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
       contentAsJson(res) mustBe Json.parse("""{"code":"UNAUTHORIZED","message":"Insufficient Enrolments"}""")
 
       verifyNoInteractions(mockCitizenMatchingService)
-      mockAuditHelper.auditApiFailure(any(), any(), any(), any(), any())(any()) was called
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "respond with http 400 (Bad Request) for a malformed CorrelationId" in new Setup {
-      mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
-        .returns(failed(new MatchNotFoundException))
+      when(
+        mockCitizenMatchingService
+          .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
+      )
+        .thenReturn(failed(new MatchNotFoundException))
 
       val res: Future[Result] = liveController
         .matchedIndividual(uuid.toString)
@@ -141,13 +153,15 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
           |""".stripMargin
       )
 
-      mockAuditHelper.auditApiFailure(any(), any(), any(), any(), any())(any()) was called
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
 
     "respond with http 400 (Bad Request) for a missing CorrelationId" in new Setup {
-      mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
-        .returns(failed(new MatchNotFoundException))
+      when(
+        mockCitizenMatchingService
+          .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
+      )
+        .thenReturn(failed(new MatchNotFoundException))
 
       val res: Future[Result] = liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
 
@@ -161,7 +175,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
           |""".stripMargin
       )
 
-      mockAuditHelper.auditApiFailure(any(), any(), any(), any(), any())(any()) was called
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
     }
   }
 
