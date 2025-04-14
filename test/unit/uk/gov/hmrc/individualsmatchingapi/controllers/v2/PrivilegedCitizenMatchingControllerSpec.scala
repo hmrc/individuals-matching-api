@@ -16,7 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -65,7 +65,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     when(
       mockAuthConnector
-        .authorise(any(), Retrievals.allEnrolments)(any(), any())
+        .authorise(any(), eqTo(Retrievals.allEnrolments))(any(), any())
     ).thenReturn(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
 
   }
@@ -342,7 +342,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
       when(
         mockAuthConnector
-          .authorise(any(), Retrievals.allEnrolments)(any(), any())
+          .authorise(any(), eqTo(Retrievals.allEnrolments))(any(), any())
       ).thenReturn(failed(InsufficientEnrolments()))
 
       val res: Future[Result] = liveController.matchCitizen()(

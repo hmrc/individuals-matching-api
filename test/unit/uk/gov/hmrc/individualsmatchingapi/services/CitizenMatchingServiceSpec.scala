@@ -16,7 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -67,17 +67,17 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
 
       when(
         mockCitizenDetailsConnector
-          .citizenDetails(ninoString)(any[HeaderCarrier])
+          .citizenDetails(eqTo(ninoString))(any[HeaderCarrier])
       ).thenReturn(Future.successful(details))
 
       when(
         mockMatchingConnector
-          .validateMatch(detailsMatchRequest)(any[HeaderCarrier])
+          .validateMatch(eqTo(detailsMatchRequest))(any[HeaderCarrier])
       ).thenReturn(Future.successful(()))
 
       when(
         mockNinoMatchRepository
-          .create(nino)
+          .create(eqTo(nino))
       ).thenReturn(Future.successful(ninoMatch))
 
       val result: UUID = await(liveService.matchCitizen(citizenMatchingRequest))
@@ -88,7 +88,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     "propagate exception when citizen details are not found" in new Setup {
       when(
         mockCitizenDetailsConnector
-          .citizenDetails(ninoString)(any[HeaderCarrier])
+          .citizenDetails(eqTo(ninoString))(any[HeaderCarrier])
       ).thenReturn(Future.failed(new CitizenNotFoundException))
 
       intercept[CitizenNotFoundException](await(liveService.matchCitizen(citizenMatchingRequest)))
@@ -98,7 +98,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     "propagate exception for an invalid nino" in new Setup {
       when(
         mockCitizenDetailsConnector
-          .citizenDetails(ninoString)(any[HeaderCarrier])
+          .citizenDetails(eqTo(ninoString))(any[HeaderCarrier])
       ).thenReturn(Future.failed(new InvalidNinoException))
 
       intercept[InvalidNinoException](await(liveService.matchCitizen(citizenMatchingRequest)))
@@ -107,12 +107,12 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     "propagate exception for a non-match" in new Setup {
       when(
         mockCitizenDetailsConnector
-          .citizenDetails(ninoString)(any[HeaderCarrier])
+          .citizenDetails(eqTo(ninoString))(any[HeaderCarrier])
       )
         .thenReturn(Future.successful(details))
       when(
         mockMatchingConnector
-          .validateMatch(detailsMatchRequest)(any[HeaderCarrier])
+          .validateMatch(eqTo(detailsMatchRequest))(any[HeaderCarrier])
       )
         .thenReturn(Future.failed(new MatchingException))
 
@@ -130,7 +130,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     }
 
     "propagate a citizen not found exception when a nino fails to match a citizen" in new Setup {
-      when(mockNinoMatchRepository.read(matchId)).thenReturn(Future.successful(Some(ninoMatch)))
+      when(mockNinoMatchRepository.read(eqTo(matchId))).thenReturn(Future.successful(Some(ninoMatch)))
       when(mockCitizenDetailsConnector.citizenDetails(ninoString)).thenThrow(new CitizenNotFoundException)
       intercept[CitizenNotFoundException] {
         await(liveService.fetchCitizenDetailsByMatchId(matchId))
@@ -138,7 +138,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     }
 
     "return citizen details when a match id matches a nino which matches a citizen" in new Setup {
-      when(mockNinoMatchRepository.read(matchId)).thenReturn(Future.successful(Some(ninoMatch)))
+      when(mockNinoMatchRepository.read(eqTo(matchId))).thenReturn(Future.successful(Some(ninoMatch)))
       when(mockCitizenDetailsConnector.citizenDetails(ninoString)).thenReturn(Future.successful(citizenDetails()))
       await(liveService.fetchCitizenDetailsByMatchId(matchId)) shouldBe citizenDetails()
     }
@@ -149,7 +149,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
 
     "return a matched citizen record for a valid matchId" in new Setup {
       val matchedCitizenRecord: MatchedCitizenRecord = MatchedCitizenRecord(Nino(ninoString), matchId)
-      when(mockNinoMatchRepository.read(matchId)).thenReturn(Future.successful(Some(ninoMatch)))
+      when(mockNinoMatchRepository.read(eqTo(matchId))).thenReturn(Future.successful(Some(ninoMatch)))
 
       val result: MatchedCitizenRecord = await(liveService.fetchMatchedCitizenRecord(matchId))
       result shouldBe matchedCitizenRecord

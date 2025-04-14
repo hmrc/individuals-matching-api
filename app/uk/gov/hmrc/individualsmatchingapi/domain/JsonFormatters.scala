@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.individualsmatchingapi.domain
 
-import java.time.LocalDate
 import play.api.libs.json._
 
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 

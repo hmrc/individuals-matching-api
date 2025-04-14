@@ -16,8 +16,8 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doReturn, verifyNoInteractions, when}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status.OK
@@ -51,21 +51,21 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     val controllerComponents: ControllerComponents =
       app.injector.instanceOf[ControllerComponents]
 
-    val liveController =
+    val liveController: LivePrivilegedIndividualsController =
       new LivePrivilegedIndividualsController(mockCitizenMatchingService, mockAuthConnector, controllerComponents)
-    val sandboxController = new SandboxPrivilegedIndividualsController(
+    val sandboxController: SandboxPrivilegedIndividualsController = new SandboxPrivilegedIndividualsController(
       new SandboxCitizenMatchingService(),
       mockAuthConnector,
       controllerComponents
     )
-    doReturn(successful(())).when(mockAuthConnector.authorise(any(), EmptyRetrieval)(any(), any()))
+    when(mockAuthConnector.authorise(any(), eqTo(EmptyRetrieval))(any(), any())).thenReturn(successful(()))
   }
 
   "The live matched individual function" should {
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(any[HeaderCarrier])
       )
         .thenReturn(failed(new MatchNotFoundException))
 
@@ -80,7 +80,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(any[HeaderCarrier])
       )
         .thenReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult: Future[Result] =
@@ -93,7 +93,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
 
       when(
         mockAuthConnector
-          .authorise(Enrolment("read:individuals-matching"), EmptyRetrieval)(any(), any())
+          .authorise(eqTo(Enrolment("read:individuals-matching")), eqTo(EmptyRetrieval))(any(), any())
       )
         .thenReturn(failed(InsufficientEnrolments()))
 

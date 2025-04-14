@@ -16,7 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -64,7 +64,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       controllerComponents
     )
 
-    when(mockAuthConnector.authorise(any(), EmptyRetrieval)(any(), any())).thenReturn(successful(()))
+    when(mockAuthConnector.authorise(any(), eqTo(EmptyRetrieval))(any(), any())).thenReturn(successful(()))
   }
 
   "live matching citizen controller" should {
@@ -293,7 +293,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
       when(
         mockAuthConnector
-          .authorise(Enrolment("read:individuals-matching"), EmptyRetrieval)(any(), any())
+          .authorise(eqTo(Enrolment("read:individuals-matching")), eqTo(EmptyRetrieval))(any(), any())
       ).thenReturn(failed(InsufficientEnrolments()))
 
       intercept[InsufficientEnrolments] {

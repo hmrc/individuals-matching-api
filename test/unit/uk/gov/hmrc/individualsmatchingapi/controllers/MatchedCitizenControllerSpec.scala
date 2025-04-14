@@ -17,7 +17,7 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
 import org.apache.pekko.stream.Materializer
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -59,7 +59,7 @@ class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSu
     "return 200 (OK) for a valid matchId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchMatchedCitizenRecord(matchId)(any[HeaderCarrier])
+          .fetchMatchedCitizenRecord(eqTo(matchId))(any[HeaderCarrier])
       )
         .thenReturn(Future.successful(matchedCitizenRecord))
 
@@ -74,7 +74,7 @@ class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSu
     "return 404 (Not Found) for an invalid matchId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchMatchedCitizenRecord(matchId)(any[HeaderCarrier])
+          .fetchMatchedCitizenRecord(eqTo(matchId))(any[HeaderCarrier])
       ).thenReturn(Future.failed(new MatchNotFoundException))
 
       val result: Future[Result] = matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest)
