@@ -19,7 +19,7 @@ package unit.uk.gov.hmrc.individualsmatchingapi.play
 import org.scalatest.matchers.should.Matchers
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{ACCEPT, GET}
-import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils._
+import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.*
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 class RequestHeaderUtilsSpec extends SpecBase with Matchers {

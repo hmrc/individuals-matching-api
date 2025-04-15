@@ -16,7 +16,7 @@
 
 package component.uk.gov.hmrc.individualsmatchingapi.stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.http.{HeaderNames, Status}

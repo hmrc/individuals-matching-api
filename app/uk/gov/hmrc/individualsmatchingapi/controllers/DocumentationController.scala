@@ -23,7 +23,7 @@ import org.apache.pekko.stream.Materializer
 import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import play.filters.cors.CORSActionBuilder
-import uk.gov.hmrc.individualsmatchingapi.views._
+import uk.gov.hmrc.individualsmatchingapi.views.*
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}

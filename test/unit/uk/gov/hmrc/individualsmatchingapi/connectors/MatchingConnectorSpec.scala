@@ -16,14 +16,14 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatest.matchers.should.Matchers
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.test.WireMockSupport
 import uk.gov.hmrc.individualsmatchingapi.connectors.MatchingConnector
-import uk.gov.hmrc.individualsmatchingapi.domain._
+import uk.gov.hmrc.individualsmatchingapi.domain.*
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 

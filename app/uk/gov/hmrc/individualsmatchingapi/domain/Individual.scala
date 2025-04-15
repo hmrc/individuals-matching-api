@@ -19,7 +19,7 @@ package uk.gov.hmrc.individualsmatchingapi.domain
 import uk.gov.hmrc.domain.Nino
 
 import java.time.LocalDate
-import java.time.LocalDate._
+import java.time.LocalDate.*
 import java.util.UUID
 
 case class Individual(matchId: UUID, nino: String, firstName: String, lastName: String, dateOfBirth: LocalDate)

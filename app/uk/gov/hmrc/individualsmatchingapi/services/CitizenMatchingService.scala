@@ -19,7 +19,7 @@ package uk.gov.hmrc.individualsmatchingapi.services
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.{CitizenDetailsConnector, MatchingConnector}
-import uk.gov.hmrc.individualsmatchingapi.domain._
+import uk.gov.hmrc.individualsmatchingapi.domain.*
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
 
 import java.time.LocalDate

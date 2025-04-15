@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.connectors
 
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.UpstreamErrorResponse.Upstream5xxResponse
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps, UpstreamErrorResponse}

@@ -21,7 +21,7 @@ import play.api.mvc.{Handler, RequestHeader}
 import play.api.routing.Router
 import play.api.{Configuration, OptionalDevContext}
 import play.core.WebCommands
-import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils._
+import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.*
 import uk.gov.hmrc.play.bootstrap.http.RequestHandler
 
 import javax.inject.Inject

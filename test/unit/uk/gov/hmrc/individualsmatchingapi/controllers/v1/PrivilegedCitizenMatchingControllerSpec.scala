@@ -24,13 +24,13 @@ import play.api.libs.json.Json.parse
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsJson, _}
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.v1.{LivePrivilegedCitizenMatchingController, SandboxPrivilegedCitizenMatchingController}
+import uk.gov.hmrc.individualsmatchingapi.domain.*
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
-import uk.gov.hmrc.individualsmatchingapi.domain._
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
