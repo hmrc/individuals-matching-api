@@ -17,7 +17,7 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import play.api.hal.Hal.state
-import play.api.hal.HalLink
+import play.api.hal.{HalLink, HalResource}
 import play.api.libs.json.Json
 import play.api.libs.json.Json.{obj, toJson}
 import play.api.mvc.hal._

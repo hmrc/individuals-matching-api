@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.repository
 
+import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
 import play.api.Configuration
