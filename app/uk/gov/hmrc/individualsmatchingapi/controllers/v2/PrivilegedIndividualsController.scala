@@ -17,10 +17,10 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import play.api.hal.Hal.state
-import play.api.hal.{HalLink, HalResource}
 import play.api.libs.json.Json
 import play.api.libs.json.Json.{obj, toJson}
-import play.api.mvc.hal._
+import play.api.hal.*
+import play.api.mvc.hal.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
