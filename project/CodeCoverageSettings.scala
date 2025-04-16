@@ -9,7 +9,8 @@ object CodeCoverageSettings {
     ".*BuildInfo.",
     "uk.gov.hmrc.BuildInfo",
     ".*Routes",
-    ".*RoutesPrefix*"
+    ".*RoutesPrefix*",
+    "uk.gov.hmrc.individualsmatchingapi.audit.models.*"
   )
 
   val settings: Seq[Setting[?]] = Seq(
