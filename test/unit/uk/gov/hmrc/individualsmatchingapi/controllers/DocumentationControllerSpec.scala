@@ -18,8 +18,9 @@ package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
 import controllers.Assets
 import org.apache.pekko.stream.Materializer
-import org.mockito.IdiomaticMockito
+import org.mockito.Mockito.when
 import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.Configuration
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.JsValue
@@ -33,7 +34,7 @@ import java.nio.file.{Files, Paths}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
+class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSugar {
   implicit lazy val materializer: Materializer = app.materializer
 
   trait Setup {
@@ -49,17 +50,17 @@ class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticM
     val underTest =
       new DocumentationController(controllerComponents, assets, configuration)
 
-    configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds").returns(None)
-    configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds").returns(None)
-    configuration.getOptional[String]("api.access.version-1.0.accessType").returns(None)
-    configuration.getOptional[Seq[String]]("api.access.version-2.0.whitelistedApplicationIds").returns(None)
-    configuration.getOptional[String]("api.access.version-2.0.status").returns(None)
-    configuration.getOptional[Boolean]("api.access.version-2.0.endpointsEnabled").returns(None)
+    when(configuration.getOptional[Seq[String]]("api.access.version-P1.0.whitelistedApplicationIds")).thenReturn(None)
+    when(configuration.getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds")).thenReturn(None)
+    when(configuration.getOptional[String]("api.access.version-1.0.accessType")).thenReturn(None)
+    when(configuration.getOptional[Seq[String]]("api.access.version-2.0.whitelistedApplicationIds")).thenReturn(None)
+    when(configuration.getOptional[String]("api.access.version-2.0.status")).thenReturn(None)
+    when(configuration.getOptional[Boolean]("api.access.version-2.0.endpointsEnabled")).thenReturn(None)
   }
 
   "/api/definition" should {
     "return 1.0 as PRIVATE when api.access.version-1.0.accessType is not set" in new Setup {
-      configuration.getOptional[String]("api.access.version-1.0.accessType").returns(None)
+      when(configuration.getOptional[String]("api.access.version-1.0.accessType")).thenReturn(None)
 
       val result: Future[Result] = underTest.definition()(request)
 
@@ -68,7 +69,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticM
     }
 
     "return 1.0 as PRIVATE when api.access.version-1.0.accessType is set to PRIVATE" in new Setup {
-      configuration.getOptional[String]("api.access.version-1.0.accessType").returns(Some("PRIVATE"))
+      when(configuration.getOptional[String]("api.access.version-1.0.accessType")).thenReturn(Some("PRIVATE"))
 
       val result: Future[Result] = underTest.definition()(request)
 
@@ -77,7 +78,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticM
     }
 
     "return 1.0 as PUBLIC when api.access.version-1.0.accessType is set to PUBLIC" in new Setup {
-      configuration.getOptional[String]("api.access.version-1.0.accessType").returns(Some("PUBLIC"))
+      when(configuration.getOptional[String]("api.access.version-1.0.accessType")).thenReturn(Some("PUBLIC"))
 
       val result: Future[Result] = underTest.definition()(request)
 
@@ -94,7 +95,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticM
     }
 
     "return 2.0 as ALPHA when api.access.version-2.0.status is set" in new Setup {
-      configuration.getOptional[String]("api.access.version-2.0.status").returns(Some("ALPHA"))
+      when(configuration.getOptional[String]("api.access.version-2.0.status")).thenReturn(Some("ALPHA"))
 
       val result: Future[Result] = underTest.definition()(request)
 
@@ -112,7 +113,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with IdiomaticM
 
     "return endpoints enabled false when api.access.version-2.0.endpointsEnabled is set" in new Setup {
 
-      configuration.getOptional[Boolean]("api.access.version-2.0.endpointsEnabled").returns(Some(false))
+      when(configuration.getOptional[Boolean]("api.access.version-2.0.endpointsEnabled")).thenReturn(Some(false))
 
       val result: Future[Result] = underTest.definition()(request)
 

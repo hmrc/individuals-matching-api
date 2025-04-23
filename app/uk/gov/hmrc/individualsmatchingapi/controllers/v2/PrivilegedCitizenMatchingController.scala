@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
+import play.api.hal.*
 import play.api.hal.Hal.links
-import play.api.hal.HalLink
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.hal._
+import play.api.mvc.hal.*
 import play.api.mvc.{Action, ControllerComponents}
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
-import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
+import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.*
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
-import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
+import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.*
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.{maybeCorrelationId, validateCorrelationId}
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
 

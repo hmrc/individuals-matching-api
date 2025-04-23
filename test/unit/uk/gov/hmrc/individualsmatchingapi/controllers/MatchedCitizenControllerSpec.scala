@@ -17,10 +17,11 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers
 
 import org.apache.pekko.stream.Materializer
-import org.mockito.ArgumentMatchers.any
-import org.mockito.IdiomaticMockito
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
 import org.scalatest.matchers.should.Matchers
-import play.api.http.Status._
+import org.scalatestplus.mockito.MockitoSugar
+import play.api.http.Status.*
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
 import play.api.test.FakeRequest
@@ -36,7 +37,7 @@ import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MatchedCitizenControllerSpec extends SpecBase with Matchers with IdiomaticMockito {
+class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSugar {
   implicit lazy val materializer: Materializer = app.materializer
 
   trait Setup {
@@ -56,9 +57,11 @@ class MatchedCitizenControllerSpec extends SpecBase with Matchers with Idiomatic
   "matched citizen controller" should {
 
     "return 200 (OK) for a valid matchId" in new Setup {
-      mockCitizenMatchingService
-        .fetchMatchedCitizenRecord(matchId)(any[HeaderCarrier])
-        .returns(Future.successful(matchedCitizenRecord))
+      when(
+        mockCitizenMatchingService
+          .fetchMatchedCitizenRecord(eqTo(matchId))(any[HeaderCarrier])
+      )
+        .thenReturn(Future.successful(matchedCitizenRecord))
 
       val result: Future[Result] = matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest)
 
@@ -69,9 +72,10 @@ class MatchedCitizenControllerSpec extends SpecBase with Matchers with Idiomatic
     }
 
     "return 404 (Not Found) for an invalid matchId" in new Setup {
-      mockCitizenMatchingService
-        .fetchMatchedCitizenRecord(matchId)(any[HeaderCarrier])
-        .returns(Future.failed(new MatchNotFoundException))
+      when(
+        mockCitizenMatchingService
+          .fetchMatchedCitizenRecord(eqTo(matchId))(any[HeaderCarrier])
+      ).thenReturn(Future.failed(new MatchNotFoundException))
 
       val result: Future[Result] = matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest)
 

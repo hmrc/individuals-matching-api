@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.individualsmatchingapi.domain
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.Json
 import play.api.mvc.{Result, Results}
-import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
+import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.*
 
 sealed abstract class ErrorResponse(val httpStatusCode: Int, val errorCode: String, val message: String) {
 

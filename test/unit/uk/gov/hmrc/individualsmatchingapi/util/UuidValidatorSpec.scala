@@ -28,13 +28,13 @@ class UuidValidatorSpec extends SpecBase with Matchers with ScalaCheckPropertyCh
   private val invalidUuid = "0-0-0-0-0"
 
   "Return true on a valid lower-cased UUID" in {
-    forAll { uuid: UUID =>
+    forAll { (uuid: UUID) =>
       UuidValidator.validate(uuid.toString) shouldBe true
     }
   }
 
   "Return true on a valid upper-cased UUID" in {
-    forAll { uuid: UUID =>
+    forAll { (uuid: UUID) =>
       UuidValidator.validate(uuid.toString.toUpperCase) shouldBe true
     }
   }

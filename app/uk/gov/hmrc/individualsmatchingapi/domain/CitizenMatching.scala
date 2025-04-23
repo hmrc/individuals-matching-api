@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.individualsmatchingapi.domain
 
-import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import scala.util.Try

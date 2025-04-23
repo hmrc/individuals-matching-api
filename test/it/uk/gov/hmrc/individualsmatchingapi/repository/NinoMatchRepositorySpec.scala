@@ -16,6 +16,7 @@
 
 package it.uk.gov.hmrc.individualsmatchingapi.repository
 
+import org.mongodb.scala.ObservableFuture
 import org.mongodb.scala.model.IndexModel
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
@@ -38,12 +39,12 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
   protected val mongoUri: String =
     s"mongodb://127.0.0.1:27017/$databaseName?heartbeatFrequencyMS=1000&rm.failover=default"
 
-  override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
+  override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .configure(Configuration("mongodb.uri" -> mongoUri, "mongodb.ninoMatchTtlInSeconds" -> ninoMatchTtl))
     .build()
 
   val nino: Nino = Nino("AB123456A")
-  val ninoMatchRepository: NinoMatchRepository = fakeApplication.injector.instanceOf[NinoMatchRepository]
+  val ninoMatchRepository: NinoMatchRepository = fakeApplication().injector.instanceOf[NinoMatchRepository]
 
   override def beforeEach(): Unit = {
     ninoMatchRepository.collection.drop()

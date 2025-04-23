@@ -17,7 +17,7 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
 import play.api.Logging
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.{ControllerComponents, Request, RequestHeader, Result}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
@@ -25,7 +25,7 @@ import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrol
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, TooManyRequestException}
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
-import uk.gov.hmrc.individualsmatchingapi.domain._
+import uk.gov.hmrc.individualsmatchingapi.domain.*
 import uk.gov.hmrc.individualsmatchingapi.utils.UuidValidator
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -33,13 +33,14 @@ import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
 
 abstract class CommonController @Inject() (cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   override protected def withJsonBody[T](
     f: T => Future[Result]
-  )(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] =
+  )(implicit request: Request[JsValue], m: ClassTag[T], reads: Reads[T]): Future[Result] =
     Try(request.body.validate[T]) match {
       case Success(JsSuccess(payload, _)) => f(payload)
       case Success(JsError(errs)) =>

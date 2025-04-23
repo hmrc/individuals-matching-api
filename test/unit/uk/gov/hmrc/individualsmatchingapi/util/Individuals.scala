@@ -16,8 +16,9 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.util
 
-import java.time.LocalDate.parse
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenDetails
+
+import java.time.LocalDate.parse
 
 trait Individuals {
 

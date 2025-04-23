@@ -17,17 +17,17 @@
 package component.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.{AuthStub, BaseSpec, CitizenDetailsStub, MatchingStub}
-import java.time.LocalDate
 import org.mongodb.scala.model.Filters
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.Json
 import play.api.libs.json.Json.parse
 import play.api.test.Helpers.{BAD_REQUEST, NOT_FOUND}
 import scalaj.http.{Http, HttpResponse}
-import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters._
-import uk.gov.hmrc.individualsmatchingapi.domain._
+import uk.gov.hmrc.individualsmatchingapi.domain.*
+import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.*
 import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 
+import java.time.LocalDate
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationDouble
 

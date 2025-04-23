@@ -16,14 +16,14 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
-import org.mockito.ArgumentMatchers.any
-import org.mockito.IdiomaticMockito
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
-import play.api.http.Status.OK
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsJson, _}
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -39,7 +39,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
 
-class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with IdiomaticMockito with Individuals {
+class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with MockitoSugar with Individuals {
 
   val uuid: UUID = UUID.randomUUID()
 
@@ -50,22 +50,23 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
     val controllerComponents: ControllerComponents =
       app.injector.instanceOf[ControllerComponents]
 
-    val liveController =
+    val liveController: LivePrivilegedIndividualsController =
       new LivePrivilegedIndividualsController(mockCitizenMatchingService, mockAuthConnector, controllerComponents)
-    val sandboxController = new SandboxPrivilegedIndividualsController(
+    val sandboxController: SandboxPrivilegedIndividualsController = new SandboxPrivilegedIndividualsController(
       new SandboxCitizenMatchingService(),
       mockAuthConnector,
       controllerComponents
     )
-
-    mockAuthConnector.authorise(any(), EmptyRetrieval)(any(), any()).returns(successful(()))
+    when(mockAuthConnector.authorise(any(), eqTo(EmptyRetrieval))(any(), any())).thenReturn(successful(()))
   }
 
   "The live matched individual function" should {
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
-      mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
-        .returns(failed(new MatchNotFoundException))
+      when(
+        mockCitizenMatchingService
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(any[HeaderCarrier])
+      )
+        .thenReturn(failed(new MatchNotFoundException))
 
       val eventualResult: Future[Result] =
         liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
@@ -76,9 +77,11 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
     }
 
     "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
-      mockCitizenMatchingService
-        .fetchCitizenDetailsByMatchId(uuid)(any[HeaderCarrier])
-        .returns(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
+      when(
+        mockCitizenMatchingService
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(any[HeaderCarrier])
+      )
+        .thenReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult: Future[Result] =
         liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
       status(eventualResult) mustBe OK
@@ -87,15 +90,16 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
 
     "fail with AuthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
 
-      mockAuthConnector
-        .authorise(Enrolment("read:individuals-matching"), EmptyRetrieval)(any(), any())
-        .returns(failed(InsufficientEnrolments()))
+      when(
+        mockAuthConnector
+          .authorise(eqTo(Enrolment("read:individuals-matching")), eqTo(EmptyRetrieval))(any(), any())
+      )
+        .thenReturn(failed(InsufficientEnrolments()))
 
       intercept[InsufficientEnrolments] {
         await(liveController.matchedIndividual(uuid.toString).apply(FakeRequest()))
       }
-
-      mockCitizenMatchingService wasNever called
+      verifyNoInteractions(mockCitizenMatchingService)
     }
   }
 
@@ -123,7 +127,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Id
         .matchedIndividual(sandboxMatchId.toString)
         .apply(FakeRequest())
       status(eventualResult) mustBe OK
-      mockAuthConnector wasNever called
+      verifyNoInteractions(mockAuthConnector)
     }
   }
 

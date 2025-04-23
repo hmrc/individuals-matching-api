@@ -16,7 +16,7 @@
 
 package component.uk.gov.hmrc.individualsmatchingapi.stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import uk.gov.hmrc.individualsmatchingapi.domain.{CitizenDetails, CitizenMatchingRequest}
 

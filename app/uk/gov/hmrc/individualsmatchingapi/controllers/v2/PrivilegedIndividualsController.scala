@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
+import play.api.hal.*
 import play.api.hal.Hal.state
-import play.api.hal.HalLink
 import play.api.libs.json.Json
 import play.api.libs.json.Json.{obj, toJson}
-import play.api.mvc.hal._
+import play.api.mvc.hal.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
-import uk.gov.hmrc.individualsmatchingapi.controllers.Environment._
+import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.*
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.{maybeCorrelationId, validateCorrelationId}
