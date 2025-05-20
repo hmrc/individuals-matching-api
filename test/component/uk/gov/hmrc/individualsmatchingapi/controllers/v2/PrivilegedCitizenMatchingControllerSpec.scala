@@ -44,6 +44,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
 
   // Scopes list MUST be in alphabetical order
   val scopes = List(
+    "read:individuals-employments-ho-nrc",
     "read:individuals-matching-hmcts-c2",
     "read:individuals-matching-hmcts-c3",
     "read:individuals-matching-hmcts-c4",
