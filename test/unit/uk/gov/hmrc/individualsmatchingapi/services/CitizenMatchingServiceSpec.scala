@@ -67,12 +67,12 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
 
       when(
         mockCitizenDetailsConnector
-          .citizenDetails(eqTo(ninoString))(any[HeaderCarrier])
+          .citizenDetails(eqTo(ninoString))(using any[HeaderCarrier])
       ).thenReturn(Future.successful(details))
 
       when(
         mockMatchingConnector
-          .validateMatch(eqTo(detailsMatchRequest))(any[HeaderCarrier])
+          .validateMatch(eqTo(detailsMatchRequest))(using any[HeaderCarrier])
       ).thenReturn(Future.successful(()))
 
       when(
@@ -88,7 +88,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     "propagate exception when citizen details are not found" in new Setup {
       when(
         mockCitizenDetailsConnector
-          .citizenDetails(eqTo(ninoString))(any[HeaderCarrier])
+          .citizenDetails(eqTo(ninoString))(using any[HeaderCarrier])
       ).thenReturn(Future.failed(new CitizenNotFoundException))
 
       intercept[CitizenNotFoundException](await(liveService.matchCitizen(citizenMatchingRequest)))
@@ -98,7 +98,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     "propagate exception for an invalid nino" in new Setup {
       when(
         mockCitizenDetailsConnector
-          .citizenDetails(eqTo(ninoString))(any[HeaderCarrier])
+          .citizenDetails(eqTo(ninoString))(using any[HeaderCarrier])
       ).thenReturn(Future.failed(new InvalidNinoException))
 
       intercept[InvalidNinoException](await(liveService.matchCitizen(citizenMatchingRequest)))
@@ -107,12 +107,12 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     "propagate exception for a non-match" in new Setup {
       when(
         mockCitizenDetailsConnector
-          .citizenDetails(eqTo(ninoString))(any[HeaderCarrier])
+          .citizenDetails(eqTo(ninoString))(using any[HeaderCarrier])
       )
         .thenReturn(Future.successful(details))
       when(
         mockMatchingConnector
-          .validateMatch(eqTo(detailsMatchRequest))(any[HeaderCarrier])
+          .validateMatch(eqTo(detailsMatchRequest))(using any[HeaderCarrier])
       )
         .thenReturn(Future.failed(new MatchingException))
 

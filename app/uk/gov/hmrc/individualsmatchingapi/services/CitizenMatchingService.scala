@@ -77,10 +77,10 @@ class SandboxCitizenMatchingService extends CitizenMatchingService {
       value.trim.take(length)
 
     def isFirstNameMatch(requestName: String, individualName: String) =
-      firstNLetters(1, requestName) equalsIgnoreCase firstNLetters(1, individualName)
+      firstNLetters(1, requestName).equalsIgnoreCase(firstNLetters(1, individualName))
 
     def isLastNameMatch(requestLastName: String, individualLastName: String) =
-      firstNLetters(3, requestLastName) equalsIgnoreCase firstNLetters(3, individualLastName)
+      firstNLetters(3, requestLastName).equalsIgnoreCase(firstNLetters(3, individualLastName))
 
     def isMatch(individual: Individual) =
       isFirstNameMatch(citizenMatchingRequest.firstName, individual.firstName) &&

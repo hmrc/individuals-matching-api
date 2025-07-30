@@ -65,7 +65,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
 
     when(
       mockAuthConnector
-        .authorise(any(), eqTo(Retrievals.allEnrolments))(any(), any())
+        .authorise(any(), eqTo(Retrievals.allEnrolments))(using any(), any())
     )
       .thenReturn(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
   }
@@ -74,7 +74,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
       )
         .thenReturn(failed(new MatchNotFoundException))
 
@@ -87,13 +87,13 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
         """{"code":"NOT_FOUND","message":"The resource can not be found"}"""
       )
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
       )
         .thenReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult: Future[Result] =
@@ -103,20 +103,20 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       status(eventualResult) mustBe OK
       contentAsJson(eventualResult) mustBe Json.parse(response(uuid, "Joe", "Bloggs", "AB123456C", "1969-01-15"))
 
-      verify(mockAuditHelper).auditApiResponse(any(), any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiResponse(any(), any(), any(), any(), any(), any())(using any())
     }
 
     "fail with AuthorizedException when the bearer token does not have a valid enrolment" in new Setup {
 
       when(
         mockAuthConnector
-          .authorise(any(), eqTo(Retrievals.allEnrolments))(any(), any())
+          .authorise(any(), eqTo(Retrievals.allEnrolments))(using any(), any())
       )
         .thenReturn(failed(InsufficientEnrolments()))
 
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
       )
         .thenReturn(failed(new MatchNotFoundException))
 
@@ -128,13 +128,13 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       contentAsJson(res) mustBe Json.parse("""{"code":"UNAUTHORIZED","message":"Insufficient Enrolments"}""")
 
       verifyNoInteractions(mockCitizenMatchingService)
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "respond with http 400 (Bad Request) for a malformed CorrelationId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
       )
         .thenReturn(failed(new MatchNotFoundException))
 
@@ -152,13 +152,13 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
           |""".stripMargin
       )
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "respond with http 400 (Bad Request) for a missing CorrelationId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
       )
         .thenReturn(failed(new MatchNotFoundException))
 
@@ -174,7 +174,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
           |""".stripMargin
       )
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
   }
 

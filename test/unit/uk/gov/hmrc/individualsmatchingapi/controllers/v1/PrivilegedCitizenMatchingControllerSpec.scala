@@ -64,7 +64,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       controllerComponents
     )
 
-    when(mockAuthConnector.authorise(any(), eqTo(EmptyRetrieval))(any(), any())).thenReturn(successful(()))
+    when(mockAuthConnector.authorise(any(), eqTo(EmptyRetrieval))(using any(), any())).thenReturn(successful(()))
   }
 
   "live matching citizen controller" should {
@@ -74,7 +74,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     "return 200 (Ok) for a matched citizen" in new Setup {
       when(
         mockLiveCitizenMatchingService
-          .matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier])
+          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier])
       ).thenReturn(Future.successful(matchId))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
@@ -99,7 +99,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     "return 200 Ok when matching a user with a '.' in their name" in new Setup {
       when(
-        mockLiveCitizenMatchingService.matchCitizen(any())(any())
+        mockLiveCitizenMatchingService.matchCitizen(any())(using any())
       ).thenReturn(Future.successful(matchId))
 
       val payload: JsObject = Json.obj(
@@ -116,7 +116,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     "return 403 (Forbidden) for a citizen not found" in new Setup {
       when(
         mockLiveCitizenMatchingService
-          .matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier])
+          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier])
       ).thenReturn(Future.failed(new CitizenNotFoundException))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
@@ -131,7 +131,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     "return 403 (Forbidden) when a matching exception is thrown" in new Setup {
       when(
         mockLiveCitizenMatchingService
-          .matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier])
+          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier])
       ).thenReturn(Future.failed(new MatchingException))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
@@ -146,7 +146,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     "return 403 (Forbidden) when an invalid nino exception is thrown" in new Setup {
       when(
         mockLiveCitizenMatchingService
-          .matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier])
+          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier])
       ).thenReturn(Future.failed(new InvalidNinoException()))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
@@ -159,9 +159,9 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     }
 
     "return 400 (BadRequest) for an invalid dateOfBirth" in new Setup {
-      var requestBody: JsValue =
+      val requestBody: JsValue =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
-      var eventualResult: Future[Result] =
+      val eventualResult: Future[Result] =
         liveController.matchCitizen()(fakeRequest.withBody(requestBody))
 
       status(eventualResult) mustBe BAD_REQUEST
@@ -170,11 +170,12 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         "message" -> "dateOfBirth: invalid date format"
       )
 
-      requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
-      eventualResult = liveController.matchCitizen()(fakeRequest.withBody(requestBody))
+      val requestBody1 =
+        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
+      val eventualResult1 = liveController.matchCitizen()(fakeRequest.withBody(requestBody1))
 
-      status(eventualResult) mustBe BAD_REQUEST
-      contentAsJson(eventualResult) mustBe Json.obj(
+      status(eventualResult1) mustBe BAD_REQUEST
+      contentAsJson(eventualResult1) mustBe Json.obj(
         "code"    -> "INVALID_REQUEST",
         "message" -> "dateOfBirth: invalid date format"
       )
@@ -293,7 +294,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
       when(
         mockAuthConnector
-          .authorise(eqTo(Enrolment("read:individuals-matching")), eqTo(EmptyRetrieval))(any(), any())
+          .authorise(eqTo(Enrolment("read:individuals-matching")), eqTo(EmptyRetrieval))(using any(), any())
       ).thenReturn(failed(InsufficientEnrolments()))
 
       intercept[InsufficientEnrolments] {
@@ -361,9 +362,9 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     }
 
     "return 400 (BadRequest) for an invalid dateOfBirth" in new Setup {
-      var requestBody: JsValue =
+      val requestBody: JsValue =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
-      var eventualResult: Future[Result] =
+      val eventualResult: Future[Result] =
         sandboxController.matchCitizen()(fakeRequest.withBody(requestBody))
 
       status(eventualResult) mustBe BAD_REQUEST
@@ -372,11 +373,12 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         "message" -> "dateOfBirth: invalid date format"
       )
 
-      requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
-      eventualResult = sandboxController.matchCitizen()(fakeRequest.withBody(requestBody))
+      val requestBody1: JsValue =
+        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
+      val eventualResult1: Future[Result] = sandboxController.matchCitizen()(fakeRequest.withBody(requestBody1))
 
-      status(eventualResult) mustBe BAD_REQUEST
-      contentAsJson(eventualResult) mustBe Json.obj(
+      status(eventualResult1) mustBe BAD_REQUEST
+      contentAsJson(eventualResult1) mustBe Json.obj(
         "code"    -> "INVALID_REQUEST",
         "message" -> "dateOfBirth: invalid date format"
       )

@@ -59,7 +59,7 @@ class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSu
     "return 200 (OK) for a valid matchId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchMatchedCitizenRecord(eqTo(matchId))(any[HeaderCarrier])
+          .fetchMatchedCitizenRecord(eqTo(matchId))(using any[HeaderCarrier])
       )
         .thenReturn(Future.successful(matchedCitizenRecord))
 
@@ -74,7 +74,7 @@ class MatchedCitizenControllerSpec extends SpecBase with Matchers with MockitoSu
     "return 404 (Not Found) for an invalid matchId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchMatchedCitizenRecord(eqTo(matchId))(any[HeaderCarrier])
+          .fetchMatchedCitizenRecord(eqTo(matchId))(using any[HeaderCarrier])
       ).thenReturn(Future.failed(new MatchNotFoundException))
 
       val result: Future[Result] = matchedCitizenController.matchedCitizen(matchId.toString)(fakeRequest)
