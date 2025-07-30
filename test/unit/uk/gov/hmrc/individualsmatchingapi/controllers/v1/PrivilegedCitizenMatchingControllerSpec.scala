@@ -113,6 +113,23 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       status(res) mustBe OK
     }
 
+    "return JsError when mandatory field missing" in new Setup {
+      when(
+        mockLiveCitizenMatchingService.matchCitizen(any())(using any())
+      ).thenReturn(Future.successful(matchId))
+
+      val payload: JsObject = Json.obj(
+        "firstName"   -> 1,
+        "lastName"    -> "St. John",
+        "nino"        -> "AA112233B",
+        "dateOfBirth" -> "1900-01-01"
+      )
+
+      val res: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(payload))
+
+      status(res) mustBe 400
+    }
+
     "return 403 (Forbidden) for a citizen not found" in new Setup {
       when(
         mockLiveCitizenMatchingService
