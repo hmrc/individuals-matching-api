@@ -68,6 +68,6 @@ object RequestHeaderUtils {
   private def versionedUri(urlPath: String, version: String) =
     urlPath match {
       case "/" => s"/v$version"
-      case uri => s"/v$version$urlPath"
+      case _   => s"/v$version$urlPath"
     }
 }

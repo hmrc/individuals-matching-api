@@ -57,14 +57,14 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       mockAuthConnector,
       controllerComponents
     )
-    when(mockAuthConnector.authorise(any(), eqTo(EmptyRetrieval))(any(), any())).thenReturn(successful(()))
+    when(mockAuthConnector.authorise(any(), eqTo(EmptyRetrieval))(using any(), any())).thenReturn(successful(()))
   }
 
   "The live matched individual function" should {
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
       )
         .thenReturn(failed(new MatchNotFoundException))
 
@@ -79,7 +79,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
       )
         .thenReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult: Future[Result] =
@@ -92,7 +92,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
 
       when(
         mockAuthConnector
-          .authorise(eqTo(Enrolment("read:individuals-matching")), eqTo(EmptyRetrieval))(any(), any())
+          .authorise(eqTo(Enrolment("read:individuals-matching")), eqTo(EmptyRetrieval))(using any(), any())
       )
         .thenReturn(failed(InsufficientEnrolments()))
 

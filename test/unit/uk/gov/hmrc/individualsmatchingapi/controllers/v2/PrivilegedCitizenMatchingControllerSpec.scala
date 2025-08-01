@@ -65,7 +65,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     when(
       mockAuthConnector
-        .authorise(any(), eqTo(Retrievals.allEnrolments))(any(), any())
+        .authorise(any(), eqTo(Retrievals.allEnrolments))(using any(), any())
     ).thenReturn(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
 
   }
@@ -77,7 +77,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     "return 200 (Ok) for a matched citizen" in new Setup {
       when(
         mockLiveCitizenMatchingService
-          .matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier])
+          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier])
       ).thenReturn(Future.successful(matchId))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(
@@ -99,12 +99,12 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
                }
              }"""
       )
-      verify(mockAuditHelper).auditApiResponse(any(), any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiResponse(any(), any(), any(), any(), any(), any())(using any())
     }
 
     "return 200 Ok when matching a user with a '.' in their name" in new Setup {
 
-      when(mockLiveCitizenMatchingService.matchCitizen(any())(any())).thenReturn(Future.successful(matchId))
+      when(mockLiveCitizenMatchingService.matchCitizen(any())(using any())).thenReturn(Future.successful(matchId))
 
       val payload: JsObject = Json.obj(
         "firstName"   -> "Mr.",
@@ -116,13 +116,13 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       val res: Future[Result] =
         liveController.matchCitizen()(fakeRequest.withBody(payload).withHeaders(("CorrelationId", sampleCorrelationId)))
       status(res) mustBe OK
-      verify(mockAuditHelper).auditApiResponse(any(), any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiResponse(any(), any(), any(), any(), any(), any())(using any())
     }
 
     "return 404 (Not Found) for a citizen not found" in new Setup {
       when(
         mockLiveCitizenMatchingService
-          .matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier])
+          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier])
       ).thenReturn(Future.failed(new CitizenNotFoundException))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(
@@ -135,13 +135,13 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         "message" -> "There is no match for the information provided"
       )
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "return 403 (Forbidden) when a matching exception is thrown" in new Setup {
       when(
         mockLiveCitizenMatchingService
-          .matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier])
+          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier])
       ).thenReturn(Future.failed(new MatchingException))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(
@@ -154,13 +154,13 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         "message" -> "There is no match for the information provided"
       )
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "return 404 (Not Found) when an invalid nino exception is thrown" in new Setup {
       when(
         mockLiveCitizenMatchingService
-          .matchCitizen(any[CitizenMatchingRequest])(any[HeaderCarrier])
+          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier])
       ).thenReturn(Future.failed(new InvalidNinoException()))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(
@@ -173,13 +173,13 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         "message" -> "There is no match for the information provided"
       )
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "return 400 (BadRequest) for an invalid dateOfBirth" in new Setup {
-      var requestBody: JsValue =
+      val requestBody: JsValue =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
-      var eventualResult: Future[Result] =
+      val eventualResult: Future[Result] =
         liveController.matchCitizen()(
           fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId))
         )
@@ -190,15 +190,16 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         "message" -> "dateOfBirth: invalid date format"
       )
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
 
-      requestBody = parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
-      eventualResult = liveController.matchCitizen()(
-        fakeRequest.withBody(requestBody).withHeaders(("CorrelationId", sampleCorrelationId))
+      val requestBody1: JsValue =
+        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
+      val eventualResult1: Future[Result] = liveController.matchCitizen()(
+        fakeRequest.withBody(requestBody1).withHeaders(("CorrelationId", sampleCorrelationId))
       )
 
-      status(eventualResult) mustBe BAD_REQUEST
-      contentAsJson(eventualResult) mustBe Json.obj(
+      status(eventualResult1) mustBe BAD_REQUEST
+      contentAsJson(eventualResult1) mustBe Json.obj(
         "code"    -> "INVALID_REQUEST",
         "message" -> "dateOfBirth: invalid date format"
       )
@@ -218,7 +219,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         "message" -> "Malformed nino submitted"
       )
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "return 400 Bad Request when the first name is empty" in new Setup {
@@ -237,7 +238,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "firstName is required")
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "return 400 Bad Request when the last name is empty" in new Setup {
@@ -255,7 +256,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       status(res) mustBe BAD_REQUEST
       contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "lastName is required")
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "return 400 Bad Request when the first name is greater than 35 characters" in new Setup {
@@ -275,7 +276,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       contentAsJson(res) mustBe Json
         .obj("code" -> "INVALID_REQUEST", "message" -> "firstName must be no more than 35 characters")
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "return 400 Bad Request when the last name is greater than 35 characters" in new Setup {
@@ -295,7 +296,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       contentAsJson(res) mustBe Json
         .obj("code" -> "INVALID_REQUEST", "message" -> "lastName must be no more than 35 characters")
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "return 400 Bad Request when the first name contains invalid characters" in new Setup {
@@ -314,7 +315,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       contentAsJson(res) mustBe Json
         .obj("code" -> "INVALID_REQUEST", "message" -> "firstName contains invalid characters")
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "return 400 Bad Request when the last name contains invalid characters" in new Setup {
@@ -333,7 +334,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       contentAsJson(res) mustBe Json
         .obj("code" -> "INVALID_REQUEST", "message" -> "lastName contains invalid characters")
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
     "fail with UnauthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
@@ -342,7 +343,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
       when(
         mockAuthConnector
-          .authorise(any(), eqTo(Retrievals.allEnrolments))(any(), any())
+          .authorise(any(), eqTo(Retrievals.allEnrolments))(using any(), any())
       ).thenReturn(failed(InsufficientEnrolments()))
 
       val res: Future[Result] = liveController.matchCitizen()(
@@ -353,7 +354,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         .obj("code" -> "UNAUTHORIZED", "message" -> "Insufficient Enrolments")
       verifyNoInteractions(mockLiveCitizenMatchingService)
 
-      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(any())
+      verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
   }
 
