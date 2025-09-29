@@ -55,7 +55,8 @@ lazy val microservice =
     )
     .settings(majorVersion := 0)
     .settings(
-      scalacOptions += "-Wconf:src=routes/.*:s,src=txt/.*:s"
+      scalacOptions += "-Wconf:src=routes/.*:s,src=txt/.*:s",
+      scalacOptions += "-Wconf:msg=Flag.*repeatedly:s"
     )
     .settings(PlayKeys.playDefaultPort := 9653)
     .settings(Test / testOptions := Seq(Tests.Filter((name: String) => name.startsWith("unit"))))

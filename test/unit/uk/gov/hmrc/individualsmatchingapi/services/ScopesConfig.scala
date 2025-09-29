@@ -24,14 +24,17 @@ trait ScopesConfig {
   val mockScopeTwo: String = "scopeTwo"
   val mockScopeThree: String = "scopeThree"
   val mockScopeFour: String = "scopeFour"
+  val mockScopeFive = "scopeFive"
 
   val endpointKeyOne: String = "A"
   val endpointKeyTwo: String = "B"
   val endpointKeyThree: String = "C"
+  val endpointKeyFour: String = "D"
 
   val endpointOne: String = "sampleEndpointOne"
   val endpointTwo: String = "sampleEndpointTwo"
   val endpointThree: String = "sampleEndpointThree"
+  val endpointFour: String = "sampleEndpointFour"
 
   val mockConfig: Configuration = Configuration(
     (s"api-config.scopes.$mockScopeOne.endpoints", Seq(endpointKeyOne, endpointKeyTwo)),
@@ -44,6 +47,8 @@ trait ScopesConfig {
     (s"api-config.scopes.$mockScopeFour.endpoints", Seq(endpointKeyThree)),
     (s"api-config.scopes.$mockScopeFour.fields", Seq("G", "H", "I")),
     (s"api-config.scopes.$mockScopeFour.filters", Seq("B")),
+    (s"api-config.scopes.$mockScopeFive.endpoints", Seq(endpointKeyTwo, endpointKeyThree, endpointKeyFour)),
+    (s"api-config.scopes.$mockScopeFive.fields", Seq("X", "Y", "Z")),
     (s"api-config.endpoints.internal.$endpointOne.key", endpointKeyOne),
     (s"api-config.endpoints.internal.$endpointOne.endpoint", "/internal/1"),
     (s"api-config.endpoints.internal.$endpointOne.title", "Get the first endpoint"),
@@ -66,6 +71,9 @@ trait ScopesConfig {
     (s"api-config.endpoints.external.$endpointThree.key", endpointKeyThree),
     (s"api-config.endpoints.external.$endpointThree.endpoint", "/external/3"),
     (s"api-config.endpoints.external.$endpointThree.title", "Get the third endpoint"),
+    (s"api-config.endpoints.external.$endpointFour.key", endpointKeyFour),
+    (s"api-config.endpoints.external.$endpointFour.endpoint", "/external/4"),
+    (s"api-config.endpoints.external.$endpointFour.title", "Get the fourth endpoint"),
     (s"api-config.fields.A", "path/to/a"),
     (s"api-config.fields.B", "path/to/b"),
     (s"api-config.fields.C", "path/to/c"),

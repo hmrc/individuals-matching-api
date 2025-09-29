@@ -57,7 +57,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     "read:individuals-matching-laa-c4",
     "read:individuals-matching-lsani-c1",
     "read:individuals-matching-lsani-c3",
-    "read:individuals-matching-nictsejo-c4"
+    "read:individuals-matching-nictsejo-c4",
+    "read:individuals-matching-scts"
   )
 
   val validScopes = List("read:individuals-matching-laa-c3")
