@@ -43,7 +43,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     CitizenMatchingRequest(firstName, lastName, nino, dateOfBirthSensibleformat)
 
   // Scopes list MUST be in alphabetical order
-  val scopes = List(
+  val scopes: List[String] = List(
     "read:individuals-matching-hmcts-c2",
     "read:individuals-matching-hmcts-c3",
     "read:individuals-matching-hmcts-c4",
@@ -55,13 +55,14 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     "read:individuals-matching-laa-c2",
     "read:individuals-matching-laa-c3",
     "read:individuals-matching-laa-c4",
+    "read:individuals-matching-lad4",
     "read:individuals-matching-lsani-c1",
     "read:individuals-matching-lsani-c3",
     "read:individuals-matching-nictsejo-c4",
     "read:individuals-matching-scts"
   )
 
-  val validScopes = List("read:individuals-matching-laa-c3")
+  val validScopes: List[String] = List("read:individuals-matching-laa-c3")
 
   Feature("citizen matching is open and accessible") {
 
