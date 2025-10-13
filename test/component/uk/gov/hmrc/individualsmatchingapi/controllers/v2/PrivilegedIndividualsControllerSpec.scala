@@ -29,7 +29,7 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
   val nino = "NA000799C"
 
   // Scopes list MUST be in alphabetical order
-  val scopes = List(
+  val scopes: List[String] = List(
     "read:individuals-matching-hmcts-c2",
     "read:individuals-matching-hmcts-c3",
     "read:individuals-matching-hmcts-c4",
@@ -41,13 +41,14 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
     "read:individuals-matching-laa-c2",
     "read:individuals-matching-laa-c3",
     "read:individuals-matching-laa-c4",
+    "read:individuals-matching-lad4",
     "read:individuals-matching-lsani-c1",
     "read:individuals-matching-lsani-c3",
     "read:individuals-matching-nictsejo-c4",
     "read:individuals-matching-scts"
   )
 
-  val validScopes = List(
+  val validScopes: List[String] = List(
     "read:individuals-matching-laa-c3"
   )
 
