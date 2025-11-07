@@ -19,6 +19,7 @@ package uk.gov.hmrc.individualsmatchingapi.config
 import com.google.inject.AbstractModule
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.individualsmatchingapi.ttl.UpdateNinoMatchService
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
 
@@ -26,6 +27,6 @@ class ConfigModule extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[HttpClientV2]).toProvider(classOf[HttpClientV2Provider])
     bind(classOf[AuthConnector]).to(classOf[DefaultAuthConnector])
-
+    bind(classOf[UpdateNinoMatchService]).asEagerSingleton()
   }
 }

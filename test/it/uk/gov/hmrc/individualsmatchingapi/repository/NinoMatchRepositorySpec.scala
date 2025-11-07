@@ -27,6 +27,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfterEach {
@@ -84,7 +85,12 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
       val ninoMatch = await(ninoMatchRepository.create(nino))
 
       val storedNinoMatch = await(ninoMatchRepository.read(ninoMatch.id))
-      storedNinoMatch shouldBe Some(ninoMatch)
+      storedNinoMatch.get.nino shouldBe ninoMatch.nino
+      storedNinoMatch.get.id shouldBe ninoMatch.id
+      storedNinoMatch.get.createdAt.truncatedTo(ChronoUnit.SECONDS) shouldBe ninoMatch.createdAt.truncatedTo(
+        ChronoUnit.SECONDS
+      )
+
     }
 
     "allow the same nino to be saved multiple times" in {
@@ -102,7 +108,9 @@ class NinoMatchRepositorySpec extends SpecBase with Matchers with BeforeAndAfter
 
       val result = await(ninoMatchRepository.read(ninoMatch.id))
 
-      result shouldBe Some(ninoMatch)
+      result.get.nino shouldBe ninoMatch.nino
+      result.get.id shouldBe ninoMatch.id
+      result.get.createdAt.truncatedTo(ChronoUnit.SECONDS) shouldBe ninoMatch.createdAt.truncatedTo(ChronoUnit.SECONDS)
     }
 
     "return None when there is no individual for the nino" in {

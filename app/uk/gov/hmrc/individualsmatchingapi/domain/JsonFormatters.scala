@@ -82,7 +82,6 @@ object JsonFormatters {
       JsSuccess(UUID.fromString(json.asInstanceOf[JsString].value))
   }
 
-  implicit val ninoMatchJsonFormat: OFormat[NinoMatch] = Json.format[NinoMatch]
   implicit val matchedCitizenRecordJsonFormat: OFormat[MatchedCitizenRecord] =
     Json.format[MatchedCitizenRecord]
 }
