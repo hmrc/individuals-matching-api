@@ -16,16 +16,24 @@
 
 package uk.gov.hmrc.individualsmatchingapi.domain
 
-import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantReads
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantWrites
 
-import java.time.Instant
 import java.util.UUID
+import java.time.{Instant, LocalDateTime, ZoneOffset}
+import play.api.libs.json.{Format, Json, OFormat, Reads}
+
+import scala.util.Try
 
 case class NinoMatch(nino: Nino, id: UUID, createdAt: Instant = Instant.now())
 
 object NinoMatch {
-  given Format[Instant] = MongoJavatimeFormats.instantFormat
+  private val instantReadsWithFallback: Reads[Instant] =
+    instantReads.orElse(Reads.of[String].map { dateStr =>
+      Try(Instant.parse(dateStr)).getOrElse(LocalDateTime.parse(dateStr).toInstant(ZoneOffset.UTC))
+    })
+
+  given Format[Instant] = Format(instantReadsWithFallback, instantWrites)
   implicit val format: OFormat[NinoMatch] = Json.format[NinoMatch]
 }
