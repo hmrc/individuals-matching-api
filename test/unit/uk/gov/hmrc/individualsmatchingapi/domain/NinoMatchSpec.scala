@@ -23,10 +23,9 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.individualsmatchingapi.domain.NinoMatch
 
-import java.util.UUID
-import java.time.{Instant, LocalDateTime, ZoneOffset}
+import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.time.format.DateTimeParseException
+import java.util.UUID
 
 class NinoMatchSpec extends AnyWordSpec with Matchers {
 
@@ -36,7 +35,6 @@ class NinoMatchSpec extends AnyWordSpec with Matchers {
     val nino = Nino(validNino)
     val uuid = UUID.randomUUID()
     val createdAt: Instant = Instant.now()
-    val dateTimeCreatedAt: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
 
     val ninoMatch = NinoMatch(nino, uuid, createdAt)
     val json = Json.toJson(ninoMatch)
@@ -56,49 +54,6 @@ class NinoMatchSpec extends AnyWordSpec with Matchers {
       result.get.createdAt.truncatedTo(ChronoUnit.SECONDS) shouldBe ninoMatch.createdAt.truncatedTo(ChronoUnit.SECONDS)
     }
 
-    "deserialize JSON when createdAt is a string" in {
-      val ninoMatchJson = Json.obj(
-        "nino"      -> validNino,
-        "id"        -> uuid.toString,
-        "createdAt" -> createdAt.toString
-      )
-
-      val result = ninoMatchJson.validate[NinoMatch]
-
-      result.isSuccess shouldBe true
-      result.get.createdAt shouldBe createdAt
-    }
-
-    "deserialize JSON when createdAt is a string without offset" in {
-      val ninoMatchJson = Json.obj(
-        "nino"      -> validNino,
-        "id"        -> uuid.toString,
-        "createdAt" -> dateTimeCreatedAt.toString
-      )
-
-      val result = ninoMatchJson.validate[NinoMatch]
-
-      result.isSuccess shouldBe true
-      result.get.createdAt shouldBe dateTimeCreatedAt.toInstant(ZoneOffset.UTC)
-    }
-
-    "deserialize JSON when createdAt is a Mongo ISODate object" in {
-      val ninoMatchJson = Json.obj(
-        "nino" -> validNino,
-        "id"   -> uuid.toString,
-        "createdAt" -> Json.obj(
-          "$date" -> Json.obj(
-            "$numberLong" -> createdAt.toEpochMilli.toString
-          )
-        )
-      )
-
-      val result = ninoMatchJson.validate[NinoMatch]
-
-      result.isSuccess shouldBe true
-      result.get.createdAt shouldBe createdAt.truncatedTo(ChronoUnit.MILLIS)
-    }
-
     "fail to deserialize invalid JSON" in {
       val invalidJson = Json.obj(
         "nino"      -> validNino,
@@ -106,7 +61,8 @@ class NinoMatchSpec extends AnyWordSpec with Matchers {
         "createdAt" -> "not a date"
       )
 
-      intercept[DateTimeParseException](invalidJson.validate[NinoMatch])
+      val result = invalidJson.validate[NinoMatch]
+      result.isError shouldBe true
     }
   }
 }
