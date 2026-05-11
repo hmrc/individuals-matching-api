@@ -18,9 +18,11 @@ package uk.gov.hmrc.individualsmatchingapi.controllers.v1.sandbox
 
 import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
+import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v1.PrivilegedIndividualsController
-import uk.gov.hmrc.individualsmatchingapi.services.SandboxCitizenMatchingService
+import uk.gov.hmrc.individualsmatchingapi.services.{SandboxCitizenMatchingService, ScopesService}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
@@ -29,8 +31,10 @@ import scala.concurrent.ExecutionContext
 class SandboxPrivilegedIndividualsController @Inject() (
   sandboxCitizenMatchingService: SandboxCitizenMatchingService,
   val authConnector: AuthConnector,
-  cc: ControllerComponents
-)(implicit executionContext: ExecutionContext)
-    extends PrivilegedIndividualsController(sandboxCitizenMatchingService, cc) {
+  override val internalAuthHelper: InternalAuthHelper,
+  cc: ControllerComponents,
+  scopeService: ScopesService
+)(implicit executionContext: ExecutionContext, auditHelper: AuditHelper)
+    extends PrivilegedIndividualsController(sandboxCitizenMatchingService, scopeService, cc, auditHelper) {
   override val environment: String = SANDBOX
 }

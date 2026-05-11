@@ -17,23 +17,38 @@
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
 import play.api.libs.json.Json.toJson
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, RequestHeader, Result}
+import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.matchedCitizenRecordJsonFormat
 import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MatchedCitizenController @Inject() (cc: ControllerComponents, citizenMatchingService: LiveCitizenMatchingService)(
-  implicit executionContext: ExecutionContext
+class MatchedCitizenController @Inject() (
+  cc: ControllerComponents,
+  implicit private val auditHelper: AuditHelper,
+  internalAuthHelper: InternalAuthHelper,
+  citizenMatchingService: LiveCitizenMatchingService
+)(implicit
+  executionContext: ExecutionContext
 ) extends CommonController(cc) {
 
   def matchedCitizen(matchId: String): Action[AnyContent] = Action.async { implicit request =>
+    internalAuthHelper.isAuthorised.flatMap { isAuthorised =>
+      if (isAuthorised) {
+        auditHelper.auditAuthScopes(matchId, "internal-auth", request)
+      }
+
+      fetchMatchedCitizen(matchId)
+    }
+  }
+
+  private def fetchMatchedCitizen(matchId: String)(implicit request: RequestHeader): Future[Result] =
     withUuid(matchId) { matchUuid =>
-      citizenMatchingService.fetchMatchedCitizenRecord(matchUuid) map { matchedCitizen =>
+      citizenMatchingService.fetchMatchedCitizenRecord(matchUuid).map { matchedCitizen =>
         Ok(toJson(matchedCitizen))
       }
-    } recover recovery
-  }
+    }.recover(recovery)
 }

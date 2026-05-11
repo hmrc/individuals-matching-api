@@ -20,53 +20,79 @@ import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.Configuration
 import play.api.libs.json.Json.parse
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.mvc.RequestHeader
 import play.api.test.Helpers.*
-import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
-import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, InsufficientEnrolments}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.controllers.v1.live.LivePrivilegedCitizenMatchingController
 import uk.gov.hmrc.individualsmatchingapi.controllers.v1.sandbox.SandboxPrivilegedCitizenMatchingController
+import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
 import uk.gov.hmrc.individualsmatchingapi.domain.*
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
-import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
+import uk.gov.hmrc.individualsmatchingapi.services.SandboxCitizenMatchingService
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
+import uk.gov.hmrc.internalauth.client.BackendAuthComponents
+import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
+import unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2.ScopesConfigHelper
+import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future.{failed, successful}
+
 import scala.util.Random
 
 class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers with MockitoSugar {
 
   // noinspection ForwardReference
-  trait Setup {
+  trait Setup extends ScopesConfigHelper {
     val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+    val sampleCorrelationId = "188e9400-b636-4a3b-80ba-230a8c72b92a"
     val controllerComponents: ControllerComponents =
       app.injector.instanceOf[ControllerComponents]
 
+    val mockScopesService = new ScopesService(mockScopesConfig)
+
     val sandboxCitizenMatchingService = new SandboxCitizenMatchingService
+    val mockLiveCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
+    val mockAuthConnector: AuthConnector = mock[AuthConnector]
+    val mockInternalAuthBehaviour: StubBehaviour = mock[StubBehaviour]
+    given ControllerComponents = stubControllerComponents()
+    val backendAuthComponents: BackendAuthComponents = BackendAuthComponentsStub(mockInternalAuthBehaviour)
+    val internalAuthHelper = new InternalAuthHelper(
+      backendAuthComponents,
+      Configuration(InternalAuthHelper.InternalAuthFeatureFlag -> true)
+    )
+    val mockAuditHelper: AuditHelper = mock[AuditHelper]
+    implicit val auditHelper: AuditHelper = mockAuditHelper
+
     val sandboxController = new SandboxPrivilegedCitizenMatchingController(
       sandboxCitizenMatchingService,
       mockAuthConnector,
-      controllerComponents
+      internalAuthHelper,
+      controllerComponents,
+      mockScopesService
     )
-
-    val mockLiveCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
-    val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
     val liveController = new LivePrivilegedCitizenMatchingController(
       mockLiveCitizenMatchingService,
       mockAuthConnector,
-      controllerComponents
+      internalAuthHelper,
+      controllerComponents,
+      mockScopesService
     )
 
-    when(mockAuthConnector.authorise(any(), eqTo(EmptyRetrieval))(using any(), any())).thenReturn(successful(()))
+    when(
+      mockAuthConnector
+        .authorise(any(), eqTo(Retrievals.allEnrolments))(using any(), any())
+    ).thenReturn(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
   }
 
   "live matching citizen controller" should {
@@ -79,7 +105,9 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
           .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier], any[RequestHeader])
       ).thenReturn(Future.successful(matchId))
 
-      val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
+      val eventualResult: Future[Result] = liveController.matchCitizen()(
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       status(eventualResult) mustBe OK
       contentAsJson(eventualResult) mustBe parse(
@@ -100,6 +128,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     }
 
     "return 200 Ok when matching a user with a '.' in their name" in new Setup {
+
       when(
         mockLiveCitizenMatchingService.matchCitizen(any())(using any(), any())
       ).thenReturn(Future.successful(matchId))
@@ -111,7 +140,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         "dateOfBirth" -> "1900-01-01"
       )
 
-      val res: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(payload))
+      val res: Future[Result] =
+        liveController.matchCitizen()(fakeRequest.withHeaders("CorrelationId" -> sampleCorrelationId).withBody(payload))
       status(res) mustBe OK
     }
 
@@ -127,7 +157,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         "dateOfBirth" -> "1900-01-01"
       )
 
-      val res: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(payload))
+      val res: Future[Result] =
+        liveController.matchCitizen()(fakeRequest.withHeaders("CorrelationId" -> sampleCorrelationId).withBody(payload))
 
       status(res) mustBe 400
     }
@@ -138,7 +169,9 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
           .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier], any[RequestHeader])
       ).thenReturn(Future.failed(new CitizenNotFoundException))
 
-      val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
+      val eventualResult: Future[Result] = liveController.matchCitizen()(
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       status(eventualResult) mustBe FORBIDDEN
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -153,7 +186,9 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
           .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier], any[RequestHeader])
       ).thenReturn(Future.failed(new MatchingException))
 
-      val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
+      val eventualResult: Future[Result] = liveController.matchCitizen()(
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       status(eventualResult) mustBe FORBIDDEN
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -168,7 +203,9 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
           .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier], any[RequestHeader])
       ).thenReturn(Future.failed(new InvalidNinoException()))
 
-      val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
+      val eventualResult: Future[Result] = liveController.matchCitizen()(
+        fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId))
+      )
 
       status(eventualResult) mustBe FORBIDDEN
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -309,16 +346,22 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     "fail with UnauthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
       val requestBody: JsValue =
-        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
+        parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-31"}""")
 
       when(
-        mockAuthConnector
-          .authorise(eqTo(Enrolment("read:individuals-matching")), eqTo(EmptyRetrieval))(using any(), any())
-      ).thenReturn(failed(InsufficientEnrolments()))
+        mockAuthConnector.authorise(any(), any())(using any(), any())
+      ).thenReturn(Future.failed(InsufficientEnrolments()))
 
       intercept[InsufficientEnrolments] {
-        await(liveController.matchCitizen()(fakeRequest.withBody(requestBody)))
+        await(
+          liveController.matchCitizen()(
+            fakeRequest
+              .withHeaders("CorrelationId" -> sampleCorrelationId)
+              .withBody(requestBody)
+          )
+        )
       }
+
       verifyNoInteractions(mockLiveCitizenMatchingService)
     }
   }
@@ -327,7 +370,9 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     "return 200 (Ok) for the sandbox matchId" in new Setup {
       val eventualResult: Future[Result] =
-        sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
+        sandboxController.matchCitizen()(
+          fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId))
+        )
 
       status(eventualResult) mustBe OK
       contentAsJson(eventualResult) mustBe parse(
@@ -349,7 +394,11 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     "return 403 (Forbidden) for a citizen not found" in new Setup {
       val eventualResult: Future[Result] =
-        sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest(firstName = "José"))))
+        sandboxController.matchCitizen()(
+          fakeRequest
+            .withHeaders(("CorrelationId", sampleCorrelationId))
+            .withBody(parse(matchingRequest(firstName = "José")))
+        )
 
       status(eventualResult) mustBe FORBIDDEN
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -360,7 +409,11 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     "return 403 (Forbidden) when nino does not match a sandbox individual" in new Setup {
       val eventualResult: Future[Result] =
-        sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest(nino = "AA000799C"))))
+        sandboxController.matchCitizen()(
+          fakeRequest
+            .withHeaders(("CorrelationId", sampleCorrelationId))
+            .withBody(parse(matchingRequest(nino = "AA000799C")))
+        )
 
       status(eventualResult) mustBe FORBIDDEN
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -371,7 +424,11 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     "return 403 (Forbidden) when an invalid nino exception is thrown" in new Setup {
       val eventualResult: Future[Result] =
-        sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest(nino = "NA000799D"))))
+        sandboxController.matchCitizen()(
+          fakeRequest
+            .withHeaders(("CorrelationId", sampleCorrelationId))
+            .withBody(parse(matchingRequest(nino = "NA000799D")))
+        )
 
       status(eventualResult) mustBe FORBIDDEN
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -384,7 +441,9 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       val requestBody: JsValue =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
       val eventualResult: Future[Result] =
-        sandboxController.matchCitizen()(fakeRequest.withBody(requestBody))
+        sandboxController.matchCitizen()(
+          fakeRequest.withHeaders(("CorrelationId", sampleCorrelationId)).withBody(requestBody)
+        )
 
       status(eventualResult) mustBe BAD_REQUEST
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -394,7 +453,9 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
       val requestBody1: JsValue =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"20200131"}""")
-      val eventualResult1: Future[Result] = sandboxController.matchCitizen()(fakeRequest.withBody(requestBody1))
+      val eventualResult1: Future[Result] = sandboxController.matchCitizen()(
+        fakeRequest.withHeaders(("CorrelationId", sampleCorrelationId)).withBody(requestBody1)
+      )
 
       status(eventualResult1) mustBe BAD_REQUEST
       contentAsJson(eventualResult1) mustBe Json.obj(
@@ -407,7 +468,9 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       val requestBody: JsValue =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"AB1234567","dateOfBirth":"2020-01-31"}""")
       val eventualResult: Future[Result] =
-        sandboxController.matchCitizen()(fakeRequest.withBody(requestBody))
+        sandboxController.matchCitizen()(
+          fakeRequest.withHeaders(("CorrelationId", sampleCorrelationId)).withBody(requestBody)
+        )
 
       status(eventualResult) mustBe BAD_REQUEST
       contentAsJson(eventualResult) mustBe Json.obj(
@@ -418,7 +481,9 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     "not require bearer token authentication" in new Setup {
       val eventualResult: Future[Result] =
-        sandboxController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
+        sandboxController.matchCitizen()(
+          fakeRequest.withHeaders(("CorrelationId", sampleCorrelationId)).withBody(parse(matchingRequest()))
+        )
 
       status(eventualResult) mustBe OK
       verifyNoInteractions(mockAuthConnector)

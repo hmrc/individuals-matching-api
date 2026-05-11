@@ -18,9 +18,11 @@ package uk.gov.hmrc.individualsmatchingapi.controllers.v1.live
 
 import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.PRODUCTION
+import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v1.PrivilegedCitizenMatchingController
-import uk.gov.hmrc.individualsmatchingapi.services.LiveCitizenMatchingService
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
@@ -29,8 +31,10 @@ import scala.concurrent.ExecutionContext
 class LivePrivilegedCitizenMatchingController @Inject() (
   liveCitizenMatchingService: LiveCitizenMatchingService,
   val authConnector: AuthConnector,
-  cc: ControllerComponents
-)(implicit executionContext: ExecutionContext)
-    extends PrivilegedCitizenMatchingController(liveCitizenMatchingService, cc) {
+  override val internalAuthHelper: InternalAuthHelper,
+  cc: ControllerComponents,
+  scopeService: ScopesService
+)(implicit executionContext: ExecutionContext, auditHelper: AuditHelper)
+    extends PrivilegedCitizenMatchingController(liveCitizenMatchingService, cc, scopeService, auditHelper) {
   override val environment: String = PRODUCTION
 }

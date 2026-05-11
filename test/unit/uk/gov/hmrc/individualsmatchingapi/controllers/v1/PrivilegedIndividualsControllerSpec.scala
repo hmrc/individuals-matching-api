@@ -24,16 +24,22 @@ import play.api.libs.json.Json
 import play.api.mvc.{ControllerComponents, RequestHeader, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
-import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, InsufficientEnrolments}
+import uk.gov.hmrc.internalauth.client.BackendAuthComponents
+import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.individualsmatchingapi.controllers.v1.live.LivePrivilegedIndividualsController
 import uk.gov.hmrc.individualsmatchingapi.controllers.v1.sandbox.SandboxPrivilegedIndividualsController
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
-import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
+import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
+import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
+import play.api.Configuration
+import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
+import unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2.ScopesConfigHelper
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -44,21 +50,46 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
 
   val uuid: UUID = UUID.randomUUID()
 
-  trait Setup {
+  trait Setup extends ScopesConfigHelper {
+    given ControllerComponents = stubControllerComponents()
 
+    val sampleCorrelationId = "188e9400-b636-4a3b-80ba-230a8c72b92a"
     val mockCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
     val mockAuthConnector: AuthConnector = mock[AuthConnector]
     val controllerComponents: ControllerComponents =
       app.injector.instanceOf[ControllerComponents]
+    val mockInternalAuthBehaviour: StubBehaviour = mock[StubBehaviour]
+    val backendAuthComponents: BackendAuthComponents = BackendAuthComponentsStub(mockInternalAuthBehaviour)
+    val internalAuthHelper = new InternalAuthHelper(
+      backendAuthComponents,
+      Configuration(InternalAuthHelper.InternalAuthFeatureFlag -> true)
+    )
+
+    val mockAuditHelper: AuditHelper = mock[AuditHelper]
+    implicit val auditHelper: AuditHelper = mockAuditHelper
+
+    val mockScopesService = new ScopesService(mockScopesConfig)
 
     val liveController: LivePrivilegedIndividualsController =
-      new LivePrivilegedIndividualsController(mockCitizenMatchingService, mockAuthConnector, controllerComponents)
+      new LivePrivilegedIndividualsController(
+        mockCitizenMatchingService,
+        mockAuthConnector,
+        internalAuthHelper,
+        controllerComponents,
+        mockScopesService
+      )
     val sandboxController: SandboxPrivilegedIndividualsController = new SandboxPrivilegedIndividualsController(
       new SandboxCitizenMatchingService(),
       mockAuthConnector,
-      controllerComponents
+      internalAuthHelper,
+      controllerComponents,
+      mockScopesService
     )
-    when(mockAuthConnector.authorise(any(), eqTo(EmptyRetrieval))(using any(), any())).thenReturn(successful(()))
+
+    when(
+      mockAuthConnector
+        .authorise(any(), eqTo(Retrievals.allEnrolments))(using any(), any())
+    ).thenReturn(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
   }
 
   "The live matched individual function" should {
@@ -70,7 +101,9 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
         .thenReturn(failed(new MatchNotFoundException))
 
       val eventualResult: Future[Result] =
-        liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
+        liveController
+          .matchedIndividual(uuid.toString)
+          .apply(FakeRequest().withHeaders("CorrelationId" -> sampleCorrelationId))
       status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.parse(
         """{"code":"NOT_FOUND","message":"The resource can not be found"}"""
@@ -84,7 +117,9 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       )
         .thenReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult: Future[Result] =
-        liveController.matchedIndividual(uuid.toString).apply(FakeRequest())
+        liveController
+          .matchedIndividual(uuid.toString)
+          .apply(FakeRequest().withHeaders("CorrelationId" -> sampleCorrelationId))
       status(eventualResult) mustBe OK
       contentAsJson(eventualResult) mustBe Json.parse(response(uuid, "Joe", "Bloggs", "AB123456C", "1969-01-15"))
     }
@@ -92,13 +127,15 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     "fail with AuthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
 
       when(
-        mockAuthConnector
-          .authorise(eqTo(Enrolment("read:individuals-matching")), eqTo(EmptyRetrieval))(using any(), any())
-      )
-        .thenReturn(failed(InsufficientEnrolments()))
+        mockAuthConnector.authorise(any(), any())(using any(), any())
+      ).thenReturn(Future.failed(InsufficientEnrolments()))
 
       intercept[InsufficientEnrolments] {
-        await(liveController.matchedIndividual(uuid.toString).apply(FakeRequest()))
+        await(
+          liveController
+            .matchedIndividual(uuid.toString)
+            .apply(FakeRequest().withHeaders("CorrelationId" -> sampleCorrelationId))
+        )
       }
       verifyNoInteractions(mockCitizenMatchingService)
     }
@@ -108,7 +145,9 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
 
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
       val eventualResult: Future[Result] =
-        sandboxController.matchedIndividual(uuid.toString).apply(FakeRequest())
+        sandboxController
+          .matchedIndividual(uuid.toString)
+          .apply(FakeRequest().withHeaders("CorrelationId" -> sampleCorrelationId))
       status(eventualResult) mustBe NOT_FOUND
       contentAsJson(eventualResult) mustBe Json.parse(
         """{"code":"NOT_FOUND","message":"The resource can not be found"}"""
@@ -118,7 +157,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     "respond with http 200 (ok) for sandbox valid matchId and citizen details exist" in new Setup {
       val eventualResult: Future[Result] = sandboxController
         .matchedIndividual(sandboxMatchId.toString)
-        .apply(FakeRequest())
+        .apply(FakeRequest().withHeaders("CorrelationId" -> sampleCorrelationId))
       status(eventualResult) mustBe OK
       contentAsJson(eventualResult) mustBe Json.parse(response(sandboxMatchId))
     }
@@ -126,7 +165,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     "not require bearer token authentication" in new Setup {
       val eventualResult: Future[Result] = sandboxController
         .matchedIndividual(sandboxMatchId.toString)
-        .apply(FakeRequest())
+        .apply(FakeRequest().withHeaders("CorrelationId" -> sampleCorrelationId))
       status(eventualResult) mustBe OK
       verifyNoInteractions(mockAuthConnector)
     }

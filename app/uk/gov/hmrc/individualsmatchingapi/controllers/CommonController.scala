@@ -129,6 +129,7 @@ abstract class CommonController @Inject() (cc: ControllerComponents) extends Bac
 trait PrivilegedAuthentication extends AuthorisedFunctions {
 
   val environment: String
+  val internalAuthHelper: InternalAuthHelper
 
   def authPredicate(scopes: Iterable[String]): Predicate =
     scopes.map(Enrolment(_): Predicate).reduce(_ or _)
@@ -142,13 +143,25 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
 
     if (endpointScopes.isEmpty) throw new Exception("No scopes defined")
 
-    if (environment == Environment.SANDBOX)
+    if (environment == Environment.SANDBOX) {
       f(endpointScopes.toList)
-    else {
-      authorised(authPredicate(endpointScopes)).retrieve(Retrievals.allEnrolments) { scopes =>
-        auditHelper.auditAuthScopes(matchId, scopes.enrolments.map(_.key).mkString(","), request)
+    } else {
+      internalAuthHelper.isAuthorised.flatMap {
+        case true =>
+          auditHelper.auditAuthScopes(matchId, "internal-auth", request)
+          f(endpointScopes)
 
-        f(scopes.enrolments.map(_.key))
+        case false =>
+          authorised(authPredicate(endpointScopes))
+            .retrieve(Retrievals.allEnrolments) { scopes =>
+              auditHelper.auditAuthScopes(
+                matchId,
+                scopes.enrolments.map(_.key).mkString(","),
+                request
+              )
+
+              f(scopes.enrolments.map(_.key))
+            }
       }
     }
   }

@@ -34,6 +34,9 @@ class ScopesService @Inject() (configuration: Configuration) {
 
   def getAllScopes: List[String] = apiConfig.scopes.map(_.name).sorted
 
+  def v1Scopes: List[String] =
+    List("read:individuals-matching")
+
   def getExternalEndpoints(scopes: Iterable[String]): Iterable[ExternalEndpointConfig] = {
     val scopeKeys = scopes.flatMap(s => getScopeEndpointKeys(s)).toSeq
 

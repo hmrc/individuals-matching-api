@@ -16,7 +16,7 @@
 
 package component.uk.gov.hmrc.individualsmatchingapi.controllers
 
-import component.uk.gov.hmrc.individualsmatchingapi.stubs.BaseSpec
+import component.uk.gov.hmrc.individualsmatchingapi.stubs.{BaseSpec, InternalAuthStub}
 import play.api.libs.json.Json
 import play.api.test.Helpers.*
 import scalaj.http.Http
@@ -33,15 +33,47 @@ class MatchedCitizenControllerSpec extends BaseSpec {
       Given("A match record exists for a given NINO")
       val ninoMatch = await(mongoRepository.create(Nino(nino)))
 
+      And("internal auth authorises the token")
+      InternalAuthStub.willAuthorizeToken(authToken)
+
       When("I request the matched citizen record using the corresponding valid matchId")
       val response =
-        Http(s"$serviceUrl/match-record/${ninoMatch.id.toString}").asString
+        Http(s"$serviceUrl/match-record/${ninoMatch.id.toString}")
+          .headers(requestHeaders(acceptHeaderP1))
+          .asString
 
       Then("The response status should be 200 (Ok)")
       response.code shouldBe OK
 
       And("The response contains the matched citizen record")
       Json.parse(response.body) shouldBe Json.parse(s"""{"nino":"$nino","matchId":"${ninoMatch.id.toString}"}""")
+
+      And("internal auth was checked")
+      InternalAuthStub.verifyAuthRequestCount(expectedCount = 1)
+    }
+
+    Scenario("request for a matched citizen falls back to open access when internal auth fails") {
+
+      Given("A match record exists for a given NINO")
+      val ninoMatch = await(mongoRepository.create(Nino(nino)))
+
+      And("internal auth denies the token")
+      InternalAuthStub.willNotAuthorizeToken(authToken)
+
+      When("I request the matched citizen record using the corresponding valid matchId")
+      val response =
+        Http(s"$serviceUrl/match-record/${ninoMatch.id.toString}")
+          .headers(requestHeaders(acceptHeaderP1))
+          .asString
+
+      Then("The response status should be 200 (Ok)")
+      response.code shouldBe OK
+
+      And("The response contains the matched citizen record")
+      Json.parse(response.body) shouldBe Json.parse(s"""{"nino":"$nino","matchId":"${ninoMatch.id.toString}"}""")
+
+      And("internal auth was checked")
+      InternalAuthStub.verifyAuthRequestCount(expectedCount = 1)
     }
 
     Scenario("request for a matched citizen with an invalid matchId") {
@@ -50,13 +82,29 @@ class MatchedCitizenControllerSpec extends BaseSpec {
       val matchId = "123"
 
       When("I request the matched citizen record using the invalid matchId")
-      val response = Http(s"$serviceUrl/match-record/$matchId").asString
+      val response = Http(s"$serviceUrl/match-record/$matchId").headers(requestHeaders(acceptHeaderP1)).asString
 
       Then("The response status should be 404 (Not Found)")
       response.code shouldBe NOT_FOUND
       Json.parse(response.body) shouldBe Json.parse(
         s"""{"code":"NOT_FOUND", "message":"The resource can not be found"}"""
       )
+    }
+
+    Scenario("request for a matched citizen without an authorization header") {
+      Given("A match record exists for a given NINO")
+      val ninoMatch = await(mongoRepository.create(Nino(nino)))
+
+      When("I request the matched citizen record without an Authorization header")
+      val response = Http(s"$serviceUrl/match-record/${ninoMatch.id.toString}")
+        .headers(requestHeaders(acceptHeaderP1) - "Authorization")
+        .asString
+
+      Then("The response status should be 200 (Ok)")
+      response.code shouldBe OK
+
+      And("The response contains the matched citizen record")
+      Json.parse(response.body) shouldBe Json.parse(s"""{"nino":"$nino","matchId":"${ninoMatch.id.toString}"}""")
     }
   }
 }

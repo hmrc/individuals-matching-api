@@ -25,7 +25,7 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.*
-import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
+import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, InternalAuthHelper, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.{maybeCorrelationId, validateCorrelationId}
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesHelper, ScopesService}
@@ -39,6 +39,7 @@ class PrivilegedIndividualsController @Inject() (
   scopesHelper: ScopesHelper,
   implicit private val auditHelper: AuditHelper,
   val authConnector: AuthConnector,
+  val internalAuthHelper: InternalAuthHelper,
   cc: ControllerComponents
 )(implicit ec: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {

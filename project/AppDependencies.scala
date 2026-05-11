@@ -9,10 +9,11 @@ object AppDependencies {
   val hmrcBootstrapVersion = "10.7.0"
 
   val compile: Seq[ModuleID] = Seq(
-    hmrc      %% s"bootstrap-backend-$playVersion" % hmrcBootstrapVersion,
-    hmrc      %% s"domain-$playVersion"            % "13.0.0",
-    hmrc      %% s"play-hal-$playVersion"          % "4.1.0",
-    hmrcMongo %% s"hmrc-mongo-$playVersion"        % hmrcMongoVersion
+    hmrc      %% s"bootstrap-backend-$playVersion"    % hmrcBootstrapVersion,
+    hmrc      %% s"domain-$playVersion"               % "13.0.0",
+    hmrc      %% s"play-hal-$playVersion"             % "4.1.0",
+    hmrcMongo %% s"hmrc-mongo-$playVersion"           % hmrcMongoVersion,
+    hmrc      %% s"internal-auth-client-$playVersion" % "4.4.0"
   )
 
   def test(scope: String = "test, it"): Seq[ModuleID] = Seq(

@@ -16,28 +16,34 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
-import play.api.hal.Hal.links
 import play.api.hal.HalLink
-import play.api.libs.json.JsValue
+import play.api.hal.*
+import play.api.hal.Hal.links
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.hal.*
 import play.api.mvc.{Action, ControllerComponents}
+import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenMatchingFormat
+import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.validateCorrelationId
 import uk.gov.hmrc.individualsmatchingapi.services.CitizenMatchingService
+import uk.gov.hmrc.individualsmatchingapi.services.ScopesService
 
 import scala.concurrent.ExecutionContext
 
 abstract class PrivilegedCitizenMatchingController(
   liveCitizenMatchingService: CitizenMatchingService,
-  cc: ControllerComponents
+  cc: ControllerComponents,
+  scopeService: ScopesService,
+  implicit private val auditHelper: AuditHelper
 )(implicit executionContext: ExecutionContext)
     extends CommonController(cc) with PrivilegedAuthentication {
-
   def matchCitizen: Action[JsValue] = Action.async(parse.json) { implicit request =>
-    requiresPrivilegedAuthentication {
+    authenticate(scopeService.v1Scopes, request.body.toString()) { authScopes =>
       withJsonBody[CitizenMatchingRequest] { matchCitizen =>
-        liveCitizenMatchingService.matchCitizen(matchCitizen) map { matchId =>
+        val correlationId = validateCorrelationId(request)
+        liveCitizenMatchingService.matchCitizen(matchCitizen).map { matchId =>
           val selfLink = HalLink("self", s"/individuals/matching/")
           val individualLink = HalLink(
             "individual",
@@ -45,9 +51,21 @@ abstract class PrivilegedCitizenMatchingController(
             name = Option("GET"),
             title = Option("Individual Details")
           )
-          Ok(links(selfLink, individualLink))
+
+          val response = links(selfLink, individualLink)
+
+          auditHelper.auditApiResponse(
+            correlationId.toString,
+            matchId.toString,
+            authScopes.mkString(","),
+            request,
+            selfLink.toString,
+            Some(Json.toJson(response))
+          )
+
+          Ok(response)
         }
-      } recover recovery
-    }
+      }
+    }.recover(recovery)
   }
 }
