@@ -16,12 +16,12 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
-import play.api.mvc.{ControllerComponents, Result}
+import play.api.mvc.{ControllerComponents, RequestHeader, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
@@ -74,7 +74,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier], any[RequestHeader])
       )
         .thenReturn(failed(new MatchNotFoundException))
 
@@ -93,7 +93,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier], any[RequestHeader])
       )
         .thenReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult: Future[Result] =
@@ -116,7 +116,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
 
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier], any[RequestHeader])
       )
         .thenReturn(failed(new MatchNotFoundException))
 
@@ -134,7 +134,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     "respond with http 400 (Bad Request) for a malformed CorrelationId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier], any[RequestHeader])
       )
         .thenReturn(failed(new MatchNotFoundException))
 
@@ -158,7 +158,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     "respond with http 400 (Bad Request) for a missing CorrelationId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier], any[RequestHeader])
       )
         .thenReturn(failed(new MatchNotFoundException))
 

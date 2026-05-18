@@ -17,7 +17,10 @@
 package unit.uk.gov.hmrc.individualsmatchingapi.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
+import org.scalatest.matchers.must.Matchers.mustBe
 import org.scalatest.matchers.should.Matchers
+import play.api.mvc.RequestHeader
+import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -36,6 +39,7 @@ class CitizenDetailsConnectorSpec extends SpecBase with Matchers with WireMockSu
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
+    implicit val rd: RequestHeader = FakeRequest()
 
     val underTest: CitizenDetailsConnector = new CitizenDetailsConnector(http, servicesConfig) {
       override val serviceUrl = s"http://$wireMockHost:$wireMockPort"
@@ -98,5 +102,23 @@ class CitizenDetailsConnectorSpec extends SpecBase with Matchers with WireMockSu
 
       intercept[InvalidNinoException](await(underTest.citizenDetails(invalidNino)))
     }
+
+    "setHeaders return header when CorrelationId is present" in new Setup {
+
+      val request = FakeRequest().withHeaders("CorrelationId" -> "188e9400-b636-4a3b-80ba-230a8c72b92a")
+
+      val result: Seq[(String, String)] = underTest.setHeaders(request)
+
+      result mustBe Seq("CorrelationId" -> "188e9400-b636-4a3b-80ba-230a8c72b92a")
+    }
+
+    "setHeaders return empty Seq when CorrelationId is missing" in new Setup {
+      val request = FakeRequest()
+
+      val result: Seq[(String, String)] = underTest.setHeaders(request)
+
+      result mustBe Seq.empty
+    }
+
   }
 }

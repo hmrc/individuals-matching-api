@@ -17,6 +17,7 @@
 package uk.gov.hmrc.individualsmatchingapi.connectors
 import play.api.libs.json.Json
 import play.api.libs.ws.JsonBodyWritables.*
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
@@ -32,13 +33,20 @@ class MatchingConnector @Inject() (http: HttpClientV2, servicesConfig: ServicesC
   executionContext: ExecutionContext
 ) {
   val serviceUrl: String = servicesConfig.baseUrl("matching")
+  val setHeaders: RequestHeader => Seq[(String, String)] =
+    req =>
+      req.headers
+        .get("CorrelationId")
+        .map(id => Seq("CorrelationId" -> id))
+        .getOrElse(Seq.empty)
 
   def validateMatch(
     matchingRequest: DetailsMatchRequest
-  )(implicit hc: HeaderCarrier): Future[Unit] =
+  )(implicit hc: HeaderCarrier, request: RequestHeader): Future[Unit] =
     http
       .post(url"$serviceUrl/matching/perform-match/cycle3")
       .withBody(Json.toJson(matchingRequest))
+      .transform(_.addHttpHeaders(setHeaders(request)*))
       .execute[HttpResponse]
       .map { response =>
         (response.json \ "errorCodes").asOpt[Seq[Int]] match {

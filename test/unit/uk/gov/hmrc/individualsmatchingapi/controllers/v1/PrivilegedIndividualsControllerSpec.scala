@@ -16,18 +16,19 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
-import play.api.mvc.{ControllerComponents, Result}
+import play.api.mvc.{ControllerComponents, RequestHeader, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.individualsmatchingapi.controllers.v1.{LivePrivilegedIndividualsController, SandboxPrivilegedIndividualsController}
+import uk.gov.hmrc.individualsmatchingapi.controllers.v1.live.LivePrivilegedIndividualsController
+import uk.gov.hmrc.individualsmatchingapi.controllers.v1.sandbox.SandboxPrivilegedIndividualsController
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
@@ -64,7 +65,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     "respond with http 404 (not found) for an invalid matchId" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier], any[RequestHeader])
       )
         .thenReturn(failed(new MatchNotFoundException))
 
@@ -79,7 +80,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
       when(
         mockCitizenMatchingService
-          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier])
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier], any[RequestHeader])
       )
         .thenReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
       val eventualResult: Future[Result] =

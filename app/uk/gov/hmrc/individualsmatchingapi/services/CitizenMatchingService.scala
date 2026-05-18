@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.services
 
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.connectors.{CitizenDetailsConnector, MatchingConnector}
@@ -29,9 +30,13 @@ import scala.concurrent.Future.{failed, successful}
 import scala.concurrent.{ExecutionContext, Future}
 
 trait CitizenMatchingService {
-  def matchCitizen(citizenMatchingRequest: CitizenMatchingRequest)(implicit hc: HeaderCarrier): Future[UUID]
+  def matchCitizen(
+    citizenMatchingRequest: CitizenMatchingRequest
+  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[UUID]
 
-  def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier): Future[CitizenDetails]
+  def fetchCitizenDetailsByMatchId(
+    matchId: UUID
+  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[CitizenDetails]
 
   def fetchMatchedCitizenRecord(matchId: UUID)(implicit hc: HeaderCarrier): Future[MatchedCitizenRecord]
 }
@@ -44,14 +49,18 @@ class LiveCitizenMatchingService @Inject() (
 )(implicit executionContext: ExecutionContext)
     extends CitizenMatchingService {
 
-  override def matchCitizen(citizenMatchingRequest: CitizenMatchingRequest)(implicit hc: HeaderCarrier): Future[UUID] =
+  override def matchCitizen(
+    citizenMatchingRequest: CitizenMatchingRequest
+  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[UUID] =
     for {
       details   <- citizenDetailsConnector.citizenDetails(citizenMatchingRequest.nino)
       _         <- matchingConnector.validateMatch(DetailsMatchRequest(citizenMatchingRequest, Seq(details)))
       ninoMatch <- liveNinoMatchRepository.create(Nino(citizenMatchingRequest.nino))
     } yield ninoMatch.id
 
-  override def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier): Future[CitizenDetails] =
+  override def fetchCitizenDetailsByMatchId(
+    matchId: UUID
+  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[CitizenDetails] =
     liveNinoMatchRepository.read(matchId) flatMap {
       case Some(ninoMatch) =>
         citizenDetailsConnector.citizenDetails(ninoMatch.nino.nino)
@@ -71,7 +80,7 @@ class SandboxCitizenMatchingService extends CitizenMatchingService {
 
   override def matchCitizen(
     citizenMatchingRequest: CitizenMatchingRequest
-  )(implicit hc: HeaderCarrier): Future[UUID] = {
+  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[UUID] = {
 
     def firstNLetters(length: Int, value: String): String =
       value.trim.take(length)
@@ -94,7 +103,9 @@ class SandboxCitizenMatchingService extends CitizenMatchingService {
     }
   }
 
-  override def fetchCitizenDetailsByMatchId(matchId: UUID)(implicit hc: HeaderCarrier): Future[CitizenDetails] =
+  override def fetchCitizenDetailsByMatchId(
+    matchId: UUID
+  )(implicit hc: HeaderCarrier, requestHeader: RequestHeader): Future[CitizenDetails] =
     SandboxData.findByMatchId(matchId) match {
       case Some(individual) =>
         successful(

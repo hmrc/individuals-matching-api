@@ -16,7 +16,7 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -24,11 +24,13 @@ import play.api.libs.json.Json.parse
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
 import play.api.test.FakeRequest
+import play.api.mvc.RequestHeader
 import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.individualsmatchingapi.controllers.v1.{LivePrivilegedCitizenMatchingController, SandboxPrivilegedCitizenMatchingController}
+import uk.gov.hmrc.individualsmatchingapi.controllers.v1.live.LivePrivilegedCitizenMatchingController
+import uk.gov.hmrc.individualsmatchingapi.controllers.v1.sandbox.SandboxPrivilegedCitizenMatchingController
 import uk.gov.hmrc.individualsmatchingapi.domain.*
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService}
@@ -74,7 +76,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     "return 200 (Ok) for a matched citizen" in new Setup {
       when(
         mockLiveCitizenMatchingService
-          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier])
+          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier], any[RequestHeader])
       ).thenReturn(Future.successful(matchId))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
@@ -99,7 +101,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     "return 200 Ok when matching a user with a '.' in their name" in new Setup {
       when(
-        mockLiveCitizenMatchingService.matchCitizen(any())(using any())
+        mockLiveCitizenMatchingService.matchCitizen(any())(using any(), any())
       ).thenReturn(Future.successful(matchId))
 
       val payload: JsObject = Json.obj(
@@ -115,7 +117,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     "return JsError when mandatory field missing" in new Setup {
       when(
-        mockLiveCitizenMatchingService.matchCitizen(any())(using any())
+        mockLiveCitizenMatchingService.matchCitizen(any())(using any(), any())
       ).thenReturn(Future.successful(matchId))
 
       val payload: JsObject = Json.obj(
@@ -133,7 +135,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     "return 403 (Forbidden) for a citizen not found" in new Setup {
       when(
         mockLiveCitizenMatchingService
-          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier])
+          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier], any[RequestHeader])
       ).thenReturn(Future.failed(new CitizenNotFoundException))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
@@ -148,7 +150,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     "return 403 (Forbidden) when a matching exception is thrown" in new Setup {
       when(
         mockLiveCitizenMatchingService
-          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier])
+          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier], any[RequestHeader])
       ).thenReturn(Future.failed(new MatchingException))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
@@ -163,7 +165,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     "return 403 (Forbidden) when an invalid nino exception is thrown" in new Setup {
       when(
         mockLiveCitizenMatchingService
-          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier])
+          .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier], any[RequestHeader])
       ).thenReturn(Future.failed(new InvalidNinoException()))
 
       val eventualResult: Future[Result] = liveController.matchCitizen()(fakeRequest.withBody(parse(matchingRequest())))
