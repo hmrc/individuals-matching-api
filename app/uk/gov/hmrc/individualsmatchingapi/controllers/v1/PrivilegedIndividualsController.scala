@@ -21,13 +21,10 @@ import play.api.hal.HalLink
 import play.api.libs.json.Json.{obj, toJson}
 import play.api.mvc.hal.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.*
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
-import uk.gov.hmrc.individualsmatchingapi.services.{CitizenMatchingService, LiveCitizenMatchingService, SandboxCitizenMatchingService}
+import uk.gov.hmrc.individualsmatchingapi.services.CitizenMatchingService
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 abstract class PrivilegedIndividualsController(
@@ -59,24 +56,4 @@ abstract class PrivilegedIndividualsController(
       }
     }
   }
-}
-
-@Singleton
-class LivePrivilegedIndividualsController @Inject() (
-  liveCitizenMatchingService: LiveCitizenMatchingService,
-  val authConnector: AuthConnector,
-  cc: ControllerComponents
-)(implicit executionContext: ExecutionContext)
-    extends PrivilegedIndividualsController(liveCitizenMatchingService, cc) {
-  override val environment: String = PRODUCTION
-}
-
-@Singleton
-class SandboxPrivilegedIndividualsController @Inject() (
-  sandboxCitizenMatchingService: SandboxCitizenMatchingService,
-  val authConnector: AuthConnector,
-  cc: ControllerComponents
-)(implicit executionContext: ExecutionContext)
-    extends PrivilegedIndividualsController(sandboxCitizenMatchingService, cc) {
-  override val environment: String = SANDBOX
 }

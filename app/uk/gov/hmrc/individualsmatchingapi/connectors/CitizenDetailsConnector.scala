@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.connectors
 
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.UpstreamErrorResponse.Upstream5xxResponse
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -33,9 +34,18 @@ class CitizenDetailsConnector @Inject() (http: HttpClientV2, serviceConfig: Serv
 ) {
 
   val serviceUrl: String = serviceConfig.baseUrl("citizen-details")
+  val setHeaders: RequestHeader => Seq[(String, String)] =
+    req =>
+      req.headers
+        .get("CorrelationId")
+        .map(id => Seq("CorrelationId" -> id))
+        .getOrElse(Seq.empty)
 
-  def citizenDetails(nino: String)(implicit hc: HeaderCarrier): Future[CitizenDetails] =
-    http.get(url"$serviceUrl/citizen-details/nino/$nino").execute[CitizenDetails] recover {
+  def citizenDetails(nino: String)(implicit hc: HeaderCarrier, request: RequestHeader): Future[CitizenDetails] =
+    http
+      .get(url"$serviceUrl/citizen-details/nino/$nino")
+      .transform(_.addHttpHeaders(setHeaders(request)*))
+      .execute[CitizenDetails] recover {
       case UpstreamErrorResponse(_, 404, _, _) => throw new CitizenNotFoundException
       case UpstreamErrorResponse(_, 400, _, _) => throw new InvalidNinoException
       case Upstream5xxResponse(response) =>

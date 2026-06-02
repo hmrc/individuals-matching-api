@@ -16,7 +16,7 @@
 
 // $COVERAGE-OFF$
 
-package uk.gov.hmrc.individualsmatchingapi.controllers
+package uk.gov.hmrc.individualsmatchingapi.controllers.documentation
 
 import controllers.Assets
 import org.apache.pekko.stream.Materializer

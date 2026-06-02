@@ -27,7 +27,7 @@ import play.api.libs.json.JsValue
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, contentAsString, defaultAwaitTimeout, status}
-import uk.gov.hmrc.individualsmatchingapi.controllers.DocumentationController
+import uk.gov.hmrc.individualsmatchingapi.controllers.documentation.DocumentationController
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import java.nio.file.{Files, Paths}

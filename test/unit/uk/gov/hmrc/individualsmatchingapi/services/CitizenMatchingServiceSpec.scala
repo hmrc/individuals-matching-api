@@ -16,11 +16,13 @@
 
 package unit.uk.gov.hmrc.individualsmatchingapi.services
 
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.mvc.RequestHeader
+import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
@@ -46,6 +48,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
   trait Setup {
 
     implicit val headers: HeaderCarrier = HeaderCarrier()
+    implicit val rd: RequestHeader = FakeRequest()
 
     val mockNinoMatchRepository: NinoMatchRepository = mock[NinoMatchRepository]
     val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
@@ -67,12 +70,12 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
 
       when(
         mockCitizenDetailsConnector
-          .citizenDetails(eqTo(ninoString))(using any[HeaderCarrier])
+          .citizenDetails(eqTo(ninoString))(using any[HeaderCarrier], any[RequestHeader])
       ).thenReturn(Future.successful(details))
 
       when(
         mockMatchingConnector
-          .validateMatch(eqTo(detailsMatchRequest))(using any[HeaderCarrier])
+          .validateMatch(eqTo(detailsMatchRequest))(using any[HeaderCarrier], any[RequestHeader])
       ).thenReturn(Future.successful(()))
 
       when(
@@ -88,7 +91,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     "propagate exception when citizen details are not found" in new Setup {
       when(
         mockCitizenDetailsConnector
-          .citizenDetails(eqTo(ninoString))(using any[HeaderCarrier])
+          .citizenDetails(eqTo(ninoString))(using any[HeaderCarrier], any[RequestHeader])
       ).thenReturn(Future.failed(new CitizenNotFoundException))
 
       intercept[CitizenNotFoundException](await(liveService.matchCitizen(citizenMatchingRequest)))
@@ -98,7 +101,7 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     "propagate exception for an invalid nino" in new Setup {
       when(
         mockCitizenDetailsConnector
-          .citizenDetails(eqTo(ninoString))(using any[HeaderCarrier])
+          .citizenDetails(eqTo(ninoString))(using any[HeaderCarrier], any[RequestHeader])
       ).thenReturn(Future.failed(new InvalidNinoException))
 
       intercept[InvalidNinoException](await(liveService.matchCitizen(citizenMatchingRequest)))
@@ -107,12 +110,12 @@ class CitizenMatchingServiceSpec extends SpecBase with Matchers with MockitoSuga
     "propagate exception for a non-match" in new Setup {
       when(
         mockCitizenDetailsConnector
-          .citizenDetails(eqTo(ninoString))(using any[HeaderCarrier])
+          .citizenDetails(eqTo(ninoString))(using any[HeaderCarrier], any[RequestHeader])
       )
         .thenReturn(Future.successful(details))
       when(
         mockMatchingConnector
-          .validateMatch(eqTo(detailsMatchRequest))(using any[HeaderCarrier])
+          .validateMatch(eqTo(detailsMatchRequest))(using any[HeaderCarrier], any[RequestHeader])
       )
         .thenReturn(Future.failed(new MatchingException))
 
