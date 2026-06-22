@@ -21,6 +21,7 @@ import org.mockito.Mockito.{verify, verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
+import play.api.Configuration
 import play.api.mvc.{ControllerComponents, RequestHeader, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -33,6 +34,9 @@ import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesHelper, ScopesService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
+import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
+import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
+import uk.gov.hmrc.internalauth.client.BackendAuthComponents
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -48,11 +52,20 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
 
     val mockAuthConnector: AuthConnector = mock[AuthConnector]
     val mockAuditHelper: AuditHelper = mock[AuditHelper]
+    val mockInternalAuthBehaviour: StubBehaviour = mock[StubBehaviour]
 
     val mockScopesService = new ScopesService(mockScopesConfig)
     val scopesHelper = new ScopesHelper(mockScopesService)
 
+    given ControllerComponents = stubControllerComponents()
+
     val controllerComponents: ControllerComponents = app.injector.instanceOf[ControllerComponents]
+
+    val backendAuthComponents: BackendAuthComponents = BackendAuthComponentsStub(mockInternalAuthBehaviour)
+    val internalAuthHelper = new InternalAuthHelper(
+      backendAuthComponents,
+      Configuration(InternalAuthHelper.InternalAuthFeatureFlag -> true)
+    )
 
     val liveController = new PrivilegedIndividualsController(
       mockCitizenMatchingService,
@@ -60,6 +73,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       scopesHelper,
       mockAuditHelper,
       mockAuthConnector,
+      internalAuthHelper,
       controllerComponents
     )
 

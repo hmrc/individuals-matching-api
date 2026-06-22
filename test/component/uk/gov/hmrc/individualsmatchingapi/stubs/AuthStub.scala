@@ -101,4 +101,7 @@ object AuthStub extends MockHost(22000) {
     "authorise" -> Json.arr(Json.toJson(Enrolment("read:individuals-matching"))),
     "retrieve"  -> JsArray()
   )
+
+  def verifyAuthoriseRequestCount(expectedCount: Int): Unit =
+    server.verify(expectedCount, postRequestedFor(urlEqualTo("/auth/authorise")))
 }

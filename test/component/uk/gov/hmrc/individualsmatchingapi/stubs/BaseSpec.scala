@@ -28,31 +28,34 @@ import play.api.http.HeaderNames.{ACCEPT, AUTHORIZATION, CONTENT_TYPE}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.mvc.Http.MimeTypes.JSON
 import uk.gov.hmrc.individualsmatchingapi.repository.NinoMatchRepository
+import play.api.test.{Helpers, TestServer}
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.Await.result
 import scala.concurrent.duration.{Duration, FiniteDuration}
+import java.net.ServerSocket
 
 trait BaseSpec
     extends AnyFeatureSpec with BeforeAndAfterAll with BeforeAndAfterEach with Matchers with GuiceOneServerPerSuite
     with GivenWhenThen {
 
-  implicit override lazy val app: Application = GuiceApplicationBuilder()
+  protected def appBuilder: GuiceApplicationBuilder = GuiceApplicationBuilder()
     .configure(
       "auditing.enabled"                           -> false,
       "auditing.traceRequests"                     -> false,
       "microservice.services.auth.port"            -> AuthStub.port,
+      "microservice.services.internal-auth.port"   -> InternalAuthStub.port,
       "microservice.services.citizen-details.port" -> CitizenDetailsStub.port,
       "microservice.services.matching.port"        -> MatchingStub.port,
       "mongodb.uri"                                -> "mongodb://localhost:27017/nino-match-repository-it",
       "run.mode"                                   -> "It",
       "versioning.unversionedContexts"             -> List("/match-record")
     )
-    .build()
+  implicit override lazy val app: Application = appBuilder.build()
 
   val timeout: FiniteDuration = Duration(5, TimeUnit.SECONDS)
   val serviceUrl = s"http://localhost:$port"
-  val mocks = Seq(AuthStub, CitizenDetailsStub, MatchingStub)
+  val mocks = Seq(AuthStub, InternalAuthStub, CitizenDetailsStub, MatchingStub)
   val mongoRepository: NinoMatchRepository = app.injector.instanceOf[NinoMatchRepository]
   val authToken = "Bearer AUTH_TOKEN"
 
@@ -83,6 +86,17 @@ trait BaseSpec
   override def afterAll(): Unit = {
     mocks.foreach(_.server.stop())
     result(mongoRepository.collection.drop().headOption(), timeout)
+  }
+  protected def withConfiguredServer[A](overrides: (String, Any)*)(f: String => A): A = {
+    val socket = new ServerSocket(0)
+    val freePort = socket.getLocalPort
+    socket.close()
+
+    val testApp = appBuilder.configure(overrides*).build()
+
+    Helpers.running(TestServer(freePort, testApp)) {
+      f(s"http://127.0.0.1:$freePort")
+    }
   }
 }
 

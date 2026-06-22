@@ -43,6 +43,9 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
   val matchingRequest: CitizenMatchingRequest =
     CitizenMatchingRequest(firstName, lastName, nino, dateOfBirthSensibleformat)
 
+  val scopes: List[String] = List("read:individuals-matching")
+  val validScopes: List[String] = List("read:individuals-matching")
+
   Feature("citizen matching is open and accessible") {
 
     Scenario("valid request to the sandbox implementation. Individual's details match sandbox citizen") {
@@ -77,7 +80,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     Scenario("Valid request to the live implementation. Individual's details match existing citizen records") {
 
       Given("A valid privileged Auth bearer token")
-      AuthStub.willAuthorizePrivilegedAuthToken(authToken)
+      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)
 
       And("Citizen exists for the given NINO")
       CitizenDetailsStub.getByNinoReturnsCitizenDetails(nino, firstName, lastName, dateOfBirthDesFormat)
@@ -122,7 +125,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     Scenario("No match. Individual's details do not match existing citizen records") {
 
       Given("A valid privileged Auth bearer token")
-      AuthStub.willAuthorizePrivilegedAuthToken(authToken)
+      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)
 
       And("Citizen exists for the given NINO")
       CitizenDetailsStub.getByNinoReturnsCitizenDetails("CS700100A", firstName, lastName, "13091972")
@@ -148,7 +151,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     Scenario("Citizen does not exist for the given NINO") {
 
       Given("A valid privileged Auth bearer token")
-      AuthStub.willAuthorizePrivilegedAuthToken(authToken)
+      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)
 
       And("Citizen for the given NINO cannot be found")
       CitizenDetailsStub.getByNinoReturnsError(nino, NOT_FOUND)
@@ -168,7 +171,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
     Scenario("Invalid NINO provided") {
 
       Given("A valid privileged Auth bearer token")
-      AuthStub.willAuthorizePrivilegedAuthToken(authToken)
+      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)
 
       And("The given NINO is invalid")
       CitizenDetailsStub.getByNinoReturnsError(nino, BAD_REQUEST, s"invalid nino: $nino")
@@ -189,7 +192,7 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
   Scenario("NINO provided with wrong format") {
 
     Given("A valid privileged Auth bearer token")
-    AuthStub.willAuthorizePrivilegedAuthToken(authToken)
+    AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)
 
     And("The given NINO is invalid")
     CitizenDetailsStub.getByNinoReturnsError(nino, BAD_REQUEST, s"invalid nino: $nino")

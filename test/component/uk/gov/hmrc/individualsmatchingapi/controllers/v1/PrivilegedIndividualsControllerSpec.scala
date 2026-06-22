@@ -29,12 +29,15 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
 
   val nino = "NA000799C"
 
+  val scopes: List[String] = List("read:individuals-matching")
+  val validScopes: List[String] = List("read:individuals-matching")
+
   Feature("matched individual is open and accessible") {
 
     Scenario("valid request to the live implementation") {
 
       Given("A valid privileged Auth bearer token")
-      AuthStub.willAuthorizePrivilegedAuthToken(authToken)
+      AuthStub.willAuthorizePrivilegedAuthToken(authToken, scopes, validScopes)
 
       And("A valid nino match exist")
       val matchId = result(mongoRepository.create(Nino(nino)), timeout).id.toString

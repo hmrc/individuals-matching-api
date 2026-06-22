@@ -36,12 +36,34 @@ class VersioningSpec extends BaseSpec {
     )
     .build()
 
+  val scopes: List[String] = List(
+    "read:individuals-matching-hmcts-c2",
+    "read:individuals-matching-hmcts-c3",
+    "read:individuals-matching-hmcts-c4",
+    "read:individuals-matching-ho-ecp",
+    "read:individuals-matching-ho-nrc",
+    "read:individuals-matching-ho-rp2",
+    "read:individuals-matching-ho-v2",
+    "read:individuals-matching-laa-c1",
+    "read:individuals-matching-laa-c2",
+    "read:individuals-matching-laa-c3",
+    "read:individuals-matching-laa-c4",
+    "read:individuals-matching-lad4",
+    "read:individuals-matching-lsani-c1",
+    "read:individuals-matching-lsani-c3",
+    "read:individuals-matching-nictsejo-c4",
+    "read:individuals-matching-scts"
+  )
+  val validScopes: List[String] = List("read:individuals-matching-laa-c3")
+
   Feature("Versioning") {
 
     Scenario("Requests with an accept header version P1") {
 
       When("A request to the match citizen endpoint is made with version P1 accept header")
-      val response = invokeWithHeaders(s"/sandbox/$sandboxMatchId", AUTHORIZATION -> authToken, acceptHeaderP1)
+      val response = Http(s"$serviceUrl/sandbox/$sandboxMatchId")
+        .headers(requestHeaders(acceptHeaderP1))
+        .asString
 
       Then("The response status should be 200 (Ok)")
       response.code shouldBe OK
@@ -77,7 +99,7 @@ class VersioningSpec extends BaseSpec {
     Scenario("Requests without an accept header default to version 1") {
 
       When("A request to the match citizen endpoint is made without an accept header")
-      val response = invokeWithHeaders(s"/sandbox/$sandboxMatchId", AUTHORIZATION -> authToken)
+      val response = invokeWithHeaders(s"/sandbox/$sandboxMatchId", AUTHORIZATION -> authToken, acceptHeaderV1)
 
       Then("The response status should be 404 (Not Found)")
       response.code shouldBe NOT_FOUND

@@ -30,15 +30,18 @@ import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, Insufficient
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.PrivilegedCitizenMatchingController
+import uk.gov.hmrc.internalauth.client.BackendAuthComponents
 import uk.gov.hmrc.individualsmatchingapi.domain.*
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
-
+import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
+import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
 import scala.util.Random
+import play.api.Configuration
 
 class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers with MockitoSugar {
   trait Setup extends ScopesConfigHelper {
@@ -55,10 +58,19 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     val mockScopesService = new ScopesService(mockScopesConfig)
 
+    given ControllerComponents = stubControllerComponents()
+    val mockInternalAuthBehaviour: StubBehaviour = mock[StubBehaviour]
+    val backendAuthComponents: BackendAuthComponents = BackendAuthComponentsStub(mockInternalAuthBehaviour)
+    val internalAuthHelper = new InternalAuthHelper(
+      backendAuthComponents,
+      Configuration(InternalAuthHelper.InternalAuthFeatureFlag -> true)
+    )
+
     val liveController = new PrivilegedCitizenMatchingController(
       mockLiveCitizenMatchingService,
       mockScopesService,
       mockAuthConnector,
+      internalAuthHelper,
       controllerComponents,
       mockAuditHelper
     )

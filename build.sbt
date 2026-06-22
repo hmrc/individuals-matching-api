@@ -11,7 +11,7 @@ lazy val microservice =
     .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
     .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
     .settings(onLoadMessage := "")
-    .settings(CodeCoverageSettings.settings *)
+    .settings(CodeCoverageSettings.settings*)
     .settings(scalaVersion := "3.7.1")
     .settings(scalafmtOnCompile := true)
     .settings(
@@ -19,7 +19,7 @@ lazy val microservice =
     )
     .settings(Compile / unmanagedResourceDirectories += baseDirectory.value / "resources")
     .configs(ItTest)
-    .settings(inConfig(ItTest)(Defaults.testSettings) *)
+    .settings(inConfig(ItTest)(Defaults.testSettings)*)
     .settings(
       ItTest / unmanagedSourceDirectories := (ItTest / baseDirectory)(base => Seq(base / "test")).value,
       ItTest / testOptions := Seq(Tests.Filter((name: String) => name startsWith "it")),
@@ -37,7 +37,7 @@ lazy val microservice =
       )
     )
     .configs(ComponentTest)
-    .settings(inConfig(ComponentTest)(Defaults.testSettings) *)
+    .settings(inConfig(ComponentTest)(Defaults.testSettings)*)
     .settings(
       ComponentTest / testOptions := Seq(Tests.Filter((name: String) => name startsWith "component")),
       ComponentTest / unmanagedSourceDirectories := (ComponentTest / baseDirectory)(base => Seq(base / "test")).value,
