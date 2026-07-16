@@ -20,8 +20,8 @@ import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.libs.json.Json
 import play.api.Configuration
+import play.api.libs.json.Json
 import play.api.mvc.{ControllerComponents, RequestHeader, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -29,19 +29,19 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
+import uk.gov.hmrc.individualsmatchingapi.config.AppConfig
+import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.PrivilegedIndividualsController
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesHelper, ScopesService}
+import uk.gov.hmrc.internalauth.client.BackendAuthComponents
+import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
-import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
-import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
-import uk.gov.hmrc.internalauth.client.BackendAuthComponents
 
 import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
+import scala.concurrent.{ExecutionContext, Future}
 
 class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with MockitoSugar with Individuals {
   val uuid: UUID = UUID.randomUUID()
@@ -53,6 +53,8 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     val mockAuthConnector: AuthConnector = mock[AuthConnector]
     val mockAuditHelper: AuditHelper = mock[AuditHelper]
     val mockInternalAuthBehaviour: StubBehaviour = mock[StubBehaviour]
+    implicit lazy val ec: ExecutionContext = fakeApplication().injector.instanceOf[ExecutionContext]
+    lazy val appConfig: AppConfig = fakeApplication().injector.instanceOf[AppConfig]
 
     val mockScopesService = new ScopesService(mockScopesConfig)
     val scopesHelper = new ScopesHelper(mockScopesService)
@@ -75,7 +77,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       mockAuthConnector,
       internalAuthHelper,
       controllerComponents
-    )
+    )(using ec, appConfig)
 
     when(
       mockAuthConnector

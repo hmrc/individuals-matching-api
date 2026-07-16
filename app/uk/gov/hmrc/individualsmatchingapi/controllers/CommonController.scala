@@ -24,7 +24,7 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, Enrolment, InsufficientEnrolments}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, TooManyRequestException}
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
-import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.SANDBOX
+import uk.gov.hmrc.individualsmatchingapi.config.AppConfig
 import uk.gov.hmrc.individualsmatchingapi.domain.*
 import uk.gov.hmrc.individualsmatchingapi.utils.UuidValidator
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -127,8 +127,6 @@ abstract class CommonController @Inject() (cc: ControllerComponents) extends Bac
 }
 
 trait PrivilegedAuthentication extends AuthorisedFunctions {
-
-  val environment: String
   val internalAuthHelper: InternalAuthHelper
 
   def authPredicate(scopes: Iterable[String]): Predicate =
@@ -138,12 +136,13 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
     hc: HeaderCarrier,
     request: RequestHeader,
     auditHelper: AuditHelper,
-    executionContext: ExecutionContext
+    executionContext: ExecutionContext,
+    appConfig: AppConfig
   ): Future[Result] = {
 
     if (endpointScopes.isEmpty) throw new Exception("No scopes defined")
 
-    if (environment == Environment.SANDBOX) {
+    if (appConfig.localEnv) {
       f(endpointScopes.toList)
     } else {
       internalAuthHelper.isAuthorised.flatMap {
@@ -165,15 +164,4 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
       }
     }
   }
-
-  def requiresPrivilegedAuthentication(
-    body: => Future[Result]
-  )(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[Result] =
-    if (environment == SANDBOX) body
-    else authorised(Enrolment("read:individuals-matching"))(body)
-}
-
-object Environment {
-  val SANDBOX = "SANDBOX"
-  val PRODUCTION = "PRODUCTION"
 }

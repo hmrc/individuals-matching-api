@@ -38,7 +38,7 @@ import java.net.ServerSocket
 trait BaseSpec
     extends AnyFeatureSpec with BeforeAndAfterAll with BeforeAndAfterEach with Matchers with GuiceOneServerPerSuite
     with GivenWhenThen {
-
+  protected def localEnv = false
   protected def appBuilder: GuiceApplicationBuilder = GuiceApplicationBuilder()
     .configure(
       "auditing.enabled"                           -> false,
@@ -49,7 +49,8 @@ trait BaseSpec
       "microservice.services.matching.port"        -> MatchingStub.port,
       "mongodb.uri"                                -> "mongodb://localhost:27017/nino-match-repository-it",
       "run.mode"                                   -> "It",
-      "versioning.unversionedContexts"             -> List("/match-record")
+      "versioning.unversionedContexts"             -> List("/match-record"),
+      "localEnv"                                   -> localEnv
     )
   implicit override lazy val app: Application = appBuilder.build()
 

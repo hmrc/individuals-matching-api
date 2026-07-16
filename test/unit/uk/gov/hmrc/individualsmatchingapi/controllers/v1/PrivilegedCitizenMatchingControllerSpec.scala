@@ -20,33 +20,31 @@ import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.Configuration
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json.parse
 import play.api.libs.json.{JsObject, JsValue, Json}
-import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, Result}
+import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, RequestHeader, Result}
 import play.api.test.FakeRequest
-import play.api.mvc.RequestHeader
 import play.api.test.Helpers.*
+import play.api.{Application, Configuration}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
+import uk.gov.hmrc.individualsmatchingapi.config.AppConfig
+import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v1.live.LivePrivilegedCitizenMatchingController
 import uk.gov.hmrc.individualsmatchingapi.controllers.v1.sandbox.SandboxPrivilegedCitizenMatchingController
-import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
 import uk.gov.hmrc.individualsmatchingapi.domain.*
 import uk.gov.hmrc.individualsmatchingapi.domain.SandboxData.sandboxMatchId
-import uk.gov.hmrc.individualsmatchingapi.services.SandboxCitizenMatchingService
-import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
+import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, SandboxCitizenMatchingService, ScopesService}
 import uk.gov.hmrc.internalauth.client.BackendAuthComponents
 import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
 import unit.uk.gov.hmrc.individualsmatchingapi.controllers.v2.ScopesConfigHelper
-import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
-import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 
 import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
 class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers with MockitoSugar {
@@ -57,7 +55,12 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     val sampleCorrelationId = "188e9400-b636-4a3b-80ba-230a8c72b92a"
     val controllerComponents: ControllerComponents =
       app.injector.instanceOf[ControllerComponents]
-
+    implicit val ec: ExecutionContext = ExecutionContext.global
+    val appLocal: Application = new GuiceApplicationBuilder()
+      .configure("localEnv" -> true)
+      .build()
+    lazy val appConfigLocal: AppConfig = appLocal.injector.instanceOf[AppConfig]
+    lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
     val mockScopesService = new ScopesService(mockScopesConfig)
 
     val sandboxCitizenMatchingService = new SandboxCitizenMatchingService
@@ -79,7 +82,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       internalAuthHelper,
       controllerComponents,
       mockScopesService
-    )
+    )(using ec, auditHelper, appConfigLocal)
 
     val liveController = new LivePrivilegedCitizenMatchingController(
       mockLiveCitizenMatchingService,
@@ -87,7 +90,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       internalAuthHelper,
       controllerComponents,
       mockScopesService
-    )
+    )(using ec, auditHelper, appConfig)
 
     when(
       mockAuthConnector

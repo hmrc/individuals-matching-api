@@ -20,6 +20,7 @@ import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.Configuration
 import play.api.libs.json.Json.parse
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, RequestHeader, Result}
@@ -29,19 +30,19 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
+import uk.gov.hmrc.individualsmatchingapi.config.AppConfig
+import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.PrivilegedCitizenMatchingController
-import uk.gov.hmrc.internalauth.client.BackendAuthComponents
 import uk.gov.hmrc.individualsmatchingapi.domain.*
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
-import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
+import uk.gov.hmrc.internalauth.client.BackendAuthComponents
 import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
-import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
+import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
+
 import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.Future.failed
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
-import play.api.Configuration
 
 class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers with MockitoSugar {
   trait Setup extends ScopesConfigHelper {
@@ -57,6 +58,8 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     val mockAuditHelper: AuditHelper = mock[AuditHelper]
 
     val mockScopesService = new ScopesService(mockScopesConfig)
+    implicit lazy val ec: ExecutionContext = fakeApplication().injector.instanceOf[ExecutionContext]
+    lazy val appConfig: AppConfig = fakeApplication().injector.instanceOf[AppConfig]
 
     given ControllerComponents = stubControllerComponents()
     val mockInternalAuthBehaviour: StubBehaviour = mock[StubBehaviour]
@@ -73,7 +76,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       internalAuthHelper,
       controllerComponents,
       mockAuditHelper
-    )
+    )(using ec, appConfig)
 
     when(
       mockAuthConnector

@@ -23,6 +23,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.hal.*
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
+import uk.gov.hmrc.individualsmatchingapi.config.AppConfig
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenMatchingFormat
@@ -37,7 +38,7 @@ abstract class PrivilegedCitizenMatchingController(
   cc: ControllerComponents,
   scopeService: ScopesService,
   implicit private val auditHelper: AuditHelper
-)(implicit executionContext: ExecutionContext)
+)(implicit executionContext: ExecutionContext, appConfig: AppConfig)
     extends CommonController(cc) with PrivilegedAuthentication {
   def matchCitizen: Action[JsValue] = Action.async(parse.json) { implicit request =>
     authenticate(scopeService.v1Scopes, request.body.toString()) { authScopes =>

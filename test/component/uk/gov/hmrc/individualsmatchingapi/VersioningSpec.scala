@@ -32,7 +32,8 @@ class VersioningSpec extends BaseSpec {
       "auditing.enabled"                -> false,
       "auditing.traceRequests"          -> false,
       "microservice.services.auth.port" -> AuthStub.port,
-      "run.mode"                        -> "It"
+      "run.mode"                        -> "It",
+      "localEnv"                        -> true
     )
     .build()
 
