@@ -21,7 +21,7 @@ import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Application, Configuration}
+import play.api.{Application, Configuration, Environment, Mode}
 import play.api.libs.json.Json
 import play.api.mvc.{ControllerComponents, RequestHeader, Result}
 import play.api.test.FakeRequest
@@ -54,6 +54,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
   trait Setup extends ScopesConfigHelper {
     given ControllerComponents = stubControllerComponents()
     implicit val ec: ExecutionContext = ExecutionContext.global
+    implicit val env: Environment = Environment.simple(mode = Mode.Dev)
     val sampleCorrelationId = "188e9400-b636-4a3b-80ba-230a8c72b92a"
     val mockCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
     val mockAuthConnector: AuthConnector = mock[AuthConnector]
@@ -83,14 +84,14 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
         internalAuthHelper,
         controllerComponents,
         mockScopesService
-      )(using ec, auditHelper, appConfig)
+      )(using ec, auditHelper, appConfig, env)
     val sandboxController: SandboxPrivilegedIndividualsController = new SandboxPrivilegedIndividualsController(
       new SandboxCitizenMatchingService(),
       mockAuthConnector,
       internalAuthHelper,
       controllerComponents,
       mockScopesService
-    )(using ec, auditHelper, appConfigLocal)
+    )(using ec, auditHelper, appConfigLocal, env)
 
     when(
       mockAuthConnector

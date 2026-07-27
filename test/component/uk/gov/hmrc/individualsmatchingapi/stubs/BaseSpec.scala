@@ -23,7 +23,7 @@ import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, GivenWhenThen}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.Application
+import play.api.{Application, Mode}
 import play.api.http.HeaderNames.{ACCEPT, AUTHORIZATION, CONTENT_TYPE}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.mvc.Http.MimeTypes.JSON
@@ -52,6 +52,7 @@ trait BaseSpec
       "versioning.unversionedContexts"             -> List("/match-record"),
       "localEnv"                                   -> localEnv
     )
+    .in(Mode.Dev)
   implicit override lazy val app: Application = appBuilder.build()
 
   val timeout: FiniteDuration = Duration(5, TimeUnit.SECONDS)

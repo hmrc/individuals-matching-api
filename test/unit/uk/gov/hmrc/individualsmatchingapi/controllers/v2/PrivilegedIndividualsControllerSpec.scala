@@ -20,7 +20,7 @@ import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.Configuration
+import play.api.{Configuration, Environment, Mode}
 import play.api.libs.json.Json
 import play.api.mvc.{ControllerComponents, RequestHeader, Result}
 import play.api.test.FakeRequest
@@ -54,6 +54,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
     val mockAuditHelper: AuditHelper = mock[AuditHelper]
     val mockInternalAuthBehaviour: StubBehaviour = mock[StubBehaviour]
     implicit lazy val ec: ExecutionContext = fakeApplication().injector.instanceOf[ExecutionContext]
+    implicit val env: Environment = Environment.simple(mode = Mode.Dev)
     lazy val appConfig: AppConfig = fakeApplication().injector.instanceOf[AppConfig]
 
     val mockScopesService = new ScopesService(mockScopesConfig)
@@ -77,7 +78,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       mockAuthConnector,
       internalAuthHelper,
       controllerComponents
-    )(using ec, appConfig)
+    )(using ec, appConfig, env)
 
     when(
       mockAuthConnector

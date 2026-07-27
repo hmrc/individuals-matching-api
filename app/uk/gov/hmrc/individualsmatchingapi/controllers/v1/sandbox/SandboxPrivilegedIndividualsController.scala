@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v1.sandbox
 
+import play.api.Environment
 import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
@@ -34,5 +35,5 @@ class SandboxPrivilegedIndividualsController @Inject() (
   override val internalAuthHelper: InternalAuthHelper,
   cc: ControllerComponents,
   scopeService: ScopesService
-)(implicit executionContext: ExecutionContext, auditHelper: AuditHelper, appConfig: AppConfig)
+)(implicit executionContext: ExecutionContext, auditHelper: AuditHelper, appConfig: AppConfig, environment: Environment)
     extends PrivilegedIndividualsController(sandboxCitizenMatchingService, scopeService, cc, auditHelper) {}

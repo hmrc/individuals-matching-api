@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers
 
-import play.api.Logging
+import play.api.{Environment, Logging, Mode}
 import play.api.libs.json.*
 import play.api.mvc.{ControllerComponents, Request, RequestHeader, Result}
 import uk.gov.hmrc.auth.core.authorise.Predicate
@@ -137,12 +137,13 @@ trait PrivilegedAuthentication extends AuthorisedFunctions {
     request: RequestHeader,
     auditHelper: AuditHelper,
     executionContext: ExecutionContext,
-    appConfig: AppConfig
+    appConfig: AppConfig,
+    environment: Environment
   ): Future[Result] = {
 
     if (endpointScopes.isEmpty) throw new Exception("No scopes defined")
 
-    if (appConfig.localEnv) {
+    if (appConfig.localEnv && environment.mode == Mode.Dev) {
       f(endpointScopes.toList)
     } else {
       internalAuthHelper.isAuthorised.flatMap {

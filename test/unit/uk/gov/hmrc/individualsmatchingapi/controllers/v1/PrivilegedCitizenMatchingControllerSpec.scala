@@ -26,7 +26,7 @@ import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, RequestHeader, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import play.api.{Application, Configuration}
+import play.api.{Application, Configuration, Environment, Mode}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -56,6 +56,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     val controllerComponents: ControllerComponents =
       app.injector.instanceOf[ControllerComponents]
     implicit val ec: ExecutionContext = ExecutionContext.global
+    implicit val env: Environment = Environment.simple(mode = Mode.Dev)
     val appLocal: Application = new GuiceApplicationBuilder()
       .configure("localEnv" -> true)
       .build()
@@ -82,7 +83,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       internalAuthHelper,
       controllerComponents,
       mockScopesService
-    )(using ec, auditHelper, appConfigLocal)
+    )(using ec, auditHelper, appConfigLocal, env)
 
     val liveController = new LivePrivilegedCitizenMatchingController(
       mockLiveCitizenMatchingService,
@@ -90,7 +91,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       internalAuthHelper,
       controllerComponents,
       mockScopesService
-    )(using ec, auditHelper, appConfig)
+    )(using ec, auditHelper, appConfig, env)
 
     when(
       mockAuthConnector

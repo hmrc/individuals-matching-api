@@ -20,7 +20,7 @@ import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.Configuration
+import play.api.{Configuration, Environment, Mode}
 import play.api.libs.json.Json.parse
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents, RequestHeader, Result}
@@ -59,6 +59,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
     val mockScopesService = new ScopesService(mockScopesConfig)
     implicit lazy val ec: ExecutionContext = fakeApplication().injector.instanceOf[ExecutionContext]
+    implicit val env: Environment = Environment.simple(mode = Mode.Dev)
     lazy val appConfig: AppConfig = fakeApplication().injector.instanceOf[AppConfig]
 
     given ControllerComponents = stubControllerComponents()
@@ -76,7 +77,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       internalAuthHelper,
       controllerComponents,
       mockAuditHelper
-    )(using ec, appConfig)
+    )(using ec, appConfig, env)
 
     when(
       mockAuthConnector

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
+import play.api.Environment
 import play.api.hal.Hal.*
 import play.api.libs.json.Json.{obj, toJson}
 import play.api.mvc.hal.*
@@ -36,7 +37,7 @@ abstract class PrivilegedIndividualsController(
   scopeService: ScopesService,
   cc: ControllerComponents,
   implicit private val auditHelper: AuditHelper
-)(implicit executionContext: ExecutionContext, appConfig: AppConfig)
+)(implicit executionContext: ExecutionContext, appConfig: AppConfig, environment: Environment)
     extends CommonController(cc) with PrivilegedAuthentication {
 
   def matchedIndividual(matchId: String): Action[AnyContent] = Action.async { implicit request =>

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
+import play.api.Environment
 import play.api.hal.*
 import play.api.hal.Hal.state
 import play.api.libs.json.Json
@@ -41,7 +42,7 @@ class PrivilegedIndividualsController @Inject() (
   val authConnector: AuthConnector,
   val internalAuthHelper: InternalAuthHelper,
   cc: ControllerComponents
-)(implicit ec: ExecutionContext, appConfig: AppConfig)
+)(implicit ec: ExecutionContext, appConfig: AppConfig, environment: Environment)
     extends CommonController(cc) with PrivilegedAuthentication {
 
   def matchedIndividual(matchId: String): Action[AnyContent] = Action.async { implicit request =>
