@@ -53,19 +53,6 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
   trait Setup extends ScopesConfigHelper {
     val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     val sampleCorrelationId = "188e9400-b636-4a3b-80ba-230a8c72b92a"
-    val controllerComponents: ControllerComponents =
-      app.injector.instanceOf[ControllerComponents]
-    implicit val ec: ExecutionContext = ExecutionContext.global
-    implicit val env: Environment = Environment.simple(mode = Mode.Dev)
-    val appLocal: Application = new GuiceApplicationBuilder()
-      .configure("localEnv" -> true)
-      .build()
-    lazy val appConfigLocal: AppConfig = appLocal.injector.instanceOf[AppConfig]
-    lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
-    val mockScopesService = new ScopesService(mockScopesConfig)
-
-    val sandboxCitizenMatchingService = new SandboxCitizenMatchingService
-    val mockLiveCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
     val mockAuthConnector: AuthConnector = mock[AuthConnector]
     val mockInternalAuthBehaviour: StubBehaviour = mock[StubBehaviour]
     given ControllerComponents = stubControllerComponents()
@@ -74,17 +61,19 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       backendAuthComponents,
       Configuration(InternalAuthHelper.InternalAuthFeatureFlag -> true)
     )
+    val controllerComponents: ControllerComponents =
+      app.injector.instanceOf[ControllerComponents]
+    implicit val ec: ExecutionContext = ExecutionContext.global
+    val mockScopesService = new ScopesService(mockScopesConfig)
+
     val mockAuditHelper: AuditHelper = mock[AuditHelper]
     implicit val auditHelper: AuditHelper = mockAuditHelper
-
-    val sandboxController = new SandboxPrivilegedCitizenMatchingController(
-      sandboxCitizenMatchingService,
-      mockAuthConnector,
-      internalAuthHelper,
-      controllerComponents,
-      mockScopesService
-    )(using ec, auditHelper, appConfigLocal, env)
-
+  }
+  // noinspection ForwardReference
+  trait NonLocalSetup extends Setup {
+    lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
+    val mockLiveCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
+    implicit val env: Environment = Environment.simple(mode = Mode.Prod)
     val liveController = new LivePrivilegedCitizenMatchingController(
       mockLiveCitizenMatchingService,
       mockAuthConnector,
@@ -99,11 +88,30 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
     ).thenReturn(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
   }
 
+  trait LocalSetup extends Setup {
+    implicit val envDev: Environment = Environment.simple(mode = Mode.Dev)
+    val appLocal: Application = new GuiceApplicationBuilder()
+      .configure("localEnv" -> true)
+      .build()
+    lazy val appConfigLocal: AppConfig = appLocal.injector.instanceOf[AppConfig]
+
+    val sandboxCitizenMatchingService = new SandboxCitizenMatchingService
+
+    val sandboxController = new SandboxPrivilegedCitizenMatchingController(
+      sandboxCitizenMatchingService,
+      mockAuthConnector,
+      internalAuthHelper,
+      controllerComponents,
+      mockScopesService
+    )(using ec, auditHelper, appConfigLocal, envDev)
+
+  }
+
   "live matching citizen controller" should {
 
     val matchId = UUID.randomUUID()
 
-    "return 200 (Ok) for a matched citizen" in new Setup {
+    "return 200 (Ok) for a matched citizen" in new NonLocalSetup {
       when(
         mockLiveCitizenMatchingService
           .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier], any[RequestHeader])
@@ -131,7 +139,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
     }
 
-    "return 200 Ok when matching a user with a '.' in their name" in new Setup {
+    "return 200 Ok when matching a user with a '.' in their name" in new NonLocalSetup {
 
       when(
         mockLiveCitizenMatchingService.matchCitizen(any())(using any(), any())
@@ -149,7 +157,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       status(res) mustBe OK
     }
 
-    "return JsError when mandatory field missing" in new Setup {
+    "return JsError when mandatory field missing" in new NonLocalSetup {
       when(
         mockLiveCitizenMatchingService.matchCitizen(any())(using any(), any())
       ).thenReturn(Future.successful(matchId))
@@ -167,7 +175,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       status(res) mustBe 400
     }
 
-    "return 403 (Forbidden) for a citizen not found" in new Setup {
+    "return 403 (Forbidden) for a citizen not found" in new NonLocalSetup {
       when(
         mockLiveCitizenMatchingService
           .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier], any[RequestHeader])
@@ -184,7 +192,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
     }
 
-    "return 403 (Forbidden) when a matching exception is thrown" in new Setup {
+    "return 403 (Forbidden) when a matching exception is thrown" in new NonLocalSetup {
       when(
         mockLiveCitizenMatchingService
           .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier], any[RequestHeader])
@@ -201,7 +209,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
     }
 
-    "return 403 (Forbidden) when an invalid nino exception is thrown" in new Setup {
+    "return 403 (Forbidden) when an invalid nino exception is thrown" in new NonLocalSetup {
       when(
         mockLiveCitizenMatchingService
           .matchCitizen(any[CitizenMatchingRequest])(using any[HeaderCarrier], any[RequestHeader])
@@ -218,7 +226,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
     }
 
-    "return 400 (BadRequest) for an invalid dateOfBirth" in new Setup {
+    "return 400 (BadRequest) for an invalid dateOfBirth" in new NonLocalSetup {
       val requestBody: JsValue =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
       val eventualResult: Future[Result] =
@@ -241,7 +249,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
     }
 
-    "return 400 (BadRequest) for an invalid nino" in new Setup {
+    "return 400 (BadRequest) for an invalid nino" in new NonLocalSetup {
       val requestBody: JsValue =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"AB1234567","dateOfBirth":"2020-01-31"}""")
       val eventualResult: Future[Result] =
@@ -254,7 +262,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
     }
 
-    "return 400 Bad Request when the first name is empty" in new Setup {
+    "return 400 Bad Request when the first name is empty" in new NonLocalSetup {
       val emptyFirstName: JsObject = Json.obj(
         "firstName"   -> "",
         "lastName"    -> "Person",
@@ -269,7 +277,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "firstName is required")
     }
 
-    "return 400 Bad Request when the last name is empty" in new Setup {
+    "return 400 Bad Request when the last name is empty" in new NonLocalSetup {
       val emptyLastName: JsObject = Json.obj(
         "firstName"   -> "Mr",
         "lastName"    -> "",
@@ -284,7 +292,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       contentAsJson(res) mustBe Json.obj("code" -> "INVALID_REQUEST", "message" -> "lastName is required")
     }
 
-    "return 400 Bad Request when the first name is greater than 35 characters" in new Setup {
+    "return 400 Bad Request when the first name is greater than 35 characters" in new NonLocalSetup {
       val firstNameTooLong: JsObject = Json.obj(
         "firstName"   -> Random.nextString(36),
         "lastName"    -> "Person",
@@ -300,7 +308,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         .obj("code" -> "INVALID_REQUEST", "message" -> "firstName must be no more than 35 characters")
     }
 
-    "return 400 Bad Request when the last name is greater than 35 characters" in new Setup {
+    "return 400 Bad Request when the last name is greater than 35 characters" in new NonLocalSetup {
       val lastNameTooLong: JsObject = Json.obj(
         "firstName"   -> "Mr",
         "lastName"    -> Random.nextString(36),
@@ -316,7 +324,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         .obj("code" -> "INVALID_REQUEST", "message" -> "lastName must be no more than 35 characters")
     }
 
-    "return 400 Bad Request when the first name contains invalid characters" in new Setup {
+    "return 400 Bad Request when the first name contains invalid characters" in new NonLocalSetup {
       val invalidFirstName: JsObject = Json.obj(
         "firstName"   -> """/\/\/\/\""",
         "lastName"    -> "Person",
@@ -332,7 +340,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         .obj("code" -> "INVALID_REQUEST", "message" -> "firstName contains invalid characters")
     }
 
-    "return 400 Bad Request when the last name contains invalid characters" in new Setup {
+    "return 400 Bad Request when the last name contains invalid characters" in new NonLocalSetup {
       val invalidFirstName: JsObject = Json.obj(
         "firstName"   -> "Mr",
         "lastName"    -> """/\/\/\/\""",
@@ -348,7 +356,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
         .obj("code" -> "INVALID_REQUEST", "message" -> "lastName contains invalid characters")
     }
 
-    "fail with UnauthorizedException when the bearer token does not have enrolment read:individuals-matching" in new Setup {
+    "fail with UnauthorizedException when the bearer token does not have enrolment read:individuals-matching" in new NonLocalSetup {
       val requestBody: JsValue =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-31"}""")
 
@@ -372,7 +380,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
 
   "Sandbox match citizen function" should {
 
-    "return 200 (Ok) for the sandbox matchId" in new Setup {
+    "return 200 (Ok) for the sandbox matchId" in new LocalSetup {
       val eventualResult: Future[Result] =
         sandboxController.matchCitizen()(
           fakeRequest.withBody(parse(matchingRequest())).withHeaders(("CorrelationId", sampleCorrelationId))
@@ -396,7 +404,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
     }
 
-    "return 403 (Forbidden) for a citizen not found" in new Setup {
+    "return 403 (Forbidden) for a citizen not found" in new LocalSetup {
       val eventualResult: Future[Result] =
         sandboxController.matchCitizen()(
           fakeRequest
@@ -411,7 +419,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
     }
 
-    "return 403 (Forbidden) when nino does not match a sandbox individual" in new Setup {
+    "return 403 (Forbidden) when nino does not match a sandbox individual" in new LocalSetup {
       val eventualResult: Future[Result] =
         sandboxController.matchCitizen()(
           fakeRequest
@@ -426,7 +434,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
     }
 
-    "return 403 (Forbidden) when an invalid nino exception is thrown" in new Setup {
+    "return 403 (Forbidden) when an invalid nino exception is thrown" in new LocalSetup {
       val eventualResult: Future[Result] =
         sandboxController.matchCitizen()(
           fakeRequest
@@ -441,7 +449,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
     }
 
-    "return 400 (BadRequest) for an invalid dateOfBirth" in new Setup {
+    "return 400 (BadRequest) for an invalid dateOfBirth" in new LocalSetup {
       val requestBody: JsValue =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"NA000799C","dateOfBirth":"2020-01-32"}""")
       val eventualResult: Future[Result] =
@@ -468,7 +476,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
     }
 
-    "return 400 (BadRequest) for an invalid nino" in new Setup {
+    "return 400 (BadRequest) for an invalid nino" in new LocalSetup {
       val requestBody: JsValue =
         parse("""{"firstName":"Amanda","lastName":"Joseph","nino":"AB1234567","dateOfBirth":"2020-01-31"}""")
       val eventualResult: Future[Result] =
@@ -483,7 +491,7 @@ class PrivilegedCitizenMatchingControllerSpec extends SpecBase with Matchers wit
       )
     }
 
-    "not require bearer token authentication" in new Setup {
+    "not require bearer token authentication" in new LocalSetup {
       val eventualResult: Future[Result] =
         sandboxController.matchCitizen()(
           fakeRequest.withHeaders(("CorrelationId", sampleCorrelationId)).withBody(parse(matchingRequest()))
