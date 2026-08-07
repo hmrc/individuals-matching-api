@@ -23,7 +23,7 @@ import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, GivenWhenThen}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.Application
+import play.api.{Application, Mode}
 import play.api.http.HeaderNames.{ACCEPT, AUTHORIZATION, CONTENT_TYPE}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.mvc.Http.MimeTypes.JSON
@@ -38,7 +38,7 @@ import java.net.ServerSocket
 trait BaseSpec
     extends AnyFeatureSpec with BeforeAndAfterAll with BeforeAndAfterEach with Matchers with GuiceOneServerPerSuite
     with GivenWhenThen {
-
+  protected def localEnv = false
   protected def appBuilder: GuiceApplicationBuilder = GuiceApplicationBuilder()
     .configure(
       "auditing.enabled"                           -> false,
@@ -49,8 +49,10 @@ trait BaseSpec
       "microservice.services.matching.port"        -> MatchingStub.port,
       "mongodb.uri"                                -> "mongodb://localhost:27017/nino-match-repository-it",
       "run.mode"                                   -> "It",
-      "versioning.unversionedContexts"             -> List("/match-record")
+      "versioning.unversionedContexts"             -> List("/match-record"),
+      "localEnv"                                   -> localEnv
     )
+    .in(Mode.Dev)
   implicit override lazy val app: Application = appBuilder.build()
 
   val timeout: FiniteDuration = Duration(5, TimeUnit.SECONDS)

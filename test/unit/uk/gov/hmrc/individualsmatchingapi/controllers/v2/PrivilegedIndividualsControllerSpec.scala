@@ -20,8 +20,9 @@ import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, when}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Application, Configuration, Environment, Mode}
 import play.api.libs.json.Json
-import play.api.Configuration
 import play.api.mvc.{ControllerComponents, RequestHeader, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -29,19 +30,19 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment, Enrolments, InsufficientEnrolments}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
+import uk.gov.hmrc.individualsmatchingapi.config.AppConfig
+import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v2.PrivilegedIndividualsController
 import uk.gov.hmrc.individualsmatchingapi.domain.MatchNotFoundException
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesHelper, ScopesService}
+import uk.gov.hmrc.internalauth.client.BackendAuthComponents
+import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
 import unit.uk.gov.hmrc.individualsmatchingapi.support.SpecBase
 import unit.uk.gov.hmrc.individualsmatchingapi.util.Individuals
-import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
-import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
-import uk.gov.hmrc.internalauth.client.BackendAuthComponents
 
 import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
+import scala.concurrent.{ExecutionContext, Future}
 
 class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with MockitoSugar with Individuals {
   val uuid: UUID = UUID.randomUUID()
@@ -49,11 +50,10 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
 
   trait Setup extends ScopesConfigHelper {
     val mockCitizenMatchingService: LiveCitizenMatchingService = mock[LiveCitizenMatchingService]
-
     val mockAuthConnector: AuthConnector = mock[AuthConnector]
     val mockAuditHelper: AuditHelper = mock[AuditHelper]
     val mockInternalAuthBehaviour: StubBehaviour = mock[StubBehaviour]
-
+    implicit lazy val ec: ExecutionContext = fakeApplication().injector.instanceOf[ExecutionContext]
     val mockScopesService = new ScopesService(mockScopesConfig)
     val scopesHelper = new ScopesHelper(mockScopesService)
 
@@ -66,7 +66,16 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       backendAuthComponents,
       Configuration(InternalAuthHelper.InternalAuthFeatureFlag -> true)
     )
+    when(
+      mockAuthConnector
+        .authorise(any(), eqTo(Retrievals.allEnrolments))(using any(), any())
+    )
+      .thenReturn(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
+  }
 
+  trait NonLocalSetUp extends Setup {
+    implicit val env: Environment = Environment.simple(mode = Mode.Prod)
+    lazy val appConfig: AppConfig = fakeApplication().injector.instanceOf[AppConfig]
     val liveController = new PrivilegedIndividualsController(
       mockCitizenMatchingService,
       mockScopesService,
@@ -75,17 +84,28 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       mockAuthConnector,
       internalAuthHelper,
       controllerComponents
-    )
-
-    when(
-      mockAuthConnector
-        .authorise(any(), eqTo(Retrievals.allEnrolments))(using any(), any())
-    )
-      .thenReturn(Future.successful(Enrolments(Set(Enrolment("test-scope")))))
+    )(using ec, appConfig, env)
   }
 
-  "The live matched individual function" should {
-    "respond with http 404 (not found) for an invalid matchId" in new Setup {
+  trait LocalSetUp extends Setup {
+    val appLocal: Application = new GuiceApplicationBuilder()
+      .configure("localEnv" -> true)
+      .build()
+    lazy val appConfigLocal: AppConfig = appLocal.injector.instanceOf[AppConfig]
+    implicit val env: Environment = Environment.simple(mode = Mode.Dev)
+    val liveController = new PrivilegedIndividualsController(
+      mockCitizenMatchingService,
+      mockScopesService,
+      scopesHelper,
+      mockAuditHelper,
+      mockAuthConnector,
+      internalAuthHelper,
+      controllerComponents
+    )(using ec, appConfigLocal, env)
+  }
+
+  "The live matched individual function in NonLocalSetup" should {
+    "respond with http 404 (not found) for an invalid matchId" in new NonLocalSetUp {
       when(
         mockCitizenMatchingService
           .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier], any[RequestHeader])
@@ -104,7 +124,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
-    "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new Setup {
+    "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new NonLocalSetUp {
       when(
         mockCitizenMatchingService
           .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier], any[RequestHeader])
@@ -120,7 +140,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       verify(mockAuditHelper).auditApiResponse(any(), any(), any(), any(), any(), any())(using any())
     }
 
-    "fail with AuthorizedException when the bearer token does not have a valid enrolment" in new Setup {
+    "fail with AuthorizedException when the bearer token does not have a valid enrolment" in new NonLocalSetUp {
 
       when(
         mockAuthConnector
@@ -145,7 +165,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
-    "respond with http 400 (Bad Request) for a malformed CorrelationId" in new Setup {
+    "respond with http 400 (Bad Request) for a malformed CorrelationId" in new NonLocalSetUp {
       when(
         mockCitizenMatchingService
           .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier], any[RequestHeader])
@@ -169,7 +189,7 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
     }
 
-    "respond with http 400 (Bad Request) for a missing CorrelationId" in new Setup {
+    "respond with http 400 (Bad Request) for a missing CorrelationId" in new NonLocalSetUp {
       when(
         mockCitizenMatchingService
           .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier], any[RequestHeader])
@@ -189,6 +209,25 @@ class PrivilegedIndividualsControllerSpec extends SpecBase with Matchers with Mo
       )
 
       verify(mockAuditHelper).auditApiFailure(any(), any(), any(), any(), any())(using any())
+    }
+  }
+
+  "The live matched individual function in LocalSetUp" should {
+
+    "respond with http 200 (ok) when a nino match is successful and citizen details exist" in new NonLocalSetUp {
+      when(
+        mockCitizenMatchingService
+          .fetchCitizenDetailsByMatchId(eqTo(uuid))(using any[HeaderCarrier], any[RequestHeader])
+      )
+        .thenReturn(successful(citizenDetails("Joe", "Bloggs", "AB123456C", "1969-01-15")))
+      val eventualResult: Future[Result] =
+        liveController
+          .matchedIndividual(uuid.toString)
+          .apply(FakeRequest().withHeaders(("CorrelationId", sampleCorrelationId)))
+      status(eventualResult) mustBe OK
+      contentAsJson(eventualResult) mustBe Json.parse(response(uuid, "Joe", "Bloggs", "AB123456C", "1969-01-15"))
+
+      verify(mockAuditHelper).auditApiResponse(any(), any(), any(), any(), any(), any())(using any())
     }
   }
 

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v2
 
+import play.api.Environment
 import play.api.hal.*
 import play.api.hal.Hal.links
 import play.api.libs.json.{JsValue, Json}
@@ -23,7 +24,7 @@ import play.api.mvc.hal.*
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
-import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.*
+import uk.gov.hmrc.individualsmatchingapi.config.AppConfig
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, InternalAuthHelper, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.CitizenMatchingRequest
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.*
@@ -40,7 +41,7 @@ class PrivilegedCitizenMatchingController @Inject() (
   val internalAuthHelper: InternalAuthHelper,
   cc: ControllerComponents,
   implicit private val auditHelper: AuditHelper
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, appConfig: AppConfig, environment: Environment)
     extends CommonController(cc) with PrivilegedAuthentication {
 
   def matchCitizen: Action[JsValue] = Action.async(parse.json) { implicit request =>
@@ -71,5 +72,4 @@ class PrivilegedCitizenMatchingController @Inject() (
       }
     } recover recoveryWithAudit(maybeCorrelationId(request), request.body.toString, "/individuals/matching/")
   }
-  val environment: String = PRODUCTION
 }

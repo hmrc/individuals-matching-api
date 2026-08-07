@@ -31,6 +31,7 @@ class PrivilegedIndividualsControllerSpec extends BaseSpec {
 
   val scopes: List[String] = List("read:individuals-matching")
   val validScopes: List[String] = List("read:individuals-matching")
+  override protected def localEnv: Boolean = true
 
   Feature("matched individual is open and accessible") {
 

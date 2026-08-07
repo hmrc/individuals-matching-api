@@ -46,6 +46,8 @@ class PrivilegedCitizenMatchingControllerSpec extends BaseSpec {
   val scopes: List[String] = List("read:individuals-matching")
   val validScopes: List[String] = List("read:individuals-matching")
 
+  override protected def localEnv: Boolean = true
+
   Feature("citizen matching is open and accessible") {
 
     Scenario("valid request to the sandbox implementation. Individual's details match sandbox citizen") {

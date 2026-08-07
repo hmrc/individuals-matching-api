@@ -17,7 +17,7 @@
 package component.uk.gov.hmrc.individualsmatchingapi
 
 import component.uk.gov.hmrc.individualsmatchingapi.stubs.{AuthStub, BaseSpec}
-import play.api.Application
+import play.api.{Application, Mode}
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -32,8 +32,10 @@ class VersioningSpec extends BaseSpec {
       "auditing.enabled"                -> false,
       "auditing.traceRequests"          -> false,
       "microservice.services.auth.port" -> AuthStub.port,
-      "run.mode"                        -> "It"
+      "run.mode"                        -> "It",
+      "localEnv"                        -> true
     )
+    .in(Mode.Dev)
     .build()
 
   val scopes: List[String] = List(

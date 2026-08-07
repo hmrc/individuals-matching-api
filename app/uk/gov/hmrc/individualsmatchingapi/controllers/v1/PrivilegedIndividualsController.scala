@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v1
 
+import play.api.Environment
 import play.api.hal.Hal.*
 import play.api.libs.json.Json.{obj, toJson}
 import play.api.mvc.hal.*
@@ -23,6 +24,7 @@ import play.api.hal.*
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
+import uk.gov.hmrc.individualsmatchingapi.config.AppConfig
 import uk.gov.hmrc.individualsmatchingapi.controllers.{CommonController, PrivilegedAuthentication}
 import uk.gov.hmrc.individualsmatchingapi.domain.JsonFormatters.citizenDetailsFormat
 import uk.gov.hmrc.individualsmatchingapi.play.RequestHeaderUtils.validateCorrelationId
@@ -35,7 +37,7 @@ abstract class PrivilegedIndividualsController(
   scopeService: ScopesService,
   cc: ControllerComponents,
   implicit private val auditHelper: AuditHelper
-)(implicit executionContext: ExecutionContext)
+)(implicit executionContext: ExecutionContext, appConfig: AppConfig, environment: Environment)
     extends CommonController(cc) with PrivilegedAuthentication {
 
   def matchedIndividual(matchId: String): Action[AnyContent] = Action.async { implicit request =>

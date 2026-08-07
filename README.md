@@ -14,6 +14,10 @@ Please ensure you reference the OGD Data Item matrix to ensure the right data it
 to date if further data items are added.
 (The matrix was last validated at V1.1, please ensure you update with any changes you make.)
 
+### Running locally for performance test
+
+    sbt run -Dconfig.resource=application.local.conf
+
 ### Running tests
 
 Unit, integration and component tests can be run with the following:

@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.individualsmatchingapi.controllers.v1.live
 
+import play.api.Environment
 import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.individualsmatchingapi.audit.AuditHelper
-import uk.gov.hmrc.individualsmatchingapi.controllers.Environment.PRODUCTION
+import uk.gov.hmrc.individualsmatchingapi.config.AppConfig
 import uk.gov.hmrc.individualsmatchingapi.controllers.InternalAuthHelper
 import uk.gov.hmrc.individualsmatchingapi.controllers.v1.PrivilegedIndividualsController
 import uk.gov.hmrc.individualsmatchingapi.services.{LiveCitizenMatchingService, ScopesService}
@@ -34,7 +35,5 @@ class LivePrivilegedIndividualsController @Inject() (
   override val internalAuthHelper: InternalAuthHelper,
   cc: ControllerComponents,
   scopeService: ScopesService
-)(implicit executionContext: ExecutionContext, auditHelper: AuditHelper)
-    extends PrivilegedIndividualsController(liveCitizenMatchingService, scopeService, cc, auditHelper) {
-  override val environment: String = PRODUCTION
-}
+)(implicit executionContext: ExecutionContext, auditHelper: AuditHelper, appConfig: AppConfig, environment: Environment)
+    extends PrivilegedIndividualsController(liveCitizenMatchingService, scopeService, cc, auditHelper) {}
