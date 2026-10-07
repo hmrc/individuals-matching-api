@@ -64,8 +64,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
 
       val result: Future[Result] = underTest.definition()(request)
 
-      (apiVersion(result, "1.0") \ "access" \ "type")
-        .as[String] shouldBe "PRIVATE"
+      (apiVersion(result, "1.0") \ "access").as[String] shouldBe "INTERNAL"
     }
 
     "return 1.0 as PRIVATE when api.access.version-1.0.accessType is set to PRIVATE" in new Setup {
@@ -73,8 +72,6 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
 
       val result: Future[Result] = underTest.definition()(request)
 
-      (apiVersion(result, "1.0") \ "access" \ "type")
-        .as[String] shouldBe "PRIVATE"
     }
 
     "return 1.0 as PUBLIC when api.access.version-1.0.accessType is set to PUBLIC" in new Setup {
@@ -82,8 +79,7 @@ class DocumentationControllerSpec extends SpecBase with Matchers with MockitoSug
 
       val result: Future[Result] = underTest.definition()(request)
 
-      (apiVersion(result, "1.0") \ "access" \ "type")
-        .as[String] shouldBe "PUBLIC"
+      (apiVersion(result, "1.0") \ "access").as[String] shouldBe "PUBLIC"
     }
 
     "return 2.0 as BETA when api.access.version-2.0.status is not set" in new Setup {

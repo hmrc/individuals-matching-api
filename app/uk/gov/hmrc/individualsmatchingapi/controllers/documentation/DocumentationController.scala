@@ -45,7 +45,7 @@ class DocumentationController @Inject() (cc: ControllerComponents, assets: Asset
 
   private lazy val accessTypeV1 = config
     .getOptional[String]("api.access.version-1.0.accessType")
-    .getOrElse("PRIVATE")
+    .getOrElse("INTERNAL")
 
   private lazy val whitelistedApplicationIdsV1 = config
     .getOptional[Seq[String]]("api.access.version-1.0.whitelistedApplicationIds")
