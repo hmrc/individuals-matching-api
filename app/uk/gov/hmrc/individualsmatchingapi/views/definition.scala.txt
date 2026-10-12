@@ -16,18 +16,18 @@
       {
         "version": "P1.0",
         "status": "STABLE",
-        "access" : {"type":"PRIVATE"}
+        "access" :  "INTERNAL"
       },
       {
         "version": "1.0",
         "status": "STABLE",
-        "access" : {"type":"@accessTypeV1"}
+        "access" : "@accessTypeV1"
       },
       {
         "version": "2.0",
         "status":@Json.toJson(v2Status),
         "endpointsEnabled":@Json.toJson(v2EndpointsEnabled),
-        "access" : {"type":"PRIVATE"}
+        "access" :  "INTERNAL"
       }
     ]
   }
